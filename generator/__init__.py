@@ -1,1 +1,1 @@
-from .generator import Generator
+from .functions import *
