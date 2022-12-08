@@ -1,9 +1,29 @@
 import numpy as np
+import pandas as pd 
 import random
 from .utils import *
 from .radius import *
 
-def compromise_user(customer_profile, compromission_probability=0.03):
+from typing import List, Union
+
+# TODO: refactor this 
+def compromise_user(customer_profile: dict, compromission_probability: float = 0.03) -> int:
+
+    """Determines whether a customer has been compromised.
+
+    This method determines whether a customer has been compromised based on the given customer profile and the
+    specified compromission probability. If the customer has already been compromised, the method returns 1. Otherwise,
+    the method uses a binomial distribution to determine whether the customer has been compromised based on the
+    compromission probability.
+
+    Args:
+        customer_profile (dict): The customer profile to check.
+        compromission_probability (float, optional): The probability of a customer being compromised. Defaults to 0.03.
+
+    Returns:
+        int: 1
+    """
+
     if customer_profile['compromised'] == 0:
         compromised = np.random.binomial(n=1, p=compromission_probability)
     else:
@@ -11,7 +31,25 @@ def compromise_user(customer_profile, compromission_probability=0.03):
     return compromised
 
 
-def generate_genuine_transactions(customer_transactions, nb_tx, customer_profile, day):
+def generate_genuine_transactions(customer_transactions: pd.DataFrame, nb_tx: int, customer_profile: dict, day: int) -> pd.DataFrame:
+
+    """Generates genuine transactions for a customer.
+
+    This method generates a specified number of genuine transactions for a given customer profile and day. The transactions
+    are generated using a normal distribution for the transaction amount, and a uniform distribution for the transaction
+    time. The generated transactions are appended to the given customer transactions dataframe.
+
+    Args:
+        customer_transactions (pd.DataFrame): The existing customer transactions.
+        nb_tx (int): The number of transactions to generate.
+        customer_profile (dict): The customer profile to use for generating transactions.
+        day (int): The day on which the transactions occurred.
+
+    Returns:
+        pd.DataFrame: The updated customer transactions dataframe.
+    """
+
+
     # If nb_tx positive, let us generate transactions
     if nb_tx > 0:
 
@@ -44,8 +82,24 @@ def generate_genuine_transactions(customer_transactions, nb_tx, customer_profile
 
 
 
-def generate_first_fraud(customer_profile, day, fraudsters_mean, fraudsters_var, terminal_profiles_table, r=20):
-    # print('-')
+def generate_first_fraud(customer_profile: pd.DataFrame, day: int, fraudsters_mean: float, fraudsters_var: float, terminal_profiles_table: pd.DataFrame, r: int = 20) -> List[Union[int, str, float]]:
+    """Generates the first fraudulent transaction for a compromised customer.
+
+    This method generates the first fraudulent transaction for a compromised customer. The transaction is generated using a
+    normal distribution for the transaction amount, and a uniform distribution for the transaction location. The location
+    is selected randomly from a set of terminals within a specified radius of a randomly chosen point.
+
+    Args:
+        customer_profile (pd.DataFrame): The customer profile to use for generating the transaction.
+        day (int): The day on which the transaction occurred.
+        fraudsters_mean (float): The mean amount of fraudulent transactions.
+        fraudsters_var (float): The variance of fraudulent transactions.
+        terminal_profiles_table (pd.DataFrame): The table of terminal profiles to use for selecting the transaction location.
+        r (int, optional): The radius around the randomly chosen point to use for selecting the transaction location. Defaults to 20.
+
+    Returns:
+        List[Union[int, str, float]]: The generated fraudulent transaction.
+    """
     new_centreX, new_centreY = compute_first_centre()
     terminals_xy = terminal_profiles_table[['x_terminal_id', 'y_terminal_id']]
     available_terminals, weights = get_list_terminals_within_radius_from_point(new_centreX, new_centreY,
