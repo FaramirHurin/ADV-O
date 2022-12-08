@@ -1,6 +1,7 @@
 import random 
 import numpy as np 
 import pandas as pd
+import pickle
 from .functions import *
 
 
@@ -16,6 +17,29 @@ class Generator():
         self.random_state = random_state
         self.max_days_from_compromission = max_days_from_compromission
     
+        self.terminal_profiles_table = generate_terminal_profiles_table(self.n_customers, self.random_state)
+        self.customer_profiles_table = generate_customer_profiles_table(self.n_terminals, self.random_state)
+        self.x_y_terminals = self.terminal_profiles_table[['x_terminal_id', 'y_terminal_id']].values.astype(float)
+        self.customer_profiles_table['available_terminals'] = self.customer_profiles_table.apply\
+            (lambda x: get_list_terminals_within_radius(x, x_y_terminals=self.x_y_terminals, r=self.radius), axis=1)
+
+        self.fraudsters_mean = np.random.normal(np.mean(self.customer_profiles_table['mean_amount'])) * 1.1
+        self.fraudsters_var = np.random.normal(np.mean(self.customer_profiles_table['std_amount'])) * 0.8
+    
+
+        
+    def generate(self):
+        
+        groups = self.customer_profiles_table.groupby('CUSTOMER_ID')
+        self.transactions_df = groups.apply(lambda x: self._generate_transactions_table(customer_profile=x.iloc[0])).reset_index(drop=True)    
+
+    def export(self, filename='transactions.csv', format='csv'):
+        if format=='csv':
+            self.transactions_df.to_csv(filename,index=False)
+        elif format=='pkl':
+            with open(filename, 'wb') as f:
+                pickle.dump(self.transactions_df,f)
+
     def _generate_transactions_table(self, customer_profile):
         days_from_compromission = 0  # Number of max frauds days
         customer_transactions = []
@@ -46,22 +70,3 @@ class Generator():
                 ['TX_DATETIME', 'CUSTOMER_ID', 'TERMINAL_ID', 'TX_AMOUNT', 'TX_TIME_SECONDS', 'TX_FRAUD']]
 
         return customer_transactions
-    
-    
-    def initialize(self):
-        self.terminal_profiles_table = generate_terminal_profiles_table(self.n_customers, self.random_state)
-        self.customer_profiles_table = generate_customer_profiles_table(self.n_terminals, self.random_state)
-        self.x_y_terminals = self.terminal_profiles_table[['x_terminal_id', 'y_terminal_id']].values.astype(float)
-        self.customer_profiles_table['available_terminals'] = self.customer_profiles_table.apply\
-            (lambda x: get_list_terminals_within_radius(x, x_y_terminals=self.x_y_terminals, r=self.radius), axis=1)
-
-        self.fraudsters_mean = np.random.normal(np.mean(self.customer_profiles_table['mean_amount'])) * 1.1
-        self.fraudsters_var = np.random.normal(np.mean(self.customer_profiles_table['std_amount'])) * 0.8
-    
-    
-    def generate(self):
-        
-        groups = self.customer_profiles_table.groupby('CUSTOMER_ID')
-        transactions_df=groups.apply(lambda x: self._generate_transactions_table(customer_profile=x.iloc[0])).reset_index(drop=True)
-        return transactions_df
-    
