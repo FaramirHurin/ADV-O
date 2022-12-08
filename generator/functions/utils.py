@@ -5,7 +5,6 @@ def compute_first_centre():
     x, y = np.random.normal(loc=70, scale=4), np.random.normal(loc=20, scale=6)
     while x > 100 or x < 0:
         x = np.random.normal(loc=70, scale=4)
-
     while y > 100 or y < 0:
         y = np.random.normal(loc=20, scale=4)
     return x, y

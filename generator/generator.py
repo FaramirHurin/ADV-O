@@ -6,29 +6,28 @@ from .functions import *
 
 class Generator():
     
-    def __init__(self, n_customers, n_terminals, radius=20, nb_days=8, start_date="2018-04-01", random_state = 2):
+    def __init__(self, n_customers=50, n_terminals=10, radius=20, nb_days=8, start_date="2018-04-01", random_state = 2, \
+        max_days_from_compromission=3):
         self.n_customers = n_customers
         self.n_terminals = n_terminals
         self.radius = radius
         self.nb_days = nb_days
         self.start_date = start_date
         self.random_state = random_state
-        
+        self.max_days_from_compromission = max_days_from_compromission
     
     def _generate_transactions_table(self, customer_profile):
-        days_from_comprmission = 0  # Number of max frauds days
+        days_from_compromission = 0  # Number of max frauds days
         customer_transactions = []
         random.seed(int(customer_profile['CUSTOMER_ID']))
         # For all days
         for day in range(self.nb_days):
             # Random number of transactions for that day
-            nb_tx = np.random.poisson(customer_profile.mean_nb_tx_per_day)
-            if nb_tx == 0:
-                continue
+            nb_tx = np.random.poisson(customer_profile.mean_nb_tx_per_day) + 1  #+1 to avoid 0
 
-            if customer_profile['compromised'] == 1 and len(customer_transactions) > 0 and days_from_comprmission < 3:
+            if customer_profile['compromised'] == 1 and len(customer_transactions) > 0 and days_from_compromission < self.max_days_from_compromission:
                 customer_transactions = generate_fraudulent_transactions(customer_transactions, nb_tx, customer_profile, day, self.fraudsters_mean, self.fraudsters_var, self.terminal_profiles_table, self.x_y_terminals)
-                days_from_comprmission += 1
+                days_from_compromission += 1
 
             else:
                 customer_transactions = generate_genuine_transactions(customer_transactions, nb_tx, customer_profile, day)
