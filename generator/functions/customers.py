@@ -1,7 +1,22 @@
 import numpy as np
 import pandas as pd 
 
-def generate_customer_profiles_table(n_customers, random_state=0):
+def generate_customer_profiles_table(n_customers: int, random_state: int = 0) -> pd.DataFrame:
+    """
+    Generate customer profiles for a given number of customers.
+    
+    Parameters
+    ----------
+    n_customers: int
+        The number of customers to generate.
+    random_state: int, optional
+        The random state to use. This is an optional parameter with a default value of 0.
+    
+    Returns
+    -------
+    pandas.DataFrame
+        A DataFrame containing the generated customer profiles.
+    """
     np.random.seed(random_state)
     customer_profiles_table = pd.DataFrame(columns=['CUSTOMER_ID', 'x_customer_id', 'y_customer_id',
                                                     'mean_amount', 'std_amount', 'mean_nb_tx_per_day', 'compromised'])

@@ -1,7 +1,15 @@
 import numpy as np
 
 # TODO: fix this function, why the conditions? LOC and SCALE as parameters
-def compute_first_centre():
+def compute_first_centre() -> Tuple[float, float]:
+    """
+    Compute the coordinates of the first center.
+    
+    Returns
+    -------
+    Tuple[float, float]
+        A tuple containing the x and y coordinates of the first center.
+    """
     x, y = np.random.normal(loc=70, scale=4), np.random.normal(loc=20, scale=6)
     while x > 100 or x < 0:
         x = np.random.normal(loc=70, scale=4)
@@ -10,19 +18,58 @@ def compute_first_centre():
     return x, y
 
 
-def compute_first_time():
+def compute_first_time() -> int:
+    """
+    Compute the first time of transaction.
+    
+    Returns
+    -------
+    int
+        An integer representing the first time of transaction.
+    """
     time_tx = abs(int(np.random.normal(86400 / 8, 20000)))
     return time_tx
 
 
-def compute_first_amount(fraudsters_mean, fraudsters_var):
+
+def compute_first_amount(fraudsters_mean: float, fraudsters_var: float) -> float:
+    """
+    Compute the first amount of transaction.
+    
+    Parameters
+    ----------
+    fraudsters_mean: float
+        The mean amount of transaction for fraudsters.
+    fraudsters_var: float
+        The variance of the amount of transaction for fraudsters.
+    
+    Returns
+    -------
+    float
+        A float representing the first amount of transaction.
+    """
     first_amount = np.random.normal(loc=fraudsters_mean, scale=fraudsters_var)
     first_amount = np.round(first_amount, decimals=2)
     # print('Amount is' + str(first_amount))
     return first_amount
 
 
-def compute_new_centre(previous_X, previous_Y):
+def compute_new_centre(previous_X: float, previous_Y: float) -> Tuple[float, float]:
+    """
+    Compute the coordinates of the new center.
+    
+    Parameters
+    ----------
+    previous_X: float
+        The previous x coordinate of the center.
+    previous_Y: float
+        The previous y coordinate of the center.
+    
+    Returns
+    -------
+    Tuple[float, float]
+        A tuple containing the x and y coordinates of the new center.
+    """
     small_x = previous_X / 100
     small_y = previous_Y / 100
 
@@ -41,7 +88,26 @@ def compute_new_centre(previous_X, previous_Y):
     return new_centreX, new_centreY
 
 
-def compute_new_amt(previous_AMT, previous_X, previous_Y, fraudsters_var):
+def compute_new_amt(previous_AMT: float, previous_X: float, previous_Y: float, fraudsters_var: float) -> float:
+    """
+    Compute the new amount of transaction.
+    
+    Parameters
+    ----------
+    previous_AMT: float
+        The previous amount of transaction.
+    previous_X: float
+        The previous x coordinate of the center.
+    previous_Y: float
+        The previous y coordinate of the center.
+    fraudsters_var: float
+        The variance of the amount of transaction for fraudsters.
+    
+    Returns
+    -------
+    float
+        A float representing the new amount of transaction.
+    """
     value = np.random.normal(1.1 * previous_AMT - 0.2 * previous_X + 0.7 + previous_Y * 0.1, fraudsters_var / 2)
     return np.abs(value)
 
@@ -51,7 +117,17 @@ def compute_new_amt(previous_AMT, previous_X, previous_Y, fraudsters_var):
 # if previous_fraud[1] == day is very unclear.
 
 # If first fraud of the day, go random, oterwise take from previous fraud.
-def compute_time(previous_fraud, day):
+def compute_time(previous_fraud: tuple, day: int) -> int:
+    """
+    Computes the time of a transaction.
+
+    Args:
+        previous_fraud (tuple): A tuple containing the previous time of fraud and the day on which it occurred.
+        day (int): The current day.
+
+    Returns:
+        int: The time of the transaction.
+    """
     if previous_fraud[1] == day:  # DAY
         time_tx = int(previous_fraud[0] + abs(np.random.normal(loc=0, scale=30000)))
         while time_tx > 86400:
