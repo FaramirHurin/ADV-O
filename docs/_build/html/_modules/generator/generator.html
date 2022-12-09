@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>generator.generator &mdash; ADV-O 0.0.1 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> ADV-O
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">generator</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">ADV-O</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">generator.generator</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for generator.generator</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">random</span> 
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span> 
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">pickle</span>
+<span class="kn">from</span> <span class="nn">.functions</span> <span class="kn">import</span> <span class="o">*</span>
+
+
+<div class="viewcode-block" id="Generator"><a class="viewcode-back" href="../../generator.html#generator.generator.Generator">[docs]</a><span class="k">class</span> <span class="nc">Generator</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A class for generating synthetic transactions data.</span>
+<span class="sd">    </span>
+<span class="sd">    This class can be used to generate a synthetic transactions dataset for use in</span>
+<span class="sd">    testing or evaluation of fraud detection systems. The dataset includes information</span>
+<span class="sd">    about customers, terminals, and the transactions themselves, and can be exported</span>
+<span class="sd">    in various formats.</span>
+<span class="sd">    </span>
+<span class="sd">    Attributes:</span>
+<span class="sd">        n_customers (int): The number of customers to include in the dataset.</span>
+<span class="sd">        n_terminals (int): The number of terminals to include in the dataset.</span>
+<span class="sd">        radius (int): The radius within which a customer can use a terminal.</span>
+<span class="sd">        nb_days (int): The number of days of transactions to generate.</span>
+<span class="sd">        start_date (str): The starting date for the transaction period.</span>
+<span class="sd">        random_state (int): The random seed to use for generating the data.</span>
+<span class="sd">        max_days_from_compromission (int): The maximum number of days from a terminal&#39;s</span>
+<span class="sd">            compromission to a transaction.</span>
+<span class="sd">        terminal_profiles_table (pandas.DataFrame): A table containing information about</span>
+<span class="sd">            each terminal in the dataset.</span>
+<span class="sd">        customer_profiles_table (pandas.DataFrame): A table containing information about</span>
+<span class="sd">            each customer in the dataset.</span>
+<span class="sd">        x_y_terminals (numpy.ndarray): The x-y coordinates of each terminal.</span>
+<span class="sd">        fraudsters_mean (float): The mean transaction amount for fraudsters.</span>
+<span class="sd">        fraudsters_var (float): The variance in transaction amount for fraudsters.</span>
+<span class="sd">    </span>
+<span class="sd">    Methods:</span>
+<span class="sd">        generate(): Generate the synthetic transactions dataset.</span>
+<span class="sd">        export(filename: str, format: str): Export the generated dataset to a file.</span>
+<span class="sd">        _generate_transactions_table(customer_profile: pandas.DataFrame): Generate a table</span>
+<span class="sd">            of transactions for a given customer.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_customers</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">n_terminals</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">nb_days</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">start_date</span><span class="o">=</span><span class="s2">&quot;2018-04-01&quot;</span><span class="p">,</span> <span class="n">random_state</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> \
+        <span class="n">max_days_from_compromission</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_customers</span> <span class="o">=</span> <span class="n">n_customers</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_terminals</span> <span class="o">=</span> <span class="n">n_terminals</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">radius</span> <span class="o">=</span> <span class="n">radius</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nb_days</span> <span class="o">=</span> <span class="n">nb_days</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_date</span> <span class="o">=</span> <span class="n">start_date</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span> <span class="o">=</span> <span class="n">random_state</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_days_from_compromission</span> <span class="o">=</span> <span class="n">max_days_from_compromission</span>
+    
+        <span class="bp">self</span><span class="o">.</span><span class="n">_initialize</span><span class="p">()</span> 
+
+    <span class="k">def</span> <span class="nf">_initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize the generator by creating the terminal and customer profiles and</span>
+<span class="sd">        calculating the available terminals for each customer.</span>
+<span class="sd">        </span>
+<span class="sd">        This method is called automatically when the `Generator` class is instantiated,</span>
+<span class="sd">        and does not need to be called directly.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">terminal_profiles_table</span> <span class="o">=</span> <span class="n">generate_terminal_profiles_table</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_customers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">customer_profiles_table</span> <span class="o">=</span> <span class="n">generate_customer_profiles_table</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_terminals</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x_y_terminals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">terminal_profiles_table</span><span class="p">[[</span><span class="s1">&#39;x_terminal_id&#39;</span><span class="p">,</span> <span class="s1">&#39;y_terminal_id&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">customer_profiles_table</span><span class="p">[</span><span class="s1">&#39;available_terminals&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">customer_profiles_table</span><span class="o">.</span><span class="n">apply</span>\
+            <span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">get_list_terminals_within_radius</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x_y_terminals</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x_y_terminals</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fraudsters_mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">customer_profiles_table</span><span class="p">[</span><span class="s1">&#39;mean_amount&#39;</span><span class="p">]))</span> <span class="o">*</span> <span class="mf">1.1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fraudsters_var</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">customer_profiles_table</span><span class="p">[</span><span class="s1">&#39;std_amount&#39;</span><span class="p">]))</span> <span class="o">*</span> <span class="mf">0.8</span>
+       
+    <span class="k">def</span> <span class="nf">_generate_transactions_table</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">customer_profile</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function takes the customer profile and returns a DataFrame of transactions for the customer.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        customer_profile (pd.DataFrame): A DataFrame containing the customer profile.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        pd.DataFrame: A DataFrame of transactions for the customer.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">days_from_compromission</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># Number of max frauds days</span>
+        <span class="n">customer_transactions</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">customer_profile</span><span class="p">[</span><span class="s1">&#39;CUSTOMER_ID&#39;</span><span class="p">]))</span>
+        <span class="c1"># For all days</span>
+        <span class="k">for</span> <span class="n">day</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nb_days</span><span class="p">):</span>
+            <span class="c1"># Random number of transactions for that day</span>
+            <span class="n">nb_tx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">poisson</span><span class="p">(</span><span class="n">customer_profile</span><span class="o">.</span><span class="n">mean_nb_tx_per_day</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>  <span class="c1">#+1 to avoid 0</span>
+
+            <span class="k">if</span> <span class="n">customer_profile</span><span class="p">[</span><span class="s1">&#39;compromised&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">customer_transactions</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">days_from_compromission</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_days_from_compromission</span><span class="p">:</span>
+                <span class="n">customer_transactions</span> <span class="o">=</span> <span class="n">generate_fraudulent_transactions</span><span class="p">(</span><span class="n">customer_transactions</span><span class="p">,</span> <span class="n">nb_tx</span><span class="p">,</span> <span class="n">customer_profile</span><span class="p">,</span> <span class="n">day</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fraudsters_mean</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fraudsters_var</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">terminal_profiles_table</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_y_terminals</span><span class="p">)</span>
+                <span class="n">days_from_compromission</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">customer_transactions</span> <span class="o">=</span> <span class="n">generate_genuine_transactions</span><span class="p">(</span><span class="n">customer_transactions</span><span class="p">,</span> <span class="n">nb_tx</span><span class="p">,</span> <span class="n">customer_profile</span><span class="p">,</span> <span class="n">day</span><span class="p">)</span>
+                <span class="n">customer_profile</span><span class="p">[</span><span class="s1">&#39;compromised&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">compromise_user</span><span class="p">(</span><span class="n">customer_profile</span><span class="p">)</span>
+
+        <span class="n">customer_transactions</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">customer_transactions</span><span class="p">,</span>
+                                             <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;TX_TIME_SECONDS_INSIDE_DAY&#39;</span><span class="p">,</span> <span class="s1">&#39;TX_TIME_DAYS&#39;</span><span class="p">,</span> <span class="s1">&#39;CUSTOMER_ID&#39;</span><span class="p">,</span>
+                                                      <span class="s1">&#39;TERMINAL_ID&#39;</span><span class="p">,</span> <span class="s1">&#39;TX_AMOUNT&#39;</span><span class="p">,</span> <span class="s1">&#39;TX_FRAUD&#39;</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">customer_transactions</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">customer_transactions</span><span class="p">[</span><span class="s1">&#39;TX_TIME_SECONDS&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">customer_transactions</span><span class="p">[</span><span class="s2">&quot;TX_TIME_SECONDS_INSIDE_DAY&quot;</span><span class="p">]</span> <span class="o">+</span> \
+                                                       <span class="n">customer_transactions</span><span class="p">[</span><span class="s2">&quot;TX_TIME_DAYS&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">86400</span>
+            <span class="n">customer_transactions</span><span class="p">[</span><span class="s1">&#39;TX_DATETIME&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">customer_transactions</span><span class="p">[</span><span class="s1">&#39;TX_TIME_SECONDS&#39;</span><span class="p">],</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">,</span>
+                                                                  <span class="n">origin</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">start_date</span><span class="p">)</span>
+            <span class="n">customer_transactions</span> <span class="o">=</span> <span class="n">customer_transactions</span><span class="p">[</span>
+                <span class="p">[</span><span class="s1">&#39;TX_DATETIME&#39;</span><span class="p">,</span> <span class="s1">&#39;CUSTOMER_ID&#39;</span><span class="p">,</span> <span class="s1">&#39;TERMINAL_ID&#39;</span><span class="p">,</span> <span class="s1">&#39;TX_AMOUNT&#39;</span><span class="p">,</span> <span class="s1">&#39;TX_TIME_SECONDS&#39;</span><span class="p">,</span> <span class="s1">&#39;TX_FRAUD&#39;</span><span class="p">]]</span>
+
+        <span class="k">return</span> <span class="n">customer_transactions</span>
+
+<div class="viewcode-block" id="Generator.generate"><a class="viewcode-back" href="../../generator.html#generator.generator.Generator.generate">[docs]</a>    <span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Generates transactions data for the customers in this dataset.</span>
+
+<span class="sd">        This function groups the customer profiles by customer ID and then generates</span>
+<span class="sd">        transactions data for each group using the `_generate_transactions_table`</span>
+<span class="sd">        function. The generated transactions data is stored in the `transactions_df`</span>
+<span class="sd">        attribute of this object.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="n">groups</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">customer_profiles_table</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;CUSTOMER_ID&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">transactions_df</span> <span class="o">=</span> <span class="n">groups</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_transactions_table</span><span class="p">(</span><span class="n">customer_profile</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>    </div>
+
+<div class="viewcode-block" id="Generator.export"><a class="viewcode-back" href="../../generator.html#generator.generator.Generator.export">[docs]</a>    <span class="k">def</span> <span class="nf">export</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span><span class="s1">&#39;transactions.csv&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span><span class="s1">&#39;csv&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Exports the transactions data to a file.</span>
+
+<span class="sd">        This function saves the transactions data stored in the `transactions_df`</span>
+<span class="sd">        attribute of this object to a file with the specified `filename` and</span>
+<span class="sd">        `format`. If `format` is &#39;csv&#39;, the data is saved as a CSV file. If</span>
+<span class="sd">        `format` is &#39;pkl&#39;, the data is pickled and saved to a binary file.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            filename (str): The name of the file to save the data to.</span>
+<span class="sd">            format (str): The format to use for saving the data. Must be &#39;csv&#39; or</span>
+<span class="sd">                &#39;pkl&#39;.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">format</span><span class="o">==</span><span class="s1">&#39;csv&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">transactions_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span><span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">format</span><span class="o">==</span><span class="s1">&#39;pkl&#39;</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">transactions_df</span><span class="p">,</span><span class="n">f</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Daniele Lunghi, Gian Marco Paldino.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

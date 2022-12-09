@@ -1,5 +1,6 @@
 import numpy as np
-import panda as pd
+import pandas as pd
+from typing import List, Tuple
 
 def get_list_terminals_within_radius(
     customer_profile: pd.DataFrame, 

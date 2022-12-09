@@ -1,4 +1,5 @@
 import numpy as np
+from typing import Tuple
 
 # TODO: fix this function, why the conditions? LOC and SCALE as parameters
 def compute_first_centre() -> Tuple[float, float]:

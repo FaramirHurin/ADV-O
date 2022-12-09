@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>generator.functions.utils &mdash; ADV-O 0.0.1 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> ADV-O
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">generator</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">ADV-O</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">generator.functions.utils</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for generator.functions.utils</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span>
+
+<span class="c1"># TODO: fix this function, why the conditions? LOC and SCALE as parameters</span>
+<div class="viewcode-block" id="compute_first_centre"><a class="viewcode-back" href="../../../generator.functions.html#generator.functions.utils.compute_first_centre">[docs]</a><span class="k">def</span> <span class="nf">compute_first_centre</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the coordinates of the first center.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Tuple[float, float]</span>
+<span class="sd">        A tuple containing the x and y coordinates of the first center.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">70</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">4</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+    <span class="k">while</span> <span class="n">x</span> <span class="o">&gt;</span> <span class="mi">100</span> <span class="ow">or</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">70</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+    <span class="k">while</span> <span class="n">y</span> <span class="o">&gt;</span> <span class="mi">100</span> <span class="ow">or</span> <span class="n">y</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span></div>
+
+
+<div class="viewcode-block" id="compute_first_time"><a class="viewcode-back" href="../../../generator.functions.html#generator.functions.utils.compute_first_time">[docs]</a><span class="k">def</span> <span class="nf">compute_first_time</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the first time of transaction.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    int</span>
+<span class="sd">        An integer representing the first time of transaction.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">time_tx</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">86400</span> <span class="o">/</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">20000</span><span class="p">)))</span>
+    <span class="k">return</span> <span class="n">time_tx</span></div>
+
+
+
+<div class="viewcode-block" id="compute_first_amount"><a class="viewcode-back" href="../../../generator.functions.html#generator.functions.utils.compute_first_amount">[docs]</a><span class="k">def</span> <span class="nf">compute_first_amount</span><span class="p">(</span><span class="n">fraudsters_mean</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">fraudsters_var</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the first amount of transaction.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    fraudsters_mean: float</span>
+<span class="sd">        The mean amount of transaction for fraudsters.</span>
+<span class="sd">    fraudsters_var: float</span>
+<span class="sd">        The variance of the amount of transaction for fraudsters.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        A float representing the first amount of transaction.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">first_amount</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="n">fraudsters_mean</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="n">fraudsters_var</span><span class="p">)</span>
+    <span class="n">first_amount</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">first_amount</span><span class="p">,</span> <span class="n">decimals</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="c1"># print(&#39;Amount is&#39; + str(first_amount))</span>
+    <span class="k">return</span> <span class="n">first_amount</span></div>
+
+
+<div class="viewcode-block" id="compute_new_centre"><a class="viewcode-back" href="../../../generator.functions.html#generator.functions.utils.compute_new_centre">[docs]</a><span class="k">def</span> <span class="nf">compute_new_centre</span><span class="p">(</span><span class="n">previous_X</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">previous_Y</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the coordinates of the new center.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    previous_X: float</span>
+<span class="sd">        The previous x coordinate of the center.</span>
+<span class="sd">    previous_Y: float</span>
+<span class="sd">        The previous y coordinate of the center.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Tuple[float, float]</span>
+<span class="sd">        A tuple containing the x and y coordinates of the new center.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">small_x</span> <span class="o">=</span> <span class="n">previous_X</span> <span class="o">/</span> <span class="mi">100</span>
+    <span class="n">small_y</span> <span class="o">=</span> <span class="n">previous_Y</span> <span class="o">/</span> <span class="mi">100</span>
+
+    <span class="n">X</span> <span class="o">=</span> <span class="p">(</span><span class="n">small_x</span> <span class="o">*</span> <span class="mf">0.75</span> <span class="o">-</span> <span class="mf">0.06</span> <span class="o">*</span> <span class="n">small_y</span> <span class="o">+</span> <span class="mf">0.08</span> <span class="o">*</span> <span class="n">small_x</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">small_y</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">small_x</span> <span class="o">*</span> <span class="n">small_y</span> <span class="o">*</span> <span class="mf">0.3</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span>
+    <span class="n">Y</span> <span class="o">=</span> <span class="p">(</span><span class="n">small_x</span> <span class="o">*</span> <span class="mf">0.3</span> <span class="o">+</span> <span class="mf">0.85</span> <span class="o">*</span> <span class="n">small_y</span> <span class="o">-</span> <span class="mf">0.3</span> <span class="o">*</span> <span class="n">small_x</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="mf">0.1</span> <span class="o">*</span> <span class="n">small_y</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">small_x</span> <span class="o">*</span> <span class="n">small_y</span> <span class="o">*</span> <span class="mf">0.3</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span>
+
+    <span class="n">new_centreX</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+    <span class="n">new_centreY</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="n">Y</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+
+    <span class="k">while</span> <span class="n">new_centreX</span> <span class="o">&gt;</span> <span class="mi">100</span> <span class="ow">or</span> <span class="n">new_centreX</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c1"># print(&#39;+&#39;)</span>
+        <span class="n">new_centreX</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    <span class="k">while</span> <span class="n">new_centreY</span> <span class="o">&gt;</span> <span class="mi">100</span> <span class="ow">or</span> <span class="n">new_centreY</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">new_centreY</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="n">Y</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+        <span class="c1"># print(&#39;+&#39;)</span>
+    <span class="k">return</span> <span class="n">new_centreX</span><span class="p">,</span> <span class="n">new_centreY</span></div>
+
+
+<div class="viewcode-block" id="compute_new_amt"><a class="viewcode-back" href="../../../generator.functions.html#generator.functions.utils.compute_new_amt">[docs]</a><span class="k">def</span> <span class="nf">compute_new_amt</span><span class="p">(</span><span class="n">previous_AMT</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">previous_X</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">previous_Y</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">fraudsters_var</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the new amount of transaction.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    previous_AMT: float</span>
+<span class="sd">        The previous amount of transaction.</span>
+<span class="sd">    previous_X: float</span>
+<span class="sd">        The previous x coordinate of the center.</span>
+<span class="sd">    previous_Y: float</span>
+<span class="sd">        The previous y coordinate of the center.</span>
+<span class="sd">    fraudsters_var: float</span>
+<span class="sd">        The variance of the amount of transaction for fraudsters.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        A float representing the new amount of transaction.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mf">1.1</span> <span class="o">*</span> <span class="n">previous_AMT</span> <span class="o">-</span> <span class="mf">0.2</span> <span class="o">*</span> <span class="n">previous_X</span> <span class="o">+</span> <span class="mf">0.7</span> <span class="o">+</span> <span class="n">previous_Y</span> <span class="o">*</span> <span class="mf">0.1</span><span class="p">,</span> <span class="n">fraudsters_var</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
+
+
+<span class="c1"># TODO. why not separating the computation of the first time from the computation</span>
+<span class="c1"># of the second time similarly to the other functions? The condition</span>
+<span class="c1"># if previous_fraud[1] == day is very unclear.</span>
+
+<span class="c1"># If first fraud of the day, go random, oterwise take from previous fraud.</span>
+<div class="viewcode-block" id="compute_time"><a class="viewcode-back" href="../../../generator.functions.html#generator.functions.utils.compute_time">[docs]</a><span class="k">def</span> <span class="nf">compute_time</span><span class="p">(</span><span class="n">previous_fraud</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">day</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Computes the time of a transaction.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        previous_fraud (tuple): A tuple containing the previous time of fraud and the day on which it occurred.</span>
+<span class="sd">        day (int): The current day.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        int: The time of the transaction.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">previous_fraud</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">day</span><span class="p">:</span>  <span class="c1"># DAY</span>
+        <span class="n">time_tx</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">previous_fraud</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">30000</span><span class="p">)))</span>
+        <span class="k">while</span> <span class="n">time_tx</span> <span class="o">&gt;</span> <span class="mi">86400</span><span class="p">:</span>
+            <span class="n">time_tx</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">previous_fraud</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">30000</span><span class="p">)))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">time_tx</span> <span class="o">=</span> <span class="n">compute_first_time</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">time_tx</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Daniele Lunghi, Gian Marco Paldino.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
