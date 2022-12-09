@@ -114,8 +114,34 @@ def generate_first_fraud(customer_profile: pd.DataFrame, day: int, fraudsters_me
     return fraud
 
 
-def generate_following_fraud(previous_fraud, terminal_profiles_table, customer_profile, day, fraudsters_mean,
-                                     fraudsters_var, x_y_terminals, r=20):
+def generate_following_fraud(
+    previous_fraud: pd.DataFrame, 
+    terminal_profiles_table: pd.DataFrame, 
+    customer_profile: pd.DataFrame, 
+    day: int, 
+    fraudsters_mean: float,
+    fraudsters_var: float, 
+    x_y_terminals: np.ndarray, 
+    r: float = 20
+) -> Tuple[List[Union[int, float]], int]:
+    """
+    This function takes the previous fraud transaction, the terminal profiles table, the customer profile, 
+    the day of the transaction, the mean and variance of fraudsters, the x and y coordinates of terminals, 
+    and a radius, and returns the next fraud transaction and the transaction time.
+
+    Parameters:
+    previous_fraud (pd.DataFrame): A DataFrame representing the previous fraud transaction.
+    terminal_profiles_table (pd.DataFrame): A DataFrame containing the terminal profiles.
+    customer_profile (pd.DataFrame): A DataFrame containing the customer profile.
+    day (int): The day of the transaction.
+    fraudsters_mean (float): The mean of fraudsters.
+    fraudsters_var (float): The variance of fraudsters.
+    x_y_terminals (np.ndarray): A 2D array containing the x and y coordinates of terminals.
+    r (float): The radius to search within (defaults to 20).
+
+    Returns:
+    Tuple[List[Union[int, float]], int]: A tuple containing the next fraud transaction and the transaction time.
+    """
 
     previous_terminal_ID = previous_fraud[3]  # TERMINAL_ID
     previous_terminal = terminal_profiles_table[terminal_profiles_table['TERMINAL_ID'] == previous_terminal_ID]
@@ -139,8 +165,34 @@ def generate_following_fraud(previous_fraud, terminal_profiles_table, customer_p
     return fraud, time_tx
 
 
-def generate_fraudulent_transactions(customer_transactions, nb_txm, customer_profile, day, fraudsters_mean,
-                                     fraudsters_var, terminal_profiles_table, x_y_terminals):
+def generate_fraudulent_transactions(
+    customer_transactions: pd.DataFrame, 
+    nb_txm: int, 
+    customer_profile: pd.DataFrame, 
+    day: int, 
+    fraudsters_mean: float,
+    fraudsters_var: float, 
+    terminal_profiles_table: pd.DataFrame, 
+    x_y_terminals: np.ndarray
+) -> pd.DataFrame:
+    """
+    This function takes the customer transactions, the number of transactions to generate, the customer profile, 
+    the day of the transaction, the mean and variance of fraudsters, the terminal profiles table, 
+    and the x and y coordinates of terminals, and returns a DataFrame of fraudulent transactions.
+
+    Parameters:
+    customer_transactions (pd.DataFrame): A DataFrame of customer transactions.
+    nb_txm (int): The number of transactions to generate.
+    customer_profile (pd.DataFrame): A DataFrame containing the customer profile.
+    day (int): The day of the transaction.
+    fraudsters_mean (float): The mean of fraudsters.
+    fraudsters_var (float): The variance of fraudsters.
+    terminal_profiles_table (pd.DataFrame): A DataFrame containing the terminal profiles.
+    x_y_terminals (np.ndarray): A 2D array containing the x and y coordinates of terminals.
+
+    Returns:
+    pd.DataFrame: A DataFrame of fraudulent transactions.
+    """
 
     time_tx = 0
     for index in range(nb_txm):
