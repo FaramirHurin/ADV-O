@@ -32,6 +32,3 @@ class TestGenerateTerminalProfilesTable(unittest.TestCase):
         y_values = result['y_terminal_id'].values
         self.assertTrue(np.isclose(np.mean(x_values), 50, atol=10))
         self.assertTrue(np.isclose(np.mean(y_values), 50, atol=10))
-
-if __name__ == '__main__':
-    unittest.main()
