@@ -1,14 +1,35 @@
 from generator import Generator
 import pandas as pd
+import numpy as np
 from pandarallel import pandarallel
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import RandomizedSearchCV
-
+from typing import Dict, Type, Any, Callable
+from sklearn.model_selection import BaseSearchCV
+from sklearn.base import BaseEstimator
 
 
 class ADVO():
     
-    """ ADVO: An Adversary model of fraudsters behaviour to improve oversampling in credit card fraud detection
+    """
+    ADVO: An Adversary model of fraudsters behaviour to improve oversampling in credit card fraud detection.
+
+    This class implements an adversarial model of fraudsters' behavior that can be used to improve oversampling in credit
+    card fraud detection. The model uses transactions data to create pairs of fraudulent transactions for each customer, and
+    trains regression models to predict future fraudulent transactions for each customer.
+
+    The class provides methods for generating transactions data, loading transactions from a file, creating pairs of
+    fraudulent transactions, tuning the hyperparameters of regression models, fitting the regression models to data, and
+    generating new synthetic transactions using the trained models.
+
+    Attributes:
+        generator (Generator): a `Generator` instance containing the transactions data.
+        n_jobs (int): the number of cores to use when running certain methods in parallel.
+        random_state (int): the random seed to use when generating transactions.
+        training_frac (float): the fraction of transactions to use for training the regression models.
+        useful_features (List[str]): a list of the names of the features to use when training the regression models.
+        regressors (Dict[str, Any]): a dictionary containing the trained regression models, with the features to predict as
+            keys.
     """
 
     def __init__(self, generator=None, n_jobs=1, training_frac=0.8, random_state=1):
@@ -23,15 +44,47 @@ class ADVO():
         pandarallel.initialize(nb_workers=self.n_jobs, progress_bar=True, use_memory_fs=False)
 
     def generate_transactions(self, n_customers=50, n_terminals=10):
+        """
+        Generate transactions after creating a Generator instance.
+
+        This method generates transactions after creating a `Generator` instance to hold the data. The
+        `Generator` instance is stored in the `generator` attribute of the current instance.
+
+        Args:
+            n_customers (int): the number of customers to generate.
+            n_terminals (int): the number of terminals to generate.
+        """
 
         self.generator = Generator(n_customers = n_customers, n_terminals=n_terminals, random_state=self.random_state)
         self.generator.generate()
 
-    def load_trasactions(self, filename):
+    def load_trasactions(self, filename: str) -> None:
+        """
+        Load transactions from a file after creating a Generator instance.
+
+        This method loads transactions from the specified file after creating a `Generator` instance to hold the data. The
+        `Generator` instance is stored in the `generator` attribute of the current instance.
+
+        Args:
+            filename (str): the name of the file containing the transactions to load.
+        """
         self.generator = Generator()
         self.generator.load(filename)
 
-    def _make_couples(group):
+    def _make_couples(self, group: pd.DataFrame) -> pd.DataFrame: 
+        """
+        Create couples of fraudulent transactions for a given customer group.
+
+        This method takes a DataFrame representing a group of fraudulent transactions for a single customer. It sorts the
+        transactions by date, and then creates couples of transactions by iterating through the transactions and pairing each
+        transaction with the subsequent transaction in the list. The resulting couples are stored in a DataFrame and returned.
+
+        Args:
+            group (pandas.DataFrame): a DataFrame representing a group of fraudulent transactions for a single customer.
+
+        Returns:
+            pandas.DataFrame: a DataFrame containing couples of fraudulent transactions for the given customer.
+        """
         group = group.sort_values(['TX_DATETIME'], axis=0, ascending=True)
         couples_df = pd.DataFrame(columns = [*'prev_' + group.columns, *'next_' + group.columns])
         if group.shape[0] > 1: 
@@ -44,6 +97,16 @@ class ADVO():
             return couples_df
             
     def create_couples(self):
+        """
+        Create couples of fraudulent transactions for each customer.
+
+        This method uses the `transactions_df` and `terminal_profiles_table` attributes of the `generator` attribute to create
+        a table of fraudulent transactions. It then groups the transactions by customer, and applies the `_make_couples` method
+        to each group in order to create couples of fraudulent transactions for each customer. The results are stored in the
+        `couples` attribute of the current instance.
+
+        This method can run in parallel using multiple cores if the `n_jobs` attribute is set to a value greater than 1.
+        """
         
         full_transactions_table =  self.generator.transactions_df.merge(self.generator.terminal_profiles_table, 'inner')
         full_frauds_table = full_transactions_table[full_transactions_table['TX_FRAUD'] == 1]
@@ -63,7 +126,24 @@ class ADVO():
         self.couples = results
 
 
-    def tune_regressors(self, searcher, search_parameters, regressor):
+    
+    def tune_regressors(
+            self,
+            searcher: Type[BaseSearchCV],
+            search_parameters: Dict[str, Any],
+            regressor: Type[BaseEstimator],
+        ) -> None:
+        """Tunes the hyperparameters of a set of regression models using a search algorithm.
+        The regressor will be part of the self.regressors dictionary, with the feature to predict as key.
+
+        Args:
+            searcher: An object that implements a search algorithm, such as GridSearchCV or RandomizedSearchCV.
+            search_parameters: A dictionary of hyperparameters for the searcher.
+            regressor: A regression model to be tuned.
+        
+        Returns:
+            None
+        """
         
         training_set = self.couples.sample(frac= 0.8, random_state=self.random_state)
         features_prev = list(map(lambda x: 'prev_' + str(x),  self.useful_features))
@@ -78,7 +158,17 @@ class ADVO():
 
 
 
-    def fit_regressors(self, metric):
+    def fit_regressors(self, metric: Callable[[np.ndarray, np.ndarray], float]) -> None:
+        """Trains a set of regression models to predict future values of features,
+        i.e. the transaction amount, the next terminal id, etc. of the next fraudulent transaction.
+    
+        Args:
+            metric: A function that takes two arrays and returns a single numeric value,
+                    representing the quality of the prediction.
+        
+        Returns:
+            None
+        """
 
         
         training_set = self.couples.sample(frac= 0.8, random_state=self.random_state)
