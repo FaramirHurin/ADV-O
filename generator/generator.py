@@ -126,24 +126,38 @@ class Generator():
         groups = self.customer_profiles_table.groupby('CUSTOMER_ID')
         self.transactions_df = groups.apply(lambda x: self._generate_transactions_table(customer_profile=x.iloc[0])).reset_index(drop=True)    
 
-    def export(self, filename: str ='transactions.csv', format: str ='csv') -> None:
+    def export(self, filename: str ='transactions.csv', format: str ='csv', include_frauds: bool =True) -> None:
         """Exports the transactions data to a file.
 
-        This function saves the transactions data stored in the `transactions_df`
+        This function saves the transactions data stored in the `transactions_df` attribute of 
+        this object merged with the terminal profiles stored in the `terminal_profiles_table`
         attribute of this object to a file with the specified `filename` and
         `format`. If `format` is 'csv', the data is saved as a CSV file. If
         `format` is 'pkl', the data is pickled and saved to a binary file.
+        If `include_frauds` is True, only the fraudulent transactions are saved
+        in a separate file.
 
         Args:
             filename (str): The name of the file to save the data to.
             format (str): The format to use for saving the data. Must be 'csv' or
                 'pkl'.
-
+            include_frauds (bool): Whether to include only the fraudulent transactions
         Returns:
             None
         """
+        
+
+        full_transactions_table = self.transactions_df.merge(self.terminal_profiles_table, 'inner')
+        full_frauds_table = full_transactions_table[full_transactions_table['TX_FRAUD'] == 1]
+
+
         if format=='csv':
-            self.transactions_df.to_csv(filename,index=False)
+            full_transactions_table.to_csv(filename,index=False)
+            if include_frauds:
+                full_frauds_table.to_csv('frauds.csv',index=False)
         elif format=='pkl':
             with open(filename, 'wb') as f:
-                pickle.dump(self.transactions_df,f)
+                pickle.dump(full_transactions_table,f)
+            if include_frauds:
+                with open('frauds.pkl', 'wb') as f:
+                    pickle.dump(full_frauds_table,f)
