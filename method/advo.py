@@ -200,6 +200,10 @@ class ADVO():
             search.fit(X_train, y_train)
             regressor = search.best_estimator_
             self.regressors[feature_to_predict] = regressor
+        
+        #save regressors in pickle file
+        with open("regressors.pkl", 'wb') as f:
+            pickle.dump(self.regressors, f)
 
     def _oversample_df(self, df: pd.DataFrame) -> pd.DataFrame:
         """Oversamples a dataframe of transactions by predicting the values for certain features using machine learning models.

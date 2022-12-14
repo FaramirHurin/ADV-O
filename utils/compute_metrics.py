@@ -31,3 +31,13 @@ def compute_metrics_remove_cards(ytest,prediction_scores,id_cards_test,id_cards_
     cprauc = pr_auc(y_true,y_pred,reference_ratio=ref_prc)
 #     cprauc_card = pr_auc(y_true,y_pred,type="card", cards=id_cards,reference_ratio=ref_prc_card)
     return accuracy,precision,recall,f1,pk10, pk20,pk50,pk100,pk300,pk1000,prauc,cprauc
+
+
+
+def compute_pk(trueY, predictions, K):
+    ordered_predicitons = np.sort(predictions)
+    value = ordered_predicitons[-K]
+    indices = np.where(predictions >= value)
+    return sum(trueY[indices])/len(indices[0]) * K
+    
+
