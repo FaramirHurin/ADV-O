@@ -1,15 +1,16 @@
-from generator import Generator
 import pandas as pd
 import numpy as np
 from pandarallel import pandarallel
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import RandomizedSearchCV
 from typing import Dict, Type, Any, Callable
-from sklearn.model_selection import BaseSearchCV
 from sklearn.base import BaseEstimator
+from sklearn.model_selection import BaseCrossValidator
 from sklearn.linear_model import Ridge
 from sklearn.metrics import r2_score
 import pickle
+
+from generator.generator import Generator
 
 
 
@@ -49,14 +50,15 @@ class ADVO():
                 training_frac=0.8,
                 sampling_strategy=0.5, 
                 random_state=1, 
-                searcher: Type[BaseSearchCV] = RandomizedSearchCV,
-                search_parameters: Dict[str, Any] = {'alpha': [0.1, 1, 10], 'fit_intercept': [True, False], 'normalize': [True, False]},
-                regressor: Type[BaseEstimator] = Ridge):
+                searcher: Type[BaseCrossValidator] = RandomizedSearchCV,
+                search_parameters: Dict[str, Any] = {'alpha': [0.1, 1, 10], 'fit_intercept': [True, False]},
+                regressor: Type[BaseEstimator] = Ridge()):
         self.transactions_df = transactions_df
         self.n_jobs = n_jobs
         self.random_state = random_state
         self.training_frac = training_frac
         self.sampling_strategy = sampling_strategy
+        #TODO: let the user choose the features to use
         self.useful_features = ['x_terminal_id', 'y_terminal_id', 'TX_AMOUNT']
         self.regressors = {}
         self.searcher = searcher
@@ -194,7 +196,7 @@ class ADVO():
 
         for feature_to_predict in self.useful_features:
             y_train = training_set['next_'+feature_to_predict]
-            search =  self.searcher(regressor, **self.search_parameters, n_jobs=self.n_jobs, random_state=self.random_state)
+            search =  self.searcher(self.regressor, self.search_parameters, n_jobs=self.n_jobs, random_state=self.random_state)
             search.fit(X_train, y_train)
             regressor = search.best_estimator_
             self.regressors[feature_to_predict] = regressor
@@ -208,20 +210,17 @@ class ADVO():
         Returns:
             A new pandas DataFrame with the original transaction data and the predicted values for the specified features.
         """
-        old_columns = df.columns
         for feature in self.regressors.keys():
-            #TODO: make it feature agnostic!
-            feature_true_name = feature[18:]
-            df['new_'+str(feature_true_name)] = self.regressors[feature].predict(df[self.useful_features].values)
-        df['new_TX_FRAUD'] = 1
-        df['new_CUSTOMER_ID'] = df['CUSTOMER_ID']
+            df.loc[:, 'new_'+str(feature)] = self.regressors[feature].predict(df[self.useful_features].values)
+        df.loc[:, 'new_TX_FRAUD'] = 1
+        df.loc[:,'new_CUSTOMER_ID'] = df['CUSTOMER_ID']
         filter_col = [col for col in df if col.startswith('new')]
         new_frauds = df[filter_col]
         df=df.drop(filter_col, axis=1)
-        new_frauds = new_frauds.rename(dict(zip(filter_col, old_columns)), axis = 1)
-        new_frauds['TX_AMOUNT'] = round( new_frauds['TX_AMOUNT'], 2)
-        new_frauds['x_terminal_id'] = new_frauds['x_terminal_id'].apply(lambda x: max(0, min(100, x)))
-        new_frauds['y_terminal_id'] = new_frauds['y_terminal_id'].apply(lambda x: max(0, min(100, x)))
+        new_frauds.columns = [column[len('new_'):] for column in new_frauds.columns]
+        new_frauds.loc[:, 'TX_AMOUNT'] = round( new_frauds['TX_AMOUNT'], 2)
+        new_frauds.loc[:, 'x_terminal_id'] = new_frauds['x_terminal_id'].apply(lambda x: max(0, min(100, x)))
+        new_frauds.loc[:, 'y_terminal_id'] = new_frauds['y_terminal_id'].apply(lambda x: max(0, min(100, x)))
         return new_frauds
 
     def enrich_dataframe(self, transactions_df: pd.DataFrame) -> pd.DataFrame:
@@ -314,4 +313,4 @@ class ADVO():
         self.tune_regressors()
         self.fit_regressors()
         self.enrich_dataframe(self.transactions_df)
-        return self.transactions_df.drop(columns=['TX_FRAUD']), self.transactions_df['TX_FRAUD']
+        return self.transactions_df[self.useful_features], self.transactions_df['TX_FRAUD']
