@@ -22,11 +22,6 @@ def main():
     # Fit the tuned regression models to the data using the ADVO instance
     advo.fit_regressors(pd.DataFrame.mean_squared_error)
 
-    # Generate synthetic transactions using the ADVO instance
-    synthetic_transactions = advo.generate_synthetic_transactions(n_samples=100)
-
-    # Print the generated synthetic transactions
-    print(synthetic_transactions)
 
 if __name__ == '__main__':
     main()
