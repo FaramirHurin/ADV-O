@@ -185,7 +185,7 @@ class ADVO():
         new_frauds['y_terminal_id'] = new_frauds['y_terminal_id'].apply(lambda x: max(0, min(100, x)))
         return new_frauds
 
-    def _enrich_dataframe(self, transactions_df: pd.DataFrame, layers: int) -> pd.DataFrame:
+    def enrich_dataframe(self, transactions_df: pd.DataFrame, layers: int) -> pd.DataFrame:
         """Adds multiple layers of predicted fraudulent transactions to a dataframe of transactions.
         
         This method filters the input dataframe to only include rows with a value of 1 in the 'TX_FRAUD' column, 
