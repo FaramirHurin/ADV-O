@@ -23,7 +23,7 @@ class ADVO():
     generating new synthetic transactions using the trained models.
 
     Attributes:
-        generator (Generator): a `Generator` instance containing the transactions data.
+        transaction_df (pd.DataFrame): a dataframe containing the transactions data.
         n_jobs (int): the number of cores to use when running certain methods in parallel.
         random_state (int): the random seed to use when generating transactions.
         training_frac (float): the fraction of transactions to use for training the regression models.
@@ -32,8 +32,8 @@ class ADVO():
             keys.
     """
 
-    def __init__(self, generator=None, n_jobs=1, training_frac=0.8, random_state=1):
-        self.generator = generator
+    def __init__(self, transaction_df=None, n_jobs=1, training_frac=0.8, random_state=1):
+        self.transaction_df = transaction_df
         self.n_jobs = n_jobs
         self.random_state = random_state
         self.training_frac = training_frac
@@ -55,8 +55,9 @@ class ADVO():
             n_terminals (int): the number of terminals to generate.
         """
 
-        self.generator = Generator(n_customers = n_customers, n_terminals=n_terminals, random_state=self.random_state)
-        self.generator.generate()
+        generator = Generator(n_customers = n_customers, n_terminals=n_terminals, random_state=self.random_state)
+        generator.generate()
+        self.transaction_df = generator.transactions_df
 
     def load_trasactions(self, filename: str) -> None:
         """
@@ -68,8 +69,10 @@ class ADVO():
         Args:
             filename (str): the name of the file containing the transactions to load.
         """
-        self.generator = Generator()
-        self.generator.load(filename)
+        generator = Generator()
+        #TODO: decouple the generator from the transactions
+        generator.load(filename)
+        self.transaction_df = generator.transactions_df
 
     def _make_couples(self, group: pd.DataFrame) -> pd.DataFrame: 
         """
@@ -127,7 +130,6 @@ class ADVO():
         
         self.couples = results
 
-
     
     def tune_regressors(
             self,
@@ -169,6 +171,7 @@ class ADVO():
         """
         old_columns = df.columns
         for feature in self.regressors.keys():
+            #TODO: make it feature agnostic!
             feature_true_name = feature[18:]
             df['new_'+str(feature_true_name)] = self.regressors[feature].predict(df[self.useful_features].values)
         df['new_TX_FRAUD'] = 1
@@ -202,7 +205,7 @@ class ADVO():
         frauds_df = transactions_df[transactions_df['TX_FRAUD'] == 1]
         frauds_groups = frauds_df.groupby(['CUSTOMER_ID'], axis=0 )    
         
-        for index in range(layers):
+        for _ in range(layers):
 
                 if self.n_jobs == 1:
                     to_verify_fraud_list = frauds_groups.apply(self._oversample_df).reset_index(drop=True)
