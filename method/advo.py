@@ -61,18 +61,27 @@ class ADVO():
 
     def load_trasactions(self, filename: str) -> None:
         """
-        Load transactions from a file after creating a Generator instance.
+        Load transactions from a file.
 
-        This method loads transactions from the specified file after creating a `Generator` instance to hold the data. The
-        `Generator` instance is stored in the `generator` attribute of the current instance.
+        This method loads transactions from a file. The file can be either a csv or a pickle file. The loaded transactions
+        are stored in the `transactions_df` attribute of the current instance.
 
         Args:
-            filename (str): the name of the file containing the transactions to load.
+            filename (str): the name of the file to load the transactions from.
         """
-        generator = Generator()
-        #TODO: decouple the generator from the transactions
-        generator.load(filename)
-        self.transaction_df = generator.transactions_df
+        
+        if  filename.endswith('.csv'):
+            full_transactions_table = pd.read_csv(filename)
+        elif filename.endswith('.pkl'):
+            with open(filename, 'rb') as f:
+                full_transactions_table = pickle.load(f)
+        else:
+            raise ValueError('Invalid file format')
+        
+        self.transactions_df = full_transactions_table[['TX_DATETIME', 'CUSTOMER_ID', 'TERMINAL_ID', 'TX_AMOUNT', 'TX_TIME_SECONDS', 'TX_FRAUD']]
+        self.transactions_df = self.transactions_df.drop_duplicates()
+        self.transactions_df = self.transactions_df.reset_index(drop=True)
+
 
     def _make_couples(self, group: pd.DataFrame) -> pd.DataFrame: 
         """
