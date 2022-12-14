@@ -111,9 +111,11 @@ class ADVO():
         full_transactions_table =  self.generator.transactions_df.merge(self.generator.terminal_profiles_table, 'inner')
         full_frauds_table = full_transactions_table[full_transactions_table['TX_FRAUD'] == 1]
 
+        #TODO: let the user choose the columns to keep...
         interestig_columns = ['TX_DATETIME', 'CUSTOMER_ID', 'x_terminal_id', 'y_terminal_id', 'TX_AMOUNT', 'TX_FRAUD']
         clean_frauds_df = full_frauds_table[interestig_columns].sort_values(['TX_DATETIME'], axis=0, ascending=True)
 
+        #TODO: let the user choose the columns to keep...
         grouped = clean_frauds_df.groupby('CUSTOMER_ID')
         if self.n_jobs == 1:
             results = grouped.apply(self._make_couples)
@@ -157,6 +159,30 @@ class ADVO():
             self.regressors[feature_to_predict] = regressor
 
 
+    def _oversample_df(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Oversamples a dataframe of transactions by predicting the values for certain features using machine learning models.
+        
+        Args:
+            df: A pandas DataFrame containing transaction data.
+        
+        Returns:
+            A new pandas DataFrame with the original transaction data and the predicted values for the specified features.
+        """
+        old_columns = df.columns
+        for feature in self.regressors.keys():
+            feature_true_name = feature[18:]
+            df['new_'+str(feature_true_name)] = self.regressors[feature].predict(df[self.useful_features].values)
+        df['new_TX_FRAUD'] = 1
+        df['new_CUSTOMER_ID'] = df['CUSTOMER_ID']
+        filter_col = [col for col in df if col.startswith('new')]
+        new_frauds = df[filter_col]
+        df=df.drop(filter_col, axis=1)
+        new_frauds = new_frauds.rename(dict(zip(filter_col, old_columns)), axis = 1)
+        new_frauds['TX_AMOUNT'] = round( new_frauds['TX_AMOUNT'], 2)
+        new_frauds['x_terminal_id'] = new_frauds['x_terminal_id'].apply(lambda x: max(0, min(100, x)))
+        new_frauds['y_terminal_id'] = new_frauds['y_terminal_id'].apply(lambda x: max(0, min(100, x)))
+        return new_frauds
+
 
     def fit_regressors(self, metric: Callable[[np.ndarray, np.ndarray], float]) -> None:
         """Trains a set of regression models to predict future values of features,
@@ -170,7 +196,6 @@ class ADVO():
             None
         """
 
-        
         training_set = self.couples.sample(frac= 0.8, random_state=self.random_state)
         test_set = self.couples[~self.couples.isin(training_set)].dropna()
 

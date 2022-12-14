@@ -126,7 +126,7 @@ class Generator():
         groups = self.customer_profiles_table.groupby('CUSTOMER_ID')
         self.transactions_df = groups.apply(lambda x: self._generate_transactions_table(customer_profile=x.iloc[0])).reset_index(drop=True)    
 
-    def export(self, filename: str ='transactions.csv', format: str ='csv', include_frauds: bool =True) -> None:
+    def export(self, filename: str ='dataset', format: str ='csv', include_frauds: bool =True) -> None:
         """Exports the transactions data to a file.
 
         This function saves the transactions data stored in the `transactions_df` attribute of 
@@ -148,16 +148,42 @@ class Generator():
         
 
         full_transactions_table = self.transactions_df.merge(self.terminal_profiles_table, 'inner')
-        full_frauds_table = full_transactions_table[full_transactions_table['TX_FRAUD'] == 1]
 
+        #TODO: include customer_profile_table, a disclaimer is needed
+        #full_transactions_table = full_transactions_table.merge(self.customer_profiles_table, 'inner')
 
+        filename = filename + '.' + format
         if format=='csv':
             full_transactions_table.to_csv(filename,index=False)
-            if include_frauds:
-                full_frauds_table.to_csv('frauds.csv',index=False)
         elif format=='pkl':
             with open(filename, 'wb') as f:
                 pickle.dump(full_transactions_table,f)
-            if include_frauds:
-                with open('frauds.pkl', 'wb') as f:
-                    pickle.dump(full_frauds_table,f)
+    
+    def load(self, filename):
+        #if filename ends with '.csv' then load csv
+        #if filename ends with '.pkl' then load pickle
+        #else raise error
+        if  filename.endswith('.csv'):
+            full_transactions_table = pd.read_csv(filename)
+        elif filename.endswith('.pkl'):
+            with open(filename, 'rb') as f:
+                full_transactions_table = pickle.load(f)
+        else:
+            raise ValueError('Invalid file format')
+        
+        self.transactions_df = full_transactions_table[['TX_DATETIME', 'CUSTOMER_ID', 'TERMINAL_ID', 'TX_AMOUNT', 'TX_TIME_SECONDS', 'TX_FRAUD']]
+        self.transactions_df = self.transactions_df.drop_duplicates()
+        self.transactions_df = self.transactions_df.reset_index(drop=True)
+        
+        self.terminal_profiles_table = full_transactions_table[['TERMINAL_ID', 'x_terminal_id', 'y_terminal_id']]
+        self.terminal_profiles_table = self.terminal_profiles_table.drop_duplicates()
+        self.terminal_profiles_table = self.terminal_profiles_table.reset_index(drop=True)
+        
+        #TODO: include customer_profile_table, a disclaimer is needed
+        #self.customer_profiles_table = full_transactions_table[['CUSTOMER_ID', 'x_customer_id', 'y_customer_id', 'mean_amount', 'std_amount', 'mean_nb_tx_per_day', 'compromised','available_terminals']]
+        #self.customer_profiles_table = self.customer_profiles_table.drop_duplicates()
+        #self.customer_profiles_table = self.customer_profiles_table.reset_index(drop=True)
+    
+        
+
+        
