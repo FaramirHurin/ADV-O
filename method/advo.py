@@ -7,10 +7,16 @@ from sklearn.model_selection import RandomizedSearchCV
 from typing import Dict, Type, Any, Callable
 from sklearn.model_selection import BaseSearchCV
 from sklearn.base import BaseEstimator
+from sklearn.linear_model import Ridge
+from sklearn.metrics import r2_score
+import pickle
+
+
 
 
 class ADVO():
     
+
     """
     ADVO: An Adversary model of fraudsters behaviour to improve oversampling in credit card fraud detection.
 
@@ -23,22 +29,40 @@ class ADVO():
     generating new synthetic transactions using the trained models.
 
     Attributes:
-        transaction_df (pd.DataFrame): a dataframe containing the transactions data.
+        transactions_df (pd.DataFrame): a dataframe containing the transactions data.
         n_jobs (int): the number of cores to use when running certain methods in parallel.
         random_state (int): the random seed to use when generating transactions.
         training_frac (float): the fraction of transactions to use for training the regression models.
+        sampling_strategy (float): the fraction of fraudulent transactions to achieve when oversampling.
         useful_features (List[str]): a list of the names of the features to use when training the regression models.
         regressors (Dict[str, Any]): a dictionary containing the trained regression models, with the features to predict as
             keys.
+        searcher (Type[BaseSearchCV]): the search cross-validation object to use for hyperparameter tuning.
+        search_parameters (Dict[str, Any]): a dictionary containing the parameters to use when tuning the regression models.
+        regressor (Type[BaseEstimator]): the regressor object to use for training the regression models.
     """
 
-    def __init__(self, transaction_df=None, n_jobs=1, training_frac=0.8, random_state=1):
-        self.transaction_df = transaction_df
+
+    def __init__(self, 
+                transactions_df=None, 
+                n_jobs=1, 
+                training_frac=0.8,
+                sampling_strategy=0.5, 
+                random_state=1, 
+                searcher: Type[BaseSearchCV] = RandomizedSearchCV,
+                search_parameters: Dict[str, Any] = {'alpha': [0.1, 1, 10], 'fit_intercept': [True, False], 'normalize': [True, False]},
+                regressor: Type[BaseEstimator] = Ridge):
+        self.transactions_df = transactions_df
         self.n_jobs = n_jobs
         self.random_state = random_state
         self.training_frac = training_frac
+        self.sampling_strategy = sampling_strategy
         self.useful_features = ['x_terminal_id', 'y_terminal_id', 'TX_AMOUNT']
         self.regressors = {}
+        self.searcher = searcher
+        self.search_parameters = search_parameters
+        self.regressor = regressor
+  
 
         # TODO: let the user choose progress_bar and use_memory_fs
         pandarallel.initialize(nb_workers=self.n_jobs, progress_bar=True, use_memory_fs=False)
@@ -57,7 +81,19 @@ class ADVO():
 
         generator = Generator(n_customers = n_customers, n_terminals=n_terminals, random_state=self.random_state)
         generator.generate()
-        self.transaction_df = generator.transactions_df
+        self.transactions_df = generator.transactions_df
+
+    def set_transactions(self, X_train, y_train) -> None:
+        """ Set the transactions data.
+
+        This method sets the transactions data. The transactions data is stored in the `transactions_df` attribute of the
+        current instance.
+
+        Args:
+            X_train (pd.DataFrame): a DataFrame containing the features of the transactions.
+            y_train (pd.Series): a Series containing the labels of the transactions.
+        """
+        self.transactions_df = pd.concat([X_train, y_train], axis=1)
 
     def load_trasactions(self, filename: str) -> None:
         """
@@ -69,7 +105,7 @@ class ADVO():
         Args:
             filename (str): the name of the file to load the transactions from.
         """
-        
+
         if  filename.endswith('.csv'):
             full_transactions_table = pd.read_csv(filename)
         elif filename.endswith('.pkl'):
@@ -120,8 +156,7 @@ class ADVO():
         This method can run in parallel using multiple cores if the `n_jobs` attribute is set to a value greater than 1.
         """
         
-        full_transactions_table =  self.generator.transactions_df.merge(self.generator.terminal_profiles_table, 'inner')
-        full_frauds_table = full_transactions_table[full_transactions_table['TX_FRAUD'] == 1]
+        full_frauds_table = self.transactions_df[self.transactions_df['TX_FRAUD'] == 1]
 
         #TODO: let the user choose the columns to keep...
         interestig_columns = ['TX_DATETIME', 'CUSTOMER_ID', 'x_terminal_id', 'y_terminal_id', 'TX_AMOUNT', 'TX_FRAUD']
@@ -140,12 +175,7 @@ class ADVO():
         self.couples = results
 
     
-    def tune_regressors(
-            self,
-            searcher: Type[BaseSearchCV],
-            search_parameters: Dict[str, Any],
-            regressor: Type[BaseEstimator],
-        ) -> None:
+    def tune_regressors(self) -> None:
         """Tunes the hyperparameters of a set of regression models using a search algorithm.
         The regressor will be part of the self.regressors dictionary, with the feature to predict as key.
 
@@ -158,13 +188,13 @@ class ADVO():
             None
         """
         
-        training_set = self.couples.sample(frac= 0.8, random_state=self.random_state)
+        training_set = self.couples.sample(frac=self.training_frac, random_state=self.random_state)
         features_prev = list(map(lambda x: 'prev_' + str(x),  self.useful_features))
         X_train = training_set[features_prev]
 
         for feature_to_predict in self.useful_features:
             y_train = training_set['next_'+feature_to_predict]
-            search =  searcher(regressor, **search_parameters, n_jobs=self.n_jobs, random_state=self.random_state)
+            search =  self.searcher(regressor, **self.search_parameters, n_jobs=self.n_jobs, random_state=self.random_state)
             search.fit(X_train, y_train)
             regressor = search.best_estimator_
             self.regressors[feature_to_predict] = regressor
@@ -194,42 +224,49 @@ class ADVO():
         new_frauds['y_terminal_id'] = new_frauds['y_terminal_id'].apply(lambda x: max(0, min(100, x)))
         return new_frauds
 
-    def enrich_dataframe(self, transactions_df: pd.DataFrame, layers: int) -> pd.DataFrame:
-        """Adds multiple layers of predicted fraudulent transactions to a dataframe of transactions.
-        
-        This method filters the input dataframe to only include rows with a value of 1 in the 'TX_FRAUD' column, 
-        and groups the remaining rows by the values in the 'CUSTOMER_ID' column. It then applies the '_oversample_df' 
-        method to each group of transactions, adding the predicted fraudulent transactions to the original dataframe. 
-        This process is repeated for the number of iterations specified by the 'layers' argument.
-        
-        Args:
-            transactions_df: A pandas DataFrame containing transaction data.
-            layers: An integer specifying the number of times to apply the '_oversample_df' method and add 
-                    the predicted fraudulent transactions to the dataframe.
-        
-        Returns:
-            A new pandas DataFrame with the original transaction data and the added layers of predicted fraudulent transactions.
+    def enrich_dataframe(self, transactions_df: pd.DataFrame) -> pd.DataFrame:
         """
-    
-        frauds_df = transactions_df[transactions_df['TX_FRAUD'] == 1]
-        frauds_groups = frauds_df.groupby(['CUSTOMER_ID'], axis=0 )    
-        
-        for _ in range(layers):
+        Adds multiple layers of predicted fraudulent transactions to a dataframe of transactions until a specified percentage of fraud is reached.
 
-                if self.n_jobs == 1:
-                    to_verify_fraud_list = frauds_groups.apply(self._oversample_df).reset_index(drop=True)
-                else:
-                    to_verify_fraud_list = frauds_groups.parallel_apply(self._oversample_df).reset_index(drop=True)
-                
-                
-                transactions_df = transactions_df.append(to_verify_fraud_list, ignore_index=True)
-                frauds_df = transactions_df[transactions_df['TX_FRAUD'] == 1]
-                frauds_groups = frauds_df.groupby(['CUSTOMER_ID'], axis=0 )
-        
+        This method filters the input dataframe to only include rows with a value of 1 in the 'TX_FRAUD' column,
+        and groups the remaining rows by the values in the 'CUSTOMER_ID' column. It then applies the '_oversample_df'
+        method to each group of transactions, adding the predicted fraudulent transactions to the original dataframe.
+        This process is repeated until the specified percentage of fraud is reached. The resulting dataframe is then
+        sampled to ensure that the exact percentage of fraud is maintained.
+
+        Args:
+        transactions_df: A pandas DataFrame containing transaction data.
+        percentage: A float specifying the target percentage of fraud in the resulting dataframe.
+
+        Returns:
+        A new pandas DataFrame with the original transaction data and the added layers of predicted fraudulent transactions.
+        """
+
+        frauds_df = transactions_df[transactions_df['TX_FRAUD'] == 1]
+        frauds_groups = frauds_df.groupby(['CUSTOMER_ID'], axis=0 )
+        total_count = len(transactions_df)
+        target_count = total_count * self.sampling_strategy
+        current_count = len(frauds_df)
+        layers = 0
+        generated_frauds_counter = 0
+        while current_count < target_count:
+            if self.n_jobs == 1:
+                to_verify_fraud_list = frauds_groups.apply(self._oversample_df).reset_index(drop=True)
+            else:
+                to_verify_fraud_list = frauds_groups.parallel_apply(self._oversample_df).reset_index(drop=True)
+            generated_frauds_counter += len(to_verify_fraud_list)
+            transactions_df = transactions_df.append(to_verify_fraud_list, ignore_index=True)
+            frauds_df = transactions_df[transactions_df['TX_FRAUD'] == 1]
+            frauds_groups = frauds_df.groupby(['CUSTOMER_ID'], axis=0 )
+            current_count = len(frauds_df)
+            layers += 1
+        synthetic_frauds_df = transactions_df[transactions_df['TX_FRAUD'] == 1][-generated_frauds_counter:]
+        synthetic_frauds_df = synthetic_frauds_df.sample(frac=self.sampling_strategy)
+        transactions_df = pd.concat([transactions_df, synthetic_frauds_df], ignore_index=True)
         return transactions_df
 
 
-    def fit_regressors(self, metric: Callable[[np.ndarray, np.ndarray], float]) -> None:
+    def fit_regressors(self, metric: Callable[[np.ndarray, np.ndarray], float] = r2_score) -> None:
         """Trains a set of regression models to predict future values of features,
         i.e. the transaction amount, the next terminal id, etc. of the next fraudulent transaction.
     
@@ -270,4 +307,11 @@ class ADVO():
 
 
 
+    def fit_resample(self, X_train, y_train):
 
+        self.set_transactions(X_train, y_train)
+        self.create_couples()
+        self.tune_regressors()
+        self.fit_regressors()
+        self.enrich_dataframe(self.transactions_df)
+        return self.transactions_df.drop(columns=['TX_FRAUD']), self.transactions_df['TX_FRAUD']
