@@ -158,7 +158,6 @@ class ADVO():
             regressor = search.best_estimator_
             self.regressors[feature_to_predict] = regressor
 
-
     def _oversample_df(self, df: pd.DataFrame) -> pd.DataFrame:
         """Oversamples a dataframe of transactions by predicting the values for certain features using machine learning models.
         
@@ -182,6 +181,40 @@ class ADVO():
         new_frauds['x_terminal_id'] = new_frauds['x_terminal_id'].apply(lambda x: max(0, min(100, x)))
         new_frauds['y_terminal_id'] = new_frauds['y_terminal_id'].apply(lambda x: max(0, min(100, x)))
         return new_frauds
+
+    def _enrich_dataframe(self, transactions_df: pd.DataFrame, layers: int) -> pd.DataFrame:
+        """Adds multiple layers of predicted fraudulent transactions to a dataframe of transactions.
+        
+        This method filters the input dataframe to only include rows with a value of 1 in the 'TX_FRAUD' column, 
+        and groups the remaining rows by the values in the 'CUSTOMER_ID' column. It then applies the '_oversample_df' 
+        method to each group of transactions, adding the predicted fraudulent transactions to the original dataframe. 
+        This process is repeated for the number of iterations specified by the 'layers' argument.
+        
+        Args:
+            transactions_df: A pandas DataFrame containing transaction data.
+            layers: An integer specifying the number of times to apply the '_oversample_df' method and add 
+                    the predicted fraudulent transactions to the dataframe.
+        
+        Returns:
+            A new pandas DataFrame with the original transaction data and the added layers of predicted fraudulent transactions.
+        """
+    
+        frauds_df = transactions_df[transactions_df['TX_FRAUD'] == 1]
+        frauds_groups = frauds_df.groupby(['CUSTOMER_ID'], axis=0 )    
+        
+        for index in range(layers):
+
+                if self.n_jobs == 1:
+                    to_verify_fraud_list = frauds_groups.apply(self._oversample_df).reset_index(drop=True)
+                else:
+                    to_verify_fraud_list = frauds_groups.parallel_apply(self._oversample_df).reset_index(drop=True)
+                
+                
+                transactions_df = transactions_df.append(to_verify_fraud_list, ignore_index=True)
+                frauds_df = transactions_df[transactions_df['TX_FRAUD'] == 1]
+                frauds_groups = frauds_df.groupby(['CUSTOMER_ID'], axis=0 )
+        
+        return transactions_df
 
 
     def fit_regressors(self, metric: Callable[[np.ndarray, np.ndarray], float]) -> None:
