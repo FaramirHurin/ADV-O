@@ -53,6 +53,7 @@ class ADVO():
                 random_state=1, 
                 verbose=False,
                 searcher: Type[BaseCrossValidator] = RandomizedSearchCV,
+                candidate_regressors = None,
                 search_parameters: Dict[str, Any] = {'alpha': [0.1, 1, 2, 5, 10], 'fit_intercept': [True, False]},
                 regressor: Type[BaseEstimator] = Ridge()):
         self.transactions_df = transactions_df
@@ -64,6 +65,7 @@ class ADVO():
         self.useful_features = ['x_terminal_id', 'y_terminal_id', 'TX_AMOUNT']
         self.regressors = {}
         self.searcher = searcher
+        self.candidate_regressors = candidate_regressors
         self.search_parameters = search_parameters
         self.regressor = regressor
   
@@ -178,8 +180,19 @@ class ADVO():
         
         self.couples = results
 
-    
-    def tune_regressors(self) -> None:
+    def tune_best_regressors(self):
+        training_set = self.couples
+        features_prev = list(map(lambda x: 'prev_' + str(x),  self.useful_features))
+        X_train = training_set[features_prev]
+
+        for feature_to_predict in self.useful_features:
+            y_train = training_set['next_'+feature_to_predict]
+            search =  self.searcher(self.regressor, self.search_parameters, n_jobs=self.n_jobs, random_state=self.random_state)
+            search.fit(X_train, y_train)
+            regressor = search.best_estimator_
+            self.regressors[feature_to_predict] = regressor
+
+    def tune_regressors(self, metric: Callable[[np.ndarray, np.ndarray], float] = r2_score) -> None:
         """Tunes the hyperparameters of a set of regression models using a search algorithm.
         The regressor will be part of the self.regressors dictionary, with the feature to predict as key.
 
@@ -193,14 +206,22 @@ class ADVO():
         """
         
         training_set = self.couples.sample(frac=self.training_frac, random_state=self.random_state)
+        test_set = self.couples[~self.couples.isin(training_set)].dropna()
         features_prev = list(map(lambda x: 'prev_' + str(x),  self.useful_features))
         X_train = training_set[features_prev]
+        X_test = test_set[features_prev]
 
         for feature_to_predict in self.useful_features:
             y_train = training_set['next_'+feature_to_predict]
+            y_test = test_set['next_'+feature_to_predict]
+            y_naive = X_test['prev_'+feature_to_predict]
             search =  self.searcher(self.regressor, self.search_parameters, n_jobs=self.n_jobs, random_state=self.random_state)
             search.fit(X_train, y_train)
             regressor = search.best_estimator_
+            y_hat = regressor.predict(X_test)
+            regressor.score = metric(y_test, y_hat)
+            regressor.naive_score = metric(y_test, y_naive)
+            regressor.feature_names = X_train.columns
             self.regressors[feature_to_predict] = regressor
         
         #save regressors in pickle file
@@ -279,63 +300,57 @@ class ADVO():
         transactions_df_copy = pd.concat([transactions_df_copy, only_synthetic_frauds_df], ignore_index=True)
         return transactions_df_copy
 
-
-    def fit_regressors(self, metric: Callable[[np.ndarray, np.ndarray], float] = r2_score) -> None:
-        """Trains a set of regression models to predict future values of features,
-        i.e. the transaction amount, the next terminal id, etc. of the next fraudulent transaction.
-    
-        Args:
-            metric: A function that takes two arrays and returns a single numeric value,
-                    representing the quality of the prediction.
-        
-        Returns:
-            None
-        """
-
-        training_set = self.couples.sample(frac= 0.8, random_state=self.random_state)
-        test_set = self.couples[~self.couples.isin(training_set)].dropna()
+   
+    def fit_regressors(self) -> None:
 
         features_prev = list(map(lambda x: 'prev_' + str(x),  self.useful_features))
 
-        X_train = training_set[features_prev]
-        X_test = test_set[features_prev]
+        X_train = self.couples[features_prev]
 
         for feature_to_predict in self.useful_features:
             regressor = self.regressors[feature_to_predict]
-            
-            y_train = training_set['next_'+feature_to_predict]
-            y_test = test_set['next_'+feature_to_predict]
-            y_naive = X_test['prev_'+feature_to_predict]
-            
+            y_train = self.couples['next_'+feature_to_predict]
             regressor.fit(X_train, y_train)
             
-            y_pred = regressor.predict(X_test)
+    def select_best_regressor(self, candidate_regressors, parameters_set):
+            best_score = 0
+            for idx, candidate_regressor in enumerate(candidate_regressors):
 
-            score = metric(y_test, y_pred)
-            naive_score = metric(y_test, y_naive)
-            
-            print(f'{feature_to_predict}: {score:.4f} (naive: {naive_score:.4f})')
+                self.regressor = candidate_regressors[idx]
+                self.search_parameters = parameters_set[idx]
+                self.tune_regressors()
+                self.fit_regressors()
 
-            regressor.score = score
-            regressor.naive_score = naive_score
-            regressor.feature_names = X_train.columns
+                scores = {}
+                naive_scores = {}
+                for feature_to_predict in self.useful_features:
+                    regressor = self.regressors[feature_to_predict]
+                    scores[feature_to_predict] = regressor.score
+                    naive_scores[feature_to_predict] = regressor.naive_score
+                scores_df = pd.DataFrame(scores, index=['score'])
+                naives_df = pd.DataFrame(naive_scores, index=['naive_score'])
+                merged_df = pd.concat([scores_df, naives_df], axis=0)
+                print('Regressor: ', candidate_regressor)
+                print(merged_df)
 
-    def print_regressor_scores(self) -> None:
-        """Prints the scores of the trained regression models.
-        
-        Returns:
-            None
-        """
-        for feature_to_predict in self.useful_features:
-            regressor = self.regressors[feature_to_predict]
-            print(f'{feature_to_predict}: {regressor.score:.4f} (naive: {regressor.naive_score:.4f})')
+                mean_value = np.array(list(scores.values())).mean()
 
+                if mean_value > best_score:
+                    best_score = mean_value
+                    self.best_regressor = candidate_regressor
+
+            print('Best regressor: ', self.best_regressor)
+            self.regressor = self.best_regressor
+            self.search_parameters = parameters_set[candidate_regressors.index(self.best_regressor)]
 
     def fit_resample(self, X_train, y_train):
 
         self.set_transactions(X_train, y_train)
         self.create_couples()
+        
         self.tune_regressors()
         self.fit_regressors()
         self.transactions_df = self.enrich_dataframe(self.transactions_df)
         return self.transactions_df[self.useful_features], self.transactions_df['TX_FRAUD']
+
+

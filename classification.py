@@ -5,6 +5,9 @@ from generator.generator import Generator
 from imblearn.over_sampling import SMOTE, RandomOverSampler, KMeansSMOTE
 from imblearn.ensemble import BalancedRandomForestClassifier
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.linear_model import Ridge
+from sklearn.neural_network import MLPRegressor
 from sklearn.neighbors import NearestNeighbors
 from sklearn.cluster import MiniBatchKMeans
 
@@ -12,15 +15,23 @@ from utils.compute_metrics import evaluate_models
 from utils.kde import compute_kde_difference_auc
 from experiments.ctgan_wrapper import CTGANOverSampler
 
+import numpy as np
+
 import sys
 
 SAMPLE_STRATEGY = 0.18
-N_JOBS = 12
+N_JOBS = 35
 N_TREES = 20
 N_USERS = 10000
 N_TERMINALS = 1000
 
-#RANDOM_GRID_RF = {'n_estimators': [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000], 'max_features': [1, 'sqrt', 'log2'], 'max_depth': [5, 16, 28, 40, None], 'min_samples_split': [10, 25, 50], 'min_samples_leaf': [4, 8, 32], 'bootstrap': [True, False]}
+RANDOM_GRID_RF = {'n_estimators': [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000], 'max_features': [1, 'sqrt', 'log2'], 'max_depth': [5, 16, 28, 40, None], 'min_samples_split': [10, 25, 50], 'min_samples_leaf': [4, 8, 32], 'bootstrap': [True, False]}
+RANDOM_GRID_RIDGE = {'alpha': [int(x) for x in np.linspace(start = 0.001, stop = 1, num = 100)], 'fit_intercept': [True, False]}
+RANDOM_GRID_NN = {'hidden_layer_sizes': [int(x) for x in np.linspace(start = 1, stop = 41, num = 80)], 'alpha': [int(x) for x in np.linspace(start = 0.005, stop = 0.02, num = 100)]}
+
+
+CANDIDATE_REGRESSORS = [MLPRegressor(max_iter=2000), Ridge(), RandomForestRegressor()]
+CANDIDATE_GRIDS = [RANDOM_GRID_NN, RANDOM_GRID_RIDGE, RANDOM_GRID_RF]
 
 def fit_predict(X_train,y_train,learner, X_test, predictions_proba, discrete_predictions):
     learner.fit(X_train, y_train)
@@ -48,13 +59,19 @@ def make_classification():
     predictions_proba = []
     discrete_predictions = []
 
+    advo = ADVO(n_jobs=N_JOBS,sampling_strategy=SAMPLE_STRATEGY)
+    advo.set_transactions(X_train, y_train)
+    advo.create_couples()
+    advo.select_best_regressor(candidate_regressors=CANDIDATE_REGRESSORS,parameters_set=CANDIDATE_GRIDS)
+    advo.tune_best_regressors()
+    advo.fit_regressors()
+    advo.transactions_df = advo.enrich_dataframe(advo.transactions_df)
+    advo_tuple = advo.transactions_df[advo.useful_features], advo.transactions_df['TX_FRAUD']
+    
     kmeans_smote = KMeansSMOTE(n_jobs=N_JOBS, kmeans_estimator=MiniBatchKMeans(n_init=3),sampling_strategy=SAMPLE_STRATEGY, cluster_balance_threshold=0.1).fit_resample(X_train[sel], y_train)
     smote = SMOTE(k_neighbors=NearestNeighbors(n_jobs=N_JOBS),sampling_strategy=SAMPLE_STRATEGY).fit_resample(X_train[sel], y_train)
     random = RandomOverSampler(sampling_strategy=SAMPLE_STRATEGY).fit_resample(X_train[sel], y_train)
     ctgan = CTGANOverSampler(sampling_strategy=SAMPLE_STRATEGY).fit_resample(X_train[sel], y_train)
-    advo = ADVO(n_jobs=N_JOBS,sampling_strategy=SAMPLE_STRATEGY)
-    #advo.print_regressor_scores()
-    advo_tuple = advo.fit_resample(X_train, y_train)
 
     # Specify oversampling strategies to compare 
     Xy_resampled = [kmeans_smote, smote, random, ctgan, advo_tuple]
