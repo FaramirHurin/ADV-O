@@ -46,7 +46,7 @@ def make_classification():
     discrete_predictions = []
 
     # Specify oversampling strategies to compare 
-    Xy_resampled = [KMeansSMOTE(n_jobs=N_JOBS, kmeans_estimator=MiniBatchKMeans(n_init='auto'),sampling_strategy=SAMPLE_STRATEGY, cluster_balance_threshold=0.1).fit_resample(X_train[sel], y_train),
+    Xy_resampled = [KMeansSMOTE(n_jobs=N_JOBS, kmeans_estimator=MiniBatchKMeans(n_init=3),sampling_strategy=SAMPLE_STRATEGY, cluster_balance_threshold=0.1).fit_resample(X_train[sel], y_train),
                SMOTE(k_neighbors=NearestNeighbors(n_jobs=N_JOBS),sampling_strategy=SAMPLE_STRATEGY).fit_resample(X_train[sel], y_train),
                RandomOverSampler(sampling_strategy=SAMPLE_STRATEGY).fit_resample(X_train[sel], y_train),
                CTGANOverSampler(sampling_strategy=SAMPLE_STRATEGY).fit_resample(X_train[sel], y_train),
