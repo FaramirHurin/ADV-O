@@ -313,6 +313,8 @@ class ADVO():
 
             score = metric(y_test, y_pred)
             naive_score = metric(y_test, y_naive)
+            
+            print(f'{feature_to_predict}: {score:.4f} (naive: {naive_score:.4f})')
 
             regressor.score = score
             regressor.naive_score = naive_score
