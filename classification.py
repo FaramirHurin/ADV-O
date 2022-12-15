@@ -1,7 +1,7 @@
 from sklearn.model_selection import train_test_split
 from method.advo import ADVO
 from generator.generator import Generator
-from ctgan_wrapper import CTGANOverSampler
+
 from imblearn.over_sampling import SMOTE, RandomOverSampler, KMeansSMOTE
 from imblearn.ensemble import BalancedRandomForestClassifier
 from sklearn.ensemble import RandomForestClassifier
@@ -10,6 +10,7 @@ from sklearn.cluster import MiniBatchKMeans
 
 from utils.compute_metrics import evaluate_models
 from utils.kde import compute_kde_difference_auc
+from experiments.ctgan_wrapper import CTGANOverSampler
 
 import sys
 
@@ -48,7 +49,7 @@ def make_classification():
     Xy_resampled = [KMeansSMOTE(n_jobs=N_JOBS, kmeans_estimator=MiniBatchKMeans(n_init='auto'),sampling_strategy=SAMPLE_STRATEGY, cluster_balance_threshold=0.1).fit_resample(X_train[sel], y_train),
                SMOTE(k_neighbors=NearestNeighbors(n_jobs=N_JOBS),sampling_strategy=SAMPLE_STRATEGY).fit_resample(X_train[sel], y_train),
                RandomOverSampler(sampling_strategy=SAMPLE_STRATEGY).fit_resample(X_train[sel], y_train),
-               CTGANOverSampler(sampling_strategy=SAMPLE_STRATEGY).fit_resample(X_train[sel], y_train)
+               CTGANOverSampler(sampling_strategy=SAMPLE_STRATEGY).fit_resample(X_train[sel], y_train),
                ADVO(n_jobs=N_JOBS,sampling_strategy=SAMPLE_STRATEGY).fit_resample(X_train, y_train)]
     # Add not oversampled data as first element
     Xy = [(X_train[sel], y_train)] + Xy_resampled 
