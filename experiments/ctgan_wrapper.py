@@ -16,6 +16,7 @@ class CTGANOverSampler():
         ctgan.fit(frauds_df)
         synthetic_data = ctgan.sample(num_synthetic_frauds)
 
+        print(synthetic_data['TX_FRAUD'].value_counts())
         augmented_df = pd.concat([synthetic_data, df], axis=0)
 
         return augmented_df.drop(columns=['TX_FRAUD']), augmented_df['TX_FRAUD']

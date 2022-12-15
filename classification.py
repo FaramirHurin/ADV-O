@@ -55,7 +55,7 @@ def make_classification():
     Xy = [(X_train[sel], y_train)] + Xy_resampled 
     
     # Fit and predict using standard Random Forest for not-oversampled data only 
-    names = ['Baseline', 'Baseline_balanced', 'SMOTE', 'Random', 'KMeansSMOTE', 'ADVO']
+    names = ['Baseline', 'Baseline_balanced', 'SMOTE', 'Random', 'KMeansSMOTE', 'CTGAN', 'ADVO']
     fit_predict(X_train[sel],y_train, RandomForestClassifier(n_estimators=N_TREES ,n_jobs=N_JOBS) , X_test[sel], predictions_proba, discrete_predictions)
     # Fit and predict using Balanced Random Forest for not-oversampled data AND oversampled data
     for X, y in Xy:
