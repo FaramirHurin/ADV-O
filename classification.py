@@ -1,7 +1,7 @@
 from sklearn.model_selection import train_test_split
 from method.advo import ADVO
 from generator.generator import Generator
-#from ctgan_wrapper import CTGANOverSampler
+from ctgan_wrapper import CTGANOverSampler
 from imblearn.over_sampling import SMOTE, RandomOverSampler, KMeansSMOTE
 from imblearn.ensemble import BalancedRandomForestClassifier
 from sklearn.ensemble import RandomForestClassifier
@@ -48,7 +48,7 @@ def make_classification():
     Xy_resampled = [KMeansSMOTE(n_jobs=N_JOBS, kmeans_estimator=MiniBatchKMeans(n_init='auto'),sampling_strategy=SAMPLE_STRATEGY, cluster_balance_threshold=0.1).fit_resample(X_train[sel], y_train),
                SMOTE(k_neighbors=NearestNeighbors(n_jobs=N_JOBS),sampling_strategy=SAMPLE_STRATEGY).fit_resample(X_train[sel], y_train),
                RandomOverSampler(sampling_strategy=SAMPLE_STRATEGY).fit_resample(X_train[sel], y_train),
-               #CTGANOverSampler(sampling_strategy=SAMPLE_STRATEGY).fit_resample(X_train[sel], y_train)
+               CTGANOverSampler(sampling_strategy=SAMPLE_STRATEGY).fit_resample(X_train[sel], y_train)
                ADVO(n_jobs=N_JOBS,sampling_strategy=SAMPLE_STRATEGY).fit_resample(X_train, y_train)]
     # Add not oversampled data as first element
     Xy = [(X_train[sel], y_train)] + Xy_resampled 
@@ -60,9 +60,7 @@ def make_classification():
     for X, y in Xy:
         fit_predict(X,y,BalancedRandomForestClassifier(n_estimators=N_TREES ,n_jobs=N_JOBS) , X_test[sel], predictions_proba, discrete_predictions)
 
-    trapzs = compute_kde_difference_auc(Xy,sel, names)
-    print(trapzs)
-    exit()
+    #trapzs = compute_kde_difference_auc(Xy,sel, names)    
 
     # Compute metrics
     K_needed = [50, 100, 200, 500, 1000, 2000]
@@ -71,6 +69,7 @@ def make_classification():
     ranking = all_metrics.rank(axis=1, ascending=False)
     print(ranking)
 
+    print(all_metrics)
 
 
 if __name__ == '__main__':
