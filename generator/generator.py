@@ -39,7 +39,7 @@ class Generator():
     """
     
     def __init__(self, n_customers=50, n_terminals=10, radius=20, nb_days=8, start_date="2018-04-01", random_state = 2, \
-        max_days_from_compromission=3):
+        max_days_from_compromission=3, compromission_probability=0.03):
 
         self.n_customers = n_customers
         self.n_terminals = n_terminals
@@ -48,6 +48,7 @@ class Generator():
         self.start_date = start_date
         self.random_state = random_state
         self.max_days_from_compromission = max_days_from_compromission
+        self.compromission_probability = compromission_probability
     
         self._initialize() 
 
@@ -62,15 +63,15 @@ class Generator():
         Returns:
             None
         """
-        self.terminal_profiles_table = generate_terminal_profiles_table(self.n_customers, self.random_state)
-        self.customer_profiles_table = generate_customer_profiles_table(self.n_terminals, self.random_state)
+        self.terminal_profiles_table = generate_terminal_profiles_table(self.n_terminals, self.random_state)
+        self.customer_profiles_table = generate_customer_profiles_table(self.n_customers, self.random_state)
         self.x_y_terminals = self.terminal_profiles_table[['x_terminal_id', 'y_terminal_id']].values.astype(float)
         self.customer_profiles_table['available_terminals'] = self.customer_profiles_table.apply\
             (lambda x: get_list_terminals_within_radius(x, x_y_terminals=self.x_y_terminals, r=self.radius), axis=1)
 
-        self.fraudsters_mean = np.random.normal(np.mean(self.customer_profiles_table['mean_amount'])) * 1.1
-        self.fraudsters_var = np.random.normal(np.mean(self.customer_profiles_table['std_amount'])) * 0.8
-       
+        self.fraudsters_mean = np.random.normal(np.mean(self.customer_profiles_table['mean_amount'])) * 0.9
+        self.fraudsters_var = np.random.normal(np.mean(self.customer_profiles_table['std_amount'])) * 1.3
+
     def _generate_transactions_table(self, customer_profile: pd.DataFrame) -> pd.DataFrame:
         """
         This function takes the customer profile and returns a DataFrame of transactions for the customer.
@@ -95,7 +96,7 @@ class Generator():
 
             else:
                 customer_transactions = generate_genuine_transactions(customer_transactions, nb_tx, customer_profile, day)
-                customer_profile['compromised'] = compromise_user(customer_profile)
+                customer_profile['compromised'] = compromise_user(customer_profile, self.compromission_probability)
 
         customer_transactions = pd.DataFrame(customer_transactions,
                                              columns=['TX_TIME_SECONDS_INSIDE_DAY', 'TX_TIME_DAYS', 'CUSTOMER_ID',

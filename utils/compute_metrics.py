@@ -1,6 +1,6 @@
-from sklearn.metrics import precision_recall_curve, PrecisionRecallDisplay, f1_score, accuracy_score, precision_score, recall_score
+from sklearn.metrics import PrecisionRecallDisplay, f1_score, accuracy_score, precision_score, recall_score
 from typing import List, Dict, Tuple
-from .fraud_metrics import pk, pr_auc
+from .fraud_metrics import pk, pr_auc, precision_recall_curve
 import numpy as np
 import pandas as pd
 
@@ -46,7 +46,7 @@ def compute_pk(trueY, predictions, K):
     
 
 
-def evaluate_models(predictions_proba: List[np.ndarray], discrete_predictions: List[np.ndarray], names: List[str], y_test: np.ndarray, K_needed: List[int]) -> Tuple[List[PrecisionRecallDisplay], pd.DataFrame, Dict[str, Dict[str, float]]]:
+def evaluate_models(predictions_proba: List[np.ndarray], discrete_predictions: List[np.ndarray], users: pd.Series, names: List[str], y_test: np.ndarray, K_needed: List[int]) -> Tuple[List[PrecisionRecallDisplay], pd.DataFrame, Dict[str, Dict[str, float]]]:
     """
     This function takes in a list of probability predictions, a list of discrete predictions, a list of names for each model, the true labels for the test set, and a list of K values for the pk metric. It returns a list of PrecisionRecallDisplay objects, a DataFrame with metrics for each model, and a dictionary with pk scores for each model.
 
@@ -68,15 +68,21 @@ def evaluate_models(predictions_proba: List[np.ndarray], discrete_predictions: L
     precison_dict = {}
     recall_dict = {}
     prauc_dict = {}
+    prauc_card_dict = {}
 
     for index, pred in enumerate(predictions_proba):
         
         precision, recall, _ = precision_recall_curve(y_test, pred)
+        precision_card, recall_card, _ = precision_recall_curve(y_test, pred, type="card", cards=users)
+
+
         pr_displays_list.append(PrecisionRecallDisplay(precision=precision, recall=recall, estimator_name=names[index]))
         auc = -np.trapz(precision, recall)
-        
+        auc_card = -np.trapz(precision_card, recall_card)
+
         y_hat = discrete_predictions[index]
         prauc_dict[names[index]] = auc
+        prauc_card_dict[names[index]] = auc_card
         recall_dict[names[index]] = recall_score(y_test, y_hat)
         precison_dict[names[index]] = precision_score(y_test, y_hat)
         f1_dict[names[index]] = f1_score(y_test, y_hat)
@@ -84,6 +90,7 @@ def evaluate_models(predictions_proba: List[np.ndarray], discrete_predictions: L
     
     metrics_dict = {}
     metrics_dict['PRAUC'] = prauc_dict
+    metrics_dict['PRAUC_Card'] = prauc_card_dict
     metrics_dict['Precision'] = precison_dict
     metrics_dict['Recall'] = recall_dict
     metrics_dict['F1 score'] = f1_dict

@@ -9,11 +9,16 @@ from sklearn.neighbors import NearestNeighbors
 from sklearn.cluster import MiniBatchKMeans
 
 from utils.compute_metrics import evaluate_models
+from utils.kde import compute_kde_difference_auc
 
 import sys
 
 SAMPLE_STRATEGY = 0.18
 N_JOBS = 12
+N_TREES = 20
+N_USERS = 10000
+N_TERMINALS = 1000
+
 #RANDOM_GRID_RF = {'n_estimators': [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000], 'max_features': [1, 'sqrt', 'log2'], 'max_depth': [5, 16, 28, 40, None], 'min_samples_split': [10, 25, 50], 'min_samples_leaf': [4, 8, 32], 'bootstrap': [True, False]}
 
 def fit_predict(X_train,y_train,learner, X_test, predictions_proba, discrete_predictions):
@@ -25,8 +30,9 @@ def fit_predict(X_train,y_train,learner, X_test, predictions_proba, discrete_pre
     
 def make_classification():
     # Generate transactions data using the GENERATOR instance
-    generator = Generator(n_customers=50000, n_terminals=1000)
+    generator = Generator(n_customers=N_USERS, n_terminals=N_TERMINALS)
     generator.generate()
+    generator.export()
 
     # Train Test Split 
     transactions_df = generator.transactions_df.merge(generator.terminal_profiles_table, left_on='TERMINAL_ID', right_on='TERMINAL_ID', how='left')
@@ -49,17 +55,21 @@ def make_classification():
     
     # Fit and predict using standard Random Forest for not-oversampled data only 
     names = ['Baseline', 'Baseline_balanced', 'SMOTE', 'Random', 'KMeansSMOTE', 'ADVO']
-    fit_predict(X_train[sel],y_train, RandomForestClassifier(n_estimators=50 ,n_jobs=N_JOBS) , X_test[sel], predictions_proba, discrete_predictions)
+    fit_predict(X_train[sel],y_train, RandomForestClassifier(n_estimators=N_TREES ,n_jobs=N_JOBS) , X_test[sel], predictions_proba, discrete_predictions)
     # Fit and predict using Balanced Random Forest for not-oversampled data AND oversampled data
     for X, y in Xy:
-        fit_predict(X,y,BalancedRandomForestClassifier(n_estimators=50 ,n_jobs=N_JOBS) , X_test[sel], predictions_proba, discrete_predictions)
+        fit_predict(X,y,BalancedRandomForestClassifier(n_estimators=N_TREES ,n_jobs=N_JOBS) , X_test[sel], predictions_proba, discrete_predictions)
 
-    
+    trapzs = compute_kde_difference_auc(Xy,sel, names)
+    print(trapzs)
+    exit()
+
     # Compute metrics
     K_needed = [50, 100, 200, 500, 1000, 2000]
-    _, all_metrics = evaluate_models(predictions_proba, discrete_predictions, names, y_test, K_needed)
+    _, all_metrics = evaluate_models(predictions_proba, discrete_predictions, X_test['CUSTOMER_ID'], names, y_test, K_needed)
 
-    print(all_metrics)
+    ranking = all_metrics.rank(axis=1, ascending=False)
+    print(ranking)
 
 
 
