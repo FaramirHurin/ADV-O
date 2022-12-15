@@ -50,12 +50,12 @@ def make_classification():
     smote = SMOTE(k_neighbors=NearestNeighbors(n_jobs=N_JOBS),sampling_strategy=SAMPLE_STRATEGY).fit_resample(X_train[sel], y_train)
     random = RandomOverSampler(sampling_strategy=SAMPLE_STRATEGY).fit_resample(X_train[sel], y_train)
     ctgan = CTGANOverSampler(sampling_strategy=SAMPLE_STRATEGY).fit_resample(X_train[sel], y_train)
-    advo = ADVO(n_jobs=N_JOBS,sampling_strategy=SAMPLE_STRATEGY).fit_resample(X_train, y_train)
+    advo = ADVO(n_jobs=N_JOBS,sampling_strategy=SAMPLE_STRATEGY)
     advo.print_regressor_scores()
-
+    advo_tuple = advo.fit_resample(X_train, y_train)
 
     # Specify oversampling strategies to compare 
-    Xy_resampled = [kmeans_smote, smote, random, ctgan, advo]
+    Xy_resampled = [kmeans_smote, smote, random, ctgan, advo_tuple]
 
     # Add not oversampled data as first element
     Xy = [(X_train[sel], y_train)] + Xy_resampled 
