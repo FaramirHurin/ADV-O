@@ -2,8 +2,9 @@ import pandas as pd
 
 from sklearn.linear_model import Ridge
 from sklearn.model_selection import GridSearchCV
+from sklearn.metrics import r2_score
 
-from experiments.advo import ADVO
+from method.advo import ADVO
 
 def main():
     # Create an ADVO instance
@@ -20,7 +21,9 @@ def main():
     advo.tune_regressors(searcher, Ridge)
 
     # Fit the tuned regression models to the data using the ADVO instance
-    advo.fit_regressors(pd.DataFrame.mean_squared_error)
+    advo.fit_regressors(r2_score)
+
+    final_df = advo.enrich_dataframe(advo.transactions_df,2)
 
 
 if __name__ == '__main__':

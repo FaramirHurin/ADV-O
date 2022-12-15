@@ -33,6 +33,7 @@ class ADVO():
         transactions_df (pd.DataFrame): a dataframe containing the transactions data.
         n_jobs (int): the number of cores to use when running certain methods in parallel.
         random_state (int): the random seed to use when generating transactions.
+        verbose (bool): whether to print progress bars when running certain methods in parallel.
         training_frac (float): the fraction of transactions to use for training the regression models.
         sampling_strategy (float): the fraction of fraudulent transactions to achieve when oversampling.
         useful_features (List[str]): a list of the names of the features to use when training the regression models.
@@ -50,8 +51,9 @@ class ADVO():
                 training_frac=0.8,
                 sampling_strategy=0.5, 
                 random_state=1, 
+                verbose=False,
                 searcher: Type[BaseCrossValidator] = RandomizedSearchCV,
-                search_parameters: Dict[str, Any] = {'alpha': [0.1, 1, 10], 'fit_intercept': [True, False]},
+                search_parameters: Dict[str, Any] = {'alpha': [0.1, 1, 2, 5, 10], 'fit_intercept': [True, False]},
                 regressor: Type[BaseEstimator] = Ridge()):
         self.transactions_df = transactions_df
         self.n_jobs = n_jobs
@@ -67,7 +69,7 @@ class ADVO():
   
 
         # TODO: let the user choose progress_bar and use_memory_fs
-        pandarallel.initialize(nb_workers=self.n_jobs, progress_bar=True, use_memory_fs=False)
+        pandarallel.initialize(nb_workers=self.n_jobs, progress_bar=verbose, use_memory_fs=False, verbose=0)
 
     def generate_transactions(self, n_customers=50, n_terminals=10):
         """
@@ -215,16 +217,23 @@ class ADVO():
             A new pandas DataFrame with the original transaction data and the predicted values for the specified features.
         """
         for feature in self.regressors.keys():
-            df.loc[:, 'new_'+str(feature)] = self.regressors[feature].predict(df[self.useful_features].values)
+            df.loc[:, 'new_'+str(feature)] = self.regressors[feature].predict(df[self.useful_features].rename(columns=lambda x: 'prev_'+str(x)))
         df.loc[:, 'new_TX_FRAUD'] = 1
         df.loc[:,'new_CUSTOMER_ID'] = df['CUSTOMER_ID']
         filter_col = [col for col in df if col.startswith('new')]
-        new_frauds = df[filter_col]
+        new_frauds = df[filter_col].copy()
         df=df.drop(filter_col, axis=1)
         new_frauds.columns = [column[len('new_'):] for column in new_frauds.columns]
-        new_frauds.loc[:, 'TX_AMOUNT'] = round( new_frauds['TX_AMOUNT'], 2)
-        new_frauds.loc[:, 'x_terminal_id'] = new_frauds['x_terminal_id'].apply(lambda x: max(0, min(100, x)))
-        new_frauds.loc[:, 'y_terminal_id'] = new_frauds['y_terminal_id'].apply(lambda x: max(0, min(100, x)))
+        
+        #new_frauds.loc[:, 'TX_AMOUNT'] = round( new_frauds.loc[:, 'TX_AMOUNT'], 2)
+        #new_frauds.loc[:, 'x_terminal_id'] = new_frauds.loc[:, 'x_terminal_id'].apply(lambda x: max(0, min(100, x)))
+        #new_frauds.loc[:, 'y_terminal_id'] = new_frauds.loc[:, 'y_terminal_id'].apply(lambda x: max(0, min(100, x)))
+        
+        new_frauds.loc[:, 'TX_AMOUNT'] = new_frauds.loc[:, 'TX_AMOUNT'].round(2)
+        new_frauds.loc[:, 'x_terminal_id'].clip(0, 100, inplace=True)
+        new_frauds.loc[:, 'y_terminal_id'].clip(0, 100, inplace=True)
+        
+
         return new_frauds
 
     def enrich_dataframe(self, transactions_df: pd.DataFrame) -> pd.DataFrame:
@@ -244,29 +253,31 @@ class ADVO():
         Returns:
         A new pandas DataFrame with the original transaction data and the added layers of predicted fraudulent transactions.
         """
-
+        transactions_df_copy = transactions_df.copy()
         frauds_df = transactions_df[transactions_df['TX_FRAUD'] == 1]
-        frauds_groups = frauds_df.groupby(['CUSTOMER_ID'], axis=0 )
+        frauds_groups = frauds_df.groupby('CUSTOMER_ID', axis=0 )
         total_count = len(transactions_df)
-        target_count = total_count * self.sampling_strategy
+        initial_count = len(frauds_df)
+        target_count = (total_count - initial_count)  * self.sampling_strategy
         current_count = len(frauds_df)
         layers = 0
         generated_frauds_counter = 0
+        only_synthetic_frauds_df = pd.DataFrame()
         while current_count < target_count:
             if self.n_jobs == 1:
                 to_verify_fraud_list = frauds_groups.apply(self._oversample_df).reset_index(drop=True)
             else:
                 to_verify_fraud_list = frauds_groups.parallel_apply(self._oversample_df).reset_index(drop=True)
             generated_frauds_counter += len(to_verify_fraud_list)
-            transactions_df = transactions_df.append(to_verify_fraud_list, ignore_index=True)
+            transactions_df = pd.concat([transactions_df, to_verify_fraud_list], ignore_index=True)
+            only_synthetic_frauds_df = pd.concat([only_synthetic_frauds_df, to_verify_fraud_list], ignore_index=True)
             frauds_df = transactions_df[transactions_df['TX_FRAUD'] == 1]
-            frauds_groups = frauds_df.groupby(['CUSTOMER_ID'], axis=0 )
+            frauds_groups = frauds_df.groupby('CUSTOMER_ID', axis=0 )
             current_count = len(frauds_df)
             layers += 1
-        synthetic_frauds_df = transactions_df[transactions_df['TX_FRAUD'] == 1][-generated_frauds_counter:]
-        synthetic_frauds_df = synthetic_frauds_df.sample(frac=self.sampling_strategy)
-        transactions_df = pd.concat([transactions_df, synthetic_frauds_df], ignore_index=True)
-        return transactions_df
+        only_synthetic_frauds_df = only_synthetic_frauds_df.sample(int(target_count) - initial_count, random_state=self.random_state)
+        transactions_df_copy = pd.concat([transactions_df_copy, only_synthetic_frauds_df], ignore_index=True)
+        return transactions_df_copy
 
 
     def fit_regressors(self, metric: Callable[[np.ndarray, np.ndarray], float] = r2_score) -> None:
@@ -316,5 +327,5 @@ class ADVO():
         self.create_couples()
         self.tune_regressors()
         self.fit_regressors()
-        self.enrich_dataframe(self.transactions_df)
+        self.transactions_df = self.enrich_dataframe(self.transactions_df)
         return self.transactions_df[self.useful_features], self.transactions_df['TX_FRAUD']
