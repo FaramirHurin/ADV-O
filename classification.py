@@ -35,6 +35,7 @@ def make_classification():
     generator.generate()
     generator.export()
 
+
     # Train Test Split 
     transactions_df = generator.transactions_df.merge(generator.terminal_profiles_table, left_on='TERMINAL_ID', right_on='TERMINAL_ID', how='left')
     X, y = transactions_df.drop(columns=['TX_FRAUD']), transactions_df['TX_FRAUD']
@@ -45,12 +46,17 @@ def make_classification():
     predictions_proba = []
     discrete_predictions = []
 
+    kmeans_smote = KMeansSMOTE(n_jobs=N_JOBS, kmeans_estimator=MiniBatchKMeans(n_init=3),sampling_strategy=SAMPLE_STRATEGY, cluster_balance_threshold=0.1).fit_resample(X_train[sel], y_train)
+    smote = SMOTE(k_neighbors=NearestNeighbors(n_jobs=N_JOBS),sampling_strategy=SAMPLE_STRATEGY).fit_resample(X_train[sel], y_train)
+    random = RandomOverSampler(sampling_strategy=SAMPLE_STRATEGY).fit_resample(X_train[sel], y_train)
+    ctgan = CTGANOverSampler(sampling_strategy=SAMPLE_STRATEGY).fit_resample(X_train[sel], y_train)
+    advo = ADVO(n_jobs=N_JOBS,sampling_strategy=SAMPLE_STRATEGY).fit_resample(X_train, y_train)
+    advo.print_regressor_scores()
+
+
     # Specify oversampling strategies to compare 
-    Xy_resampled = [KMeansSMOTE(n_jobs=N_JOBS, kmeans_estimator=MiniBatchKMeans(n_init=3),sampling_strategy=SAMPLE_STRATEGY, cluster_balance_threshold=0.1).fit_resample(X_train[sel], y_train),
-               SMOTE(k_neighbors=NearestNeighbors(n_jobs=N_JOBS),sampling_strategy=SAMPLE_STRATEGY).fit_resample(X_train[sel], y_train),
-               RandomOverSampler(sampling_strategy=SAMPLE_STRATEGY).fit_resample(X_train[sel], y_train),
-               CTGANOverSampler(sampling_strategy=SAMPLE_STRATEGY).fit_resample(X_train[sel], y_train),
-               ADVO(n_jobs=N_JOBS,sampling_strategy=SAMPLE_STRATEGY).fit_resample(X_train, y_train)]
+    Xy_resampled = [kmeans_smote, smote, random, ctgan, advo]
+
     # Add not oversampled data as first element
     Xy = [(X_train[sel], y_train)] + Xy_resampled 
     
@@ -61,15 +67,24 @@ def make_classification():
     for X, y in Xy:
         fit_predict(X,y,BalancedRandomForestClassifier(n_estimators=N_TREES ,n_jobs=N_JOBS) , X_test[sel], predictions_proba, discrete_predictions)
 
-    #trapzs = compute_kde_difference_auc(Xy,sel, names)    
+    trapzs = compute_kde_difference_auc(Xy,sel, names)
+    
+    #save trapz in a file
+    trapzs.to_csv('trapz.csv', index=False)
 
     # Compute metrics
     K_needed = [50, 100, 200, 500, 1000, 2000]
     _, all_metrics = evaluate_models(predictions_proba, discrete_predictions, X_test['CUSTOMER_ID'], names, y_test, K_needed)
 
     ranking = all_metrics.rank(axis=1, ascending=False)
-    print(ranking)
 
+    #save all_metrics in a file
+    all_metrics.to_csv('all_metrics.csv', index=False)
+    #save ranking in a file
+    ranking.to_csv('ranking.csv', index=False)
+
+    print(trapzs)
+    print(ranking)
     print(all_metrics)
 
 

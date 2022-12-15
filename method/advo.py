@@ -318,7 +318,15 @@ class ADVO():
             regressor.naive_score = naive_score
             regressor.feature_names = X_train.columns
 
-
+    def print_regressor_scores(self) -> None:
+        """Prints the scores of the trained regression models.
+        
+        Returns:
+            None
+        """
+        for feature_to_predict in self.useful_features:
+            regressor = self.regressors[feature_to_predict]
+            print(f'{feature_to_predict}: {regressor.score:.4f} (naive: {regressor.naive_score:.4f})')
 
 
     def fit_resample(self, X_train, y_train):
