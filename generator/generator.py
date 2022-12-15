@@ -160,7 +160,7 @@ class Generator():
             with open(filename, 'wb') as f:
                 pickle.dump(full_transactions_table,f)
     
-    def load(self, filename):
+    def load(self, filename='dataset.csv'):
         #if filename ends with '.csv' then load csv
         #if filename ends with '.pkl' then load pickle
         #else raise error

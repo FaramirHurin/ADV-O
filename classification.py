@@ -32,8 +32,10 @@ def fit_predict(X_train,y_train,learner, X_test, predictions_proba, discrete_pre
 def make_classification():
     # Generate transactions data using the GENERATOR instance
     generator = Generator(n_customers=N_USERS, n_terminals=N_TERMINALS)
-    generator.generate()
-    generator.export()
+    #generator.generate()
+    #generator.export()
+
+    generator.load()
 
 
     # Train Test Split 
