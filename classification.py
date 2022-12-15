@@ -14,6 +14,7 @@ from sklearn.cluster import MiniBatchKMeans
 from utils.compute_metrics import evaluate_models
 from utils.kde import compute_kde_difference_auc
 from experiments.ctgan_wrapper import CTGANOverSampler
+import torch
 
 import numpy as np
 
@@ -24,13 +25,14 @@ N_JOBS = 35
 N_TREES = 20
 N_USERS = 10000
 N_TERMINALS = 1000
+RANDOM_STATE = 42
 
 RANDOM_GRID_RF = {'n_estimators': [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000], 'max_features': [1, 'sqrt', 'log2'], 'max_depth': [5, 16, 28, 40, None], 'min_samples_split': [10, 25, 50], 'min_samples_leaf': [4, 8, 32], 'bootstrap': [True, False]}
 RANDOM_GRID_RIDGE = {'alpha': [int(x) for x in np.linspace(start = 0.001, stop = 1, num = 100)], 'fit_intercept': [True, False]}
 RANDOM_GRID_NN = {'hidden_layer_sizes': [int(x) for x in np.linspace(start = 1, stop = 41, num = 80)], 'alpha': [int(x) for x in np.linspace(start = 0.005, stop = 0.02, num = 100)]}
 
 
-CANDIDATE_REGRESSORS = [MLPRegressor(max_iter=2000), Ridge(), RandomForestRegressor()]
+CANDIDATE_REGRESSORS = [MLPRegressor(max_iter=2000, random_state=RANDOM_STATE), Ridge(random_state=RANDOM_STATE), RandomForestRegressor(random_state=RANDOM_STATE)]
 CANDIDATE_GRIDS = [RANDOM_GRID_NN, RANDOM_GRID_RIDGE, RANDOM_GRID_RF]
 
 def fit_predict(X_train,y_train,learner, X_test, predictions_proba, discrete_predictions):
@@ -41,6 +43,11 @@ def fit_predict(X_train,y_train,learner, X_test, predictions_proba, discrete_pre
     discrete_predictions.append(y_hat)
     
 def make_classification():
+
+    np.random.seed(RANDOM_STATE)
+    torch.manual_seed(RANDOM_STATE)
+
+
     # Generate transactions data using the GENERATOR instance
     generator = Generator(n_customers=N_USERS, n_terminals=N_TERMINALS)
     #generator.generate()
@@ -52,14 +59,14 @@ def make_classification():
     # Train Test Split 
     transactions_df = generator.transactions_df.merge(generator.terminal_profiles_table, left_on='TERMINAL_ID', right_on='TERMINAL_ID', how='left')
     X, y = transactions_df.drop(columns=['TX_FRAUD']), transactions_df['TX_FRAUD']
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42) 
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=RANDOM_STATE) 
     
     # Initialize useful variables
     sel = ['x_terminal_id', 'y_terminal_id', 'TX_AMOUNT']
     predictions_proba = []
     discrete_predictions = []
 
-    advo = ADVO(n_jobs=N_JOBS,sampling_strategy=SAMPLE_STRATEGY)
+    advo = ADVO(n_jobs=N_JOBS,sampling_strategy=SAMPLE_STRATEGY,random_state=RANDOM_STATE)
     advo.set_transactions(X_train, y_train)
     advo.create_couples()
     advo.select_best_regressor(candidate_regressors=CANDIDATE_REGRESSORS,parameters_set=CANDIDATE_GRIDS)
@@ -68,9 +75,9 @@ def make_classification():
     advo.transactions_df = advo.enrich_dataframe(advo.transactions_df)
     advo_tuple = advo.transactions_df[advo.useful_features], advo.transactions_df['TX_FRAUD']
     
-    kmeans_smote = KMeansSMOTE(n_jobs=N_JOBS, kmeans_estimator=MiniBatchKMeans(n_init=3),sampling_strategy=SAMPLE_STRATEGY, cluster_balance_threshold=0.1).fit_resample(X_train[sel], y_train)
-    smote = SMOTE(k_neighbors=NearestNeighbors(n_jobs=N_JOBS),sampling_strategy=SAMPLE_STRATEGY).fit_resample(X_train[sel], y_train)
-    random = RandomOverSampler(sampling_strategy=SAMPLE_STRATEGY).fit_resample(X_train[sel], y_train)
+    kmeans_smote = KMeansSMOTE(n_jobs=N_JOBS, kmeans_estimator=MiniBatchKMeans(n_init=3),sampling_strategy=SAMPLE_STRATEGY, cluster_balance_threshold=0.1, random_state=RANDOM_STATE).fit_resample(X_train[sel], y_train)
+    smote = SMOTE(k_neighbors=NearestNeighbors(n_jobs=N_JOBS),sampling_strategy=SAMPLE_STRATEGY,random_state=RANDOM_STATE).fit_resample(X_train[sel], y_train)
+    random = RandomOverSampler(sampling_strategy=SAMPLE_STRATEGY, random_state=RANDOM_STATE).fit_resample(X_train[sel], y_train)
     ctgan = CTGANOverSampler(sampling_strategy=SAMPLE_STRATEGY).fit_resample(X_train[sel], y_train)
 
     # Specify oversampling strategies to compare 
@@ -81,10 +88,10 @@ def make_classification():
     
     # Fit and predict using standard Random Forest for not-oversampled data only 
     names = ['Baseline', 'Baseline_balanced', 'SMOTE', 'Random', 'KMeansSMOTE', 'CTGAN', 'ADVO']
-    fit_predict(X_train[sel],y_train, RandomForestClassifier(n_estimators=N_TREES ,n_jobs=N_JOBS) , X_test[sel], predictions_proba, discrete_predictions)
+    fit_predict(X_train[sel],y_train, RandomForestClassifier(n_estimators=N_TREES ,n_jobs=N_JOBS, random_state=RANDOM_STATE) , X_test[sel], predictions_proba, discrete_predictions)
     # Fit and predict using Balanced Random Forest for not-oversampled data AND oversampled data
     for X, y in Xy:
-        fit_predict(X,y,BalancedRandomForestClassifier(n_estimators=N_TREES ,n_jobs=N_JOBS) , X_test[sel], predictions_proba, discrete_predictions)
+        fit_predict(X,y,BalancedRandomForestClassifier(n_estimators=N_TREES ,n_jobs=N_JOBS, random_state=RANDOM_STATE) , X_test[sel], predictions_proba, discrete_predictions)
 
     trapzs = compute_kde_difference_auc(Xy,sel, names)
     
