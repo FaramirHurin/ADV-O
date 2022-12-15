@@ -1,4 +1,4 @@
-from experiments.ctgan_wrapper import CTGAN
+from ctgan import CTGAN
 import pandas as pd 
 
 class CTGANOverSampler():
