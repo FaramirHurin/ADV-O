@@ -1,6 +1,6 @@
 from sklearn.model_selection import train_test_split
-from method.advo import ADVO
-from generator.generator import Generator
+from advo.advo import ADVO
+from advo.generator.generator import Generator
 
 from imblearn.over_sampling import SMOTE, RandomOverSampler, KMeansSMOTE
 from imblearn.ensemble import BalancedRandomForestClassifier
@@ -11,10 +11,10 @@ from sklearn.neural_network import MLPRegressor
 from sklearn.neighbors import NearestNeighbors
 from sklearn.cluster import MiniBatchKMeans
 
-from utils.compute_metrics import evaluate_models
-from utils.kde import compute_kde_difference_auc
-from experiments.ctgan_wrapper import CTGANOverSampler
-import torch
+from advo.utils.compute_metrics import evaluate_models
+from advo.utils.kde import compute_kde_difference_auc
+#from experiments.ctgan_wrapper import CTGANOverSampler
+#import torch
 
 import numpy as np
 
@@ -45,7 +45,7 @@ def fit_predict(X_train,y_train,learner, X_test, predictions_proba, discrete_pre
 def make_classification():
 
     np.random.seed(RANDOM_STATE)
-    torch.manual_seed(RANDOM_STATE)
+    #torch.manual_seed(RANDOM_STATE)
 
 
     # Generate transactions data using the GENERATOR instance
@@ -78,16 +78,27 @@ def make_classification():
     kmeans_smote = KMeansSMOTE(n_jobs=N_JOBS, kmeans_estimator=MiniBatchKMeans(n_init=3),sampling_strategy=SAMPLE_STRATEGY, cluster_balance_threshold=0.1, random_state=RANDOM_STATE).fit_resample(X_train[sel], y_train)
     smote = SMOTE(k_neighbors=NearestNeighbors(n_jobs=N_JOBS),sampling_strategy=SAMPLE_STRATEGY,random_state=RANDOM_STATE).fit_resample(X_train[sel], y_train)
     random = RandomOverSampler(sampling_strategy=SAMPLE_STRATEGY, random_state=RANDOM_STATE).fit_resample(X_train[sel], y_train)
-    ctgan = CTGANOverSampler(sampling_strategy=SAMPLE_STRATEGY).fit_resample(X_train[sel], y_train)
+    #ctgan = CTGANOverSampler(sampling_strategy=SAMPLE_STRATEGY).fit_resample(X_train[sel], y_train)
 
     # Specify oversampling strategies to compare 
-    Xy_resampled = [kmeans_smote, smote, random, ctgan, advo_tuple]
+    Xy_resampled = [kmeans_smote, 
+                    smote, 
+                    random, 
+                    #ctgan, 
+                    advo_tuple]
 
     # Add not oversampled data as first element
     Xy = [(X_train[sel], y_train)] + Xy_resampled 
     
     # Fit and predict using standard Random Forest for not-oversampled data only 
-    names = ['Baseline', 'Baseline_balanced', 'SMOTE', 'Random', 'KMeansSMOTE', 'CTGAN', 'ADVO']
+    names = ['Baseline', 
+            'Baseline_balanced', 
+            'SMOTE', 
+            'Random', 
+            'KMeansSMOTE', 
+            #'CTGAN', 
+            'ADVO']
+            
     fit_predict(X_train[sel],y_train, RandomForestClassifier(n_estimators=N_TREES ,n_jobs=N_JOBS, random_state=RANDOM_STATE) , X_test[sel], predictions_proba, discrete_predictions)
     # Fit and predict using Balanced Random Forest for not-oversampled data AND oversampled data
     for X, y in Xy:
@@ -115,7 +126,4 @@ def make_classification():
 
 
 if __name__ == '__main__':
-
-    sys.path.append('/home/gianmarco/git/ProjectPaperOversampling')
-
     make_classification()

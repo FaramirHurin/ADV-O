@@ -10,7 +10,7 @@ from sklearn.linear_model import Ridge
 from sklearn.metrics import r2_score
 import pickle
 
-from generator.generator import Generator
+from advo.generator.generator import Generator
 
 
 
