@@ -1,50 +1,66 @@
-# ProjectPaperOversampling
-An implementation of . 
-This code was built based on [Yannael Leborgne generator](https://github.com/).
+<h1 align="center">Welcome to ADV-O 👋</h1>
+<p>
+  <img alt="Version" src="https://img.shields.io/badge/version-0.2.0-blue.svg?cacheSeconds=2592000" />
+  <a href="docs" target="_blank">
+    <img alt="Documentation" src="https://img.shields.io/badge/documentation-yes-brightgreen.svg" />
+  </a>
+  <a href="licenseurl" target="_blank">
+    <img alt="License: licensename" src="https://img.shields.io/badge/License-licensename-yellow.svg" />
+  </a>
+  <a href="https://twitter.com/authortwitter" target="_blank">
+    <img alt="Twitter: authortwitter" src="https://img.shields.io/twitter/follow/authortwitter.svg?style=social" />
+  </a>
+</p>
 
-# Dependencies
+> An Adversary model of fraudsters’ behaviour to improve oversampling in credit card fraud detection
 
-To run this code fully, you'll need [this](https://pytorch.org/) (we're using version 1.4.0), [that](https://scikit-learn.org/stable/).
-We've been running our code in Python 3.7.
+### 🏠 [Homepage](homepage)
 
+### ✨ [Demo](demo)
 
-## Deep active learning + Semi-supervised learning
+## Install
 
-|                Sampling Strategies                |    Year    | Done |
-|:-------------------------------------------------:|:----------:|:----:|
-|               Consistency-SSLAL [16]                |  ECCV'20  |  ✅ |
-|               MixMatch-SSLAL [17]                |  arXiv  |  ✅ |
-|               UDA [18]                |  NIPS'20  |  In progress |
-
-
-
-
-# Running an experiment
-## Requirements
-
-First, please make sure you have installed Conda. Then, our environment can be installed by:
-```
-conda create -n ProjectPaperOversampling python=3.7
-conda activate ProjectPaperOversampling
-pip install -r requirements.txt
+```sh
+installcommand
 ```
 
-## Example
+## Usage
+
+```sh
+usagecommande
 ```
-python main.py --param1 value1 --param2 value2
+
+## Run tests
+
+```sh
+testcommand
 ```
-It runs .... using ... and ... data. The result will be saved in the **./save** directory.
 
-You can also use `run.sh` to run experiments.
+## Author
 
+👤 **authorname**
 
-# Contact
-If you have any questions/suggestions, or would like to contribute to this repo, please feel free to contact:
-  Daniele Lunghi `dlunghi@ulb.ac.be`,   Gian Marco Paldino `gpaldino@ulb.ac.be`
+* Website: authorwebsite
+* Twitter: [@authortwitter](https://twitter.com/authortwitter)
+* Github: [@githubusername](https://github.com/githubusername)
+* LinkedIn: [@authorlinkedin](https://linkedin.com/in/authorlinkedin)
 
-  
-## References
+## 🤝 Contributing
 
-[1] (Author, Conference'22) Title [paper](https://arxiv.org/pdf/) [code](https://github.com/)
+Contributions, issues and feature requests are welcome!<br />Feel free to check [issues page](issuesurl). You can also take a look at the [contributing guide](contributionguide).
 
+## Show your support
 
+Give a ⭐️ if this project helped you!
+
+<a href="https://www.patreon.com/authorpatreon">
+  <img src="https://c5.patreon.com/external/logo/become_a_patron_button@2x.png" width="160">
+</a>
+
+## 📝 License
+
+Copyright © 2022 [authorname](https://github.com/githubusername).<br />
+This project is [licensename](licenseurl) licensed.
+
+***
+_This README was generated with ❤️ by [readme-md-generator](https://github.com/kefranabg/readme-md-generator)_
