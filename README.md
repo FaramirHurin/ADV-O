@@ -26,16 +26,12 @@ The repository is expected to be extended in the future.
 
 ### ✨ [Demo](demo)
 
-## Install
+## Install and Usage
 
 ```sh
+git clone https://github.com/FaramirHurin/ADV-O.git
+cd ADV-O
 pip install -r requirements.txt
-```
-
-## Usage
-
-```sh
-git clone https://github.com//FaramirHurin/ADV-O.git
 python main.py
 ```
 
