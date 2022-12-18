@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>advo.advo &mdash; ADV-O 0.2.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> ADV-O
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">advo</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">ADV-O</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">advo.advo</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for advo.advo</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">pandarallel</span> <span class="kn">import</span> <span class="n">pandarallel</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">train_test_split</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">RandomizedSearchCV</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span>
+<span class="kn">from</span> <span class="nn">sklearn.base</span> <span class="kn">import</span> <span class="n">BaseEstimator</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">BaseCrossValidator</span>
+<span class="kn">from</span> <span class="nn">sklearn.linear_model</span> <span class="kn">import</span> <span class="n">Ridge</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">r2_score</span>
+<span class="kn">import</span> <span class="nn">pickle</span>
+
+<span class="kn">from</span> <span class="nn">advo.generator.generator</span> <span class="kn">import</span> <span class="n">Generator</span>
+
+
+
+
+<div class="viewcode-block" id="ADVO"><a class="viewcode-back" href="../../advo.html#advo.advo.ADVO">[docs]</a><span class="k">class</span> <span class="nc">ADVO</span><span class="p">():</span>
+    
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    ADVO: An Adversary model of fraudsters behaviour to improve oversampling in credit card fraud detection.</span>
+
+<span class="sd">    This class implements an adversarial model of fraudsters&#39; behavior that can be used to improve oversampling in credit</span>
+<span class="sd">    card fraud detection. The model uses transactions data to create pairs of fraudulent transactions for each customer, and</span>
+<span class="sd">    trains regression models to predict future fraudulent transactions for each customer.</span>
+
+<span class="sd">    The class provides methods for generating transactions data, loading transactions from a file, creating pairs of</span>
+<span class="sd">    fraudulent transactions, tuning the hyperparameters of regression models, fitting the regression models to data, and</span>
+<span class="sd">    generating new synthetic transactions using the trained models.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        transactions_df (pd.DataFrame): a dataframe containing the transactions data.</span>
+<span class="sd">        n_jobs (int): the number of cores to use when running certain methods in parallel.</span>
+<span class="sd">        random_state (int): the random seed to use when generating transactions.</span>
+<span class="sd">        verbose (bool): whether to print progress bars when running certain methods in parallel.</span>
+<span class="sd">        training_frac (float): the fraction of transactions to use for training the regression models.</span>
+<span class="sd">        sampling_strategy (float): the fraction of fraudulent transactions to achieve when oversampling.</span>
+<span class="sd">        useful_features (List[str]): a list of the names of the features to use when training the regression models.</span>
+<span class="sd">        regressors (Dict[str, Any]): a dictionary containing the trained regression models, with the features to predict as</span>
+<span class="sd">            keys.</span>
+<span class="sd">        searcher (Type[BaseSearchCV]): the search cross-validation object to use for hyperparameter tuning.</span>
+<span class="sd">        search_parameters (Dict[str, Any]): a dictionary containing the parameters to use when tuning the regression models.</span>
+<span class="sd">        regressor (Type[BaseEstimator]): the regressor object to use for training the regression models.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
+                <span class="n">transactions_df</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+                <span class="n">n_jobs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> 
+                <span class="n">training_frac</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
+                <span class="n">sampling_strategy</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> 
+                <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> 
+                <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">searcher</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">BaseCrossValidator</span><span class="p">]</span> <span class="o">=</span> <span class="n">RandomizedSearchCV</span><span class="p">,</span>
+                <span class="n">candidate_regressors</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="n">search_parameters</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;alpha&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="s1">&#39;fit_intercept&#39;</span><span class="p">:</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">]},</span>
+                <span class="n">regressor</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">BaseEstimator</span><span class="p">]</span> <span class="o">=</span> <span class="n">Ridge</span><span class="p">()):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">transactions_df</span> <span class="o">=</span> <span class="n">transactions_df</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span> <span class="o">=</span> <span class="n">n_jobs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span> <span class="o">=</span> <span class="n">random_state</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">training_frac</span> <span class="o">=</span> <span class="n">training_frac</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sampling_strategy</span> <span class="o">=</span> <span class="n">sampling_strategy</span>
+        <span class="c1">#TODO: let the user choose the features to use</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">useful_features</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;x_terminal_id&#39;</span><span class="p">,</span> <span class="s1">&#39;y_terminal_id&#39;</span><span class="p">,</span> <span class="s1">&#39;TX_AMOUNT&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">regressors</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">searcher</span> <span class="o">=</span> <span class="n">searcher</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">candidate_regressors</span> <span class="o">=</span> <span class="n">candidate_regressors</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">search_parameters</span> <span class="o">=</span> <span class="n">search_parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">regressor</span> <span class="o">=</span> <span class="n">regressor</span>
+  
+
+        <span class="c1"># TODO: let the user choose progress_bar and use_memory_fs</span>
+        <span class="n">pandarallel</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="n">nb_workers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span><span class="p">,</span> <span class="n">progress_bar</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span> <span class="n">use_memory_fs</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ADVO.generate_transactions"><a class="viewcode-back" href="../../advo.html#advo.advo.ADVO.generate_transactions">[docs]</a>    <span class="k">def</span> <span class="nf">generate_transactions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_customers</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">n_terminals</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generate transactions after creating a Generator instance.</span>
+
+<span class="sd">        This method generates transactions after creating a `Generator` instance to hold the data. The</span>
+<span class="sd">        `Generator` instance is stored in the `generator` attribute of the current instance.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            n_customers (int): the number of customers to generate.</span>
+<span class="sd">            n_terminals (int): the number of terminals to generate.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">generator</span> <span class="o">=</span> <span class="n">Generator</span><span class="p">(</span><span class="n">n_customers</span> <span class="o">=</span> <span class="n">n_customers</span><span class="p">,</span> <span class="n">n_terminals</span><span class="o">=</span><span class="n">n_terminals</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">)</span>
+        <span class="n">generator</span><span class="o">.</span><span class="n">generate</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">transactions_df</span> <span class="o">=</span> <span class="n">generator</span><span class="o">.</span><span class="n">transactions_df</span></div>
+
+<div class="viewcode-block" id="ADVO.set_transactions"><a class="viewcode-back" href="../../advo.html#advo.advo.ADVO.set_transactions">[docs]</a>    <span class="k">def</span> <span class="nf">set_transactions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Set the transactions data.</span>
+
+<span class="sd">        This method sets the transactions data. The transactions data is stored in the `transactions_df` attribute of the</span>
+<span class="sd">        current instance.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            X_train (pd.DataFrame): a DataFrame containing the features of the transactions.</span>
+<span class="sd">            y_train (pd.Series): a Series containing the labels of the transactions.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">transactions_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ADVO.load_trasactions"><a class="viewcode-back" href="../../advo.html#advo.advo.ADVO.load_trasactions">[docs]</a>    <span class="k">def</span> <span class="nf">load_trasactions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Load transactions from a file.</span>
+
+<span class="sd">        This method loads transactions from a file. The file can be either a csv or a pickle file. The loaded transactions</span>
+<span class="sd">        are stored in the `transactions_df` attribute of the current instance.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            filename (str): the name of the file to load the transactions from.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span>  <span class="n">filename</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.csv&#39;</span><span class="p">):</span>
+            <span class="n">full_transactions_table</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">filename</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.pkl&#39;</span><span class="p">):</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">full_transactions_table</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Invalid file format&#39;</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">transactions_df</span> <span class="o">=</span> <span class="n">full_transactions_table</span><span class="p">[[</span><span class="s1">&#39;TX_DATETIME&#39;</span><span class="p">,</span> <span class="s1">&#39;CUSTOMER_ID&#39;</span><span class="p">,</span> <span class="s1">&#39;TERMINAL_ID&#39;</span><span class="p">,</span> <span class="s1">&#39;TX_AMOUNT&#39;</span><span class="p">,</span> <span class="s1">&#39;TX_TIME_SECONDS&#39;</span><span class="p">,</span> <span class="s1">&#39;TX_FRAUD&#39;</span><span class="p">]]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">transactions_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transactions_df</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">transactions_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transactions_df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span> <span class="nf">_make_couples</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span> 
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create couples of fraudulent transactions for a given customer group.</span>
+
+<span class="sd">        This method takes a DataFrame representing a group of fraudulent transactions for a single customer. It sorts the</span>
+<span class="sd">        transactions by date, and then creates couples of transactions by iterating through the transactions and pairing each</span>
+<span class="sd">        transaction with the subsequent transaction in the list. The resulting couples are stored in a DataFrame and returned.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            group (pandas.DataFrame): a DataFrame representing a group of fraudulent transactions for a single customer.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pandas.DataFrame: a DataFrame containing couples of fraudulent transactions for the given customer.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">group</span> <span class="o">=</span> <span class="n">group</span><span class="o">.</span><span class="n">sort_values</span><span class="p">([</span><span class="s1">&#39;TX_DATETIME&#39;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">couples_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="s1">&#39;prev_&#39;</span> <span class="o">+</span> <span class="n">group</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> <span class="o">*</span><span class="s1">&#39;next_&#39;</span> <span class="o">+</span> <span class="n">group</span><span class="o">.</span><span class="n">columns</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">group</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span> 
+            <span class="n">group_as_list</span> <span class="o">=</span> <span class="n">group</span><span class="o">.</span><span class="n">values</span>
+            <span class="k">for</span> <span class="n">first_tr</span><span class="p">,</span> <span class="n">second_tr</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">group_as_list</span><span class="p">,</span> <span class="n">group_as_list</span><span class="p">[</span><span class="mi">1</span><span class="p">:]):</span>
+                <span class="n">a_series</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">([</span><span class="o">*</span><span class="n">first_tr</span><span class="p">,</span><span class="o">*</span><span class="n">second_tr</span><span class="p">],</span> <span class="n">index</span> <span class="o">=</span> <span class="n">couples_df</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span><span class="o">.</span><span class="n">to_frame</span><span class="p">()</span><span class="o">.</span><span class="n">T</span>
+                <span class="n">couples_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">couples_df</span><span class="p">,</span><span class="n">a_series</span><span class="p">])</span>
+            <span class="k">return</span> <span class="n">couples_df</span>
+        <span class="k">else</span><span class="p">:</span> 
+            <span class="k">return</span> <span class="n">couples_df</span>
+            
+<div class="viewcode-block" id="ADVO.create_couples"><a class="viewcode-back" href="../../advo.html#advo.advo.ADVO.create_couples">[docs]</a>    <span class="k">def</span> <span class="nf">create_couples</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create couples of fraudulent transactions for each customer.</span>
+
+<span class="sd">        This method uses the `transactions_df` and `terminal_profiles_table` attributes of the `generator` attribute to create</span>
+<span class="sd">        a table of fraudulent transactions. It then groups the transactions by customer, and applies the `_make_couples` method</span>
+<span class="sd">        to each group in order to create couples of fraudulent transactions for each customer. The results are stored in the</span>
+<span class="sd">        `couples` attribute of the current instance.</span>
+
+<span class="sd">        This method can run in parallel using multiple cores if the `n_jobs` attribute is set to a value greater than 1.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="n">full_frauds_table</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transactions_df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">transactions_df</span><span class="p">[</span><span class="s1">&#39;TX_FRAUD&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span>
+
+        <span class="c1">#TODO: let the user choose the columns to keep...</span>
+        <span class="n">interestig_columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;TX_DATETIME&#39;</span><span class="p">,</span> <span class="s1">&#39;CUSTOMER_ID&#39;</span><span class="p">,</span> <span class="s1">&#39;x_terminal_id&#39;</span><span class="p">,</span> <span class="s1">&#39;y_terminal_id&#39;</span><span class="p">,</span> <span class="s1">&#39;TX_AMOUNT&#39;</span><span class="p">,</span> <span class="s1">&#39;TX_FRAUD&#39;</span><span class="p">]</span>
+        <span class="n">clean_frauds_df</span> <span class="o">=</span> <span class="n">full_frauds_table</span><span class="p">[</span><span class="n">interestig_columns</span><span class="p">]</span><span class="o">.</span><span class="n">sort_values</span><span class="p">([</span><span class="s1">&#39;TX_DATETIME&#39;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1">#TODO: let the user choose the columns to keep...</span>
+        <span class="n">grouped</span> <span class="o">=</span> <span class="n">clean_frauds_df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;CUSTOMER_ID&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">results</span> <span class="o">=</span> <span class="n">grouped</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_couples</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">results</span> <span class="o">=</span> <span class="n">grouped</span><span class="o">.</span><span class="n">parallel_apply</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_couples</span><span class="p">)</span>
+
+        <span class="n">results</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">results</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="s1">&#39;prev_CUSTOMER_ID&#39;</span><span class="p">,</span> <span class="s1">&#39;next_CUSTOMER_ID&#39;</span><span class="p">],</span> <span class="n">axis</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">couples</span> <span class="o">=</span> <span class="n">results</span></div>
+
+<div class="viewcode-block" id="ADVO.tune_best_regressors"><a class="viewcode-back" href="../../advo.html#advo.advo.ADVO.tune_best_regressors">[docs]</a>    <span class="k">def</span> <span class="nf">tune_best_regressors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">training_set</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">couples</span>
+        <span class="n">features_prev</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="s1">&#39;prev_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>  <span class="bp">self</span><span class="o">.</span><span class="n">useful_features</span><span class="p">))</span>
+        <span class="n">X_train</span> <span class="o">=</span> <span class="n">training_set</span><span class="p">[</span><span class="n">features_prev</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">feature_to_predict</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">useful_features</span><span class="p">:</span>
+            <span class="n">y_train</span> <span class="o">=</span> <span class="n">training_set</span><span class="p">[</span><span class="s1">&#39;next_&#39;</span><span class="o">+</span><span class="n">feature_to_predict</span><span class="p">]</span>
+            <span class="n">search</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">searcher</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">regressor</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">search_parameters</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">)</span>
+            <span class="n">search</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+            <span class="n">regressor</span> <span class="o">=</span> <span class="n">search</span><span class="o">.</span><span class="n">best_estimator_</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">regressors</span><span class="p">[</span><span class="n">feature_to_predict</span><span class="p">]</span> <span class="o">=</span> <span class="n">regressor</span></div>
+
+<div class="viewcode-block" id="ADVO.tune_regressors"><a class="viewcode-back" href="../../advo.html#advo.advo.ADVO.tune_regressors">[docs]</a>    <span class="k">def</span> <span class="nf">tune_regressors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metric</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">r2_score</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Tunes the hyperparameters of a set of regression models using a search algorithm.</span>
+<span class="sd">        The regressor will be part of the self.regressors dictionary, with the feature to predict as key.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            searcher: An object that implements a search algorithm, such as GridSearchCV or RandomizedSearchCV.</span>
+<span class="sd">            search_parameters: A dictionary of hyperparameters for the searcher.</span>
+<span class="sd">            regressor: A regression model to be tuned.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="n">training_set</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">couples</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">frac</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">training_frac</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">)</span>
+        <span class="n">test_set</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">couples</span><span class="p">[</span><span class="o">~</span><span class="bp">self</span><span class="o">.</span><span class="n">couples</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">training_set</span><span class="p">)]</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
+        <span class="n">features_prev</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="s1">&#39;prev_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>  <span class="bp">self</span><span class="o">.</span><span class="n">useful_features</span><span class="p">))</span>
+        <span class="n">X_train</span> <span class="o">=</span> <span class="n">training_set</span><span class="p">[</span><span class="n">features_prev</span><span class="p">]</span>
+        <span class="n">X_test</span> <span class="o">=</span> <span class="n">test_set</span><span class="p">[</span><span class="n">features_prev</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">feature_to_predict</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">useful_features</span><span class="p">:</span>
+            <span class="n">y_train</span> <span class="o">=</span> <span class="n">training_set</span><span class="p">[</span><span class="s1">&#39;next_&#39;</span><span class="o">+</span><span class="n">feature_to_predict</span><span class="p">]</span>
+            <span class="n">y_test</span> <span class="o">=</span> <span class="n">test_set</span><span class="p">[</span><span class="s1">&#39;next_&#39;</span><span class="o">+</span><span class="n">feature_to_predict</span><span class="p">]</span>
+            <span class="n">y_naive</span> <span class="o">=</span> <span class="n">X_test</span><span class="p">[</span><span class="s1">&#39;prev_&#39;</span><span class="o">+</span><span class="n">feature_to_predict</span><span class="p">]</span>
+            <span class="n">search</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">searcher</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">regressor</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">search_parameters</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">)</span>
+            <span class="n">search</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+            <span class="n">regressor</span> <span class="o">=</span> <span class="n">search</span><span class="o">.</span><span class="n">best_estimator_</span>
+            <span class="n">y_hat</span> <span class="o">=</span> <span class="n">regressor</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+            <span class="n">regressor</span><span class="o">.</span><span class="n">score</span> <span class="o">=</span> <span class="n">metric</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_hat</span><span class="p">)</span>
+            <span class="n">regressor</span><span class="o">.</span><span class="n">naive_score</span> <span class="o">=</span> <span class="n">metric</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_naive</span><span class="p">)</span>
+            <span class="n">regressor</span><span class="o">.</span><span class="n">feature_names</span> <span class="o">=</span> <span class="n">X_train</span><span class="o">.</span><span class="n">columns</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">regressors</span><span class="p">[</span><span class="n">feature_to_predict</span><span class="p">]</span> <span class="o">=</span> <span class="n">regressor</span>
+        
+        <span class="c1">#save regressors in pickle file</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;regressors.pkl&quot;</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">regressors</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_oversample_df</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Oversamples a dataframe of transactions by predicting the values for certain features using machine learning models.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            df: A pandas DataFrame containing transaction data.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            A new pandas DataFrame with the original transaction data and the predicted values for the specified features.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">feature</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">regressors</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s1">&#39;new_&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">feature</span><span class="p">)]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">regressors</span><span class="p">[</span><span class="n">feature</span><span class="p">]</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">useful_features</span><span class="p">]</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="s1">&#39;prev_&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)))</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s1">&#39;new_TX_FRAUD&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span><span class="s1">&#39;new_CUSTOMER_ID&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;CUSTOMER_ID&#39;</span><span class="p">]</span>
+        <span class="n">filter_col</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">df</span> <span class="k">if</span> <span class="n">col</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;new&#39;</span><span class="p">)]</span>
+        <span class="n">new_frauds</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">filter_col</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">df</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">filter_col</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">new_frauds</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="n">column</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="s1">&#39;new_&#39;</span><span class="p">):]</span> <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">new_frauds</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
+        
+        <span class="c1">#new_frauds.loc[:, &#39;TX_AMOUNT&#39;] = round( new_frauds.loc[:, &#39;TX_AMOUNT&#39;], 2)</span>
+        <span class="c1">#new_frauds.loc[:, &#39;x_terminal_id&#39;] = new_frauds.loc[:, &#39;x_terminal_id&#39;].apply(lambda x: max(0, min(100, x)))</span>
+        <span class="c1">#new_frauds.loc[:, &#39;y_terminal_id&#39;] = new_frauds.loc[:, &#39;y_terminal_id&#39;].apply(lambda x: max(0, min(100, x)))</span>
+        
+        <span class="n">new_frauds</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s1">&#39;TX_AMOUNT&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_frauds</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s1">&#39;TX_AMOUNT&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">new_frauds</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s1">&#39;x_terminal_id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">new_frauds</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s1">&#39;y_terminal_id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        
+
+        <span class="k">return</span> <span class="n">new_frauds</span>
+
+<div class="viewcode-block" id="ADVO.enrich_dataframe"><a class="viewcode-back" href="../../advo.html#advo.advo.ADVO.enrich_dataframe">[docs]</a>    <span class="k">def</span> <span class="nf">enrich_dataframe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">transactions_df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds multiple layers of predicted fraudulent transactions to a dataframe of transactions until a specified percentage of fraud is reached.</span>
+
+<span class="sd">        This method filters the input dataframe to only include rows with a value of 1 in the &#39;TX_FRAUD&#39; column,</span>
+<span class="sd">        and groups the remaining rows by the values in the &#39;CUSTOMER_ID&#39; column. It then applies the &#39;_oversample_df&#39;</span>
+<span class="sd">        method to each group of transactions, adding the predicted fraudulent transactions to the original dataframe.</span>
+<span class="sd">        This process is repeated until the specified percentage of fraud is reached. The resulting dataframe is then</span>
+<span class="sd">        sampled to ensure that the exact percentage of fraud is maintained.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">        transactions_df: A pandas DataFrame containing transaction data.</span>
+<span class="sd">        percentage: A float specifying the target percentage of fraud in the resulting dataframe.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        A new pandas DataFrame with the original transaction data and the added layers of predicted fraudulent transactions.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">transactions_df_copy</span> <span class="o">=</span> <span class="n">transactions_df</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">frauds_df</span> <span class="o">=</span> <span class="n">transactions_df</span><span class="p">[</span><span class="n">transactions_df</span><span class="p">[</span><span class="s1">&#39;TX_FRAUD&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">frauds_groups</span> <span class="o">=</span> <span class="n">frauds_df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;CUSTOMER_ID&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span> <span class="p">)</span>
+        <span class="n">total_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">transactions_df</span><span class="p">)</span>
+        <span class="n">initial_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">frauds_df</span><span class="p">)</span>
+        <span class="n">target_count</span> <span class="o">=</span> <span class="p">(</span><span class="n">total_count</span> <span class="o">-</span> <span class="n">initial_count</span><span class="p">)</span>  <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampling_strategy</span>
+        <span class="n">current_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">frauds_df</span><span class="p">)</span>
+        <span class="n">layers</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">generated_frauds_counter</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">only_synthetic_frauds_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+        <span class="k">while</span> <span class="n">current_count</span> <span class="o">&lt;</span> <span class="n">target_count</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">to_verify_fraud_list</span> <span class="o">=</span> <span class="n">frauds_groups</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_oversample_df</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">to_verify_fraud_list</span> <span class="o">=</span> <span class="n">frauds_groups</span><span class="o">.</span><span class="n">parallel_apply</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_oversample_df</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">generated_frauds_counter</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">to_verify_fraud_list</span><span class="p">)</span>
+            <span class="n">transactions_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">transactions_df</span><span class="p">,</span> <span class="n">to_verify_fraud_list</span><span class="p">],</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">only_synthetic_frauds_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">only_synthetic_frauds_df</span><span class="p">,</span> <span class="n">to_verify_fraud_list</span><span class="p">],</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">frauds_df</span> <span class="o">=</span> <span class="n">transactions_df</span><span class="p">[</span><span class="n">transactions_df</span><span class="p">[</span><span class="s1">&#39;TX_FRAUD&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">frauds_groups</span> <span class="o">=</span> <span class="n">frauds_df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;CUSTOMER_ID&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span> <span class="p">)</span>
+            <span class="n">current_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">frauds_df</span><span class="p">)</span>
+            <span class="n">layers</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">only_synthetic_frauds_df</span> <span class="o">=</span> <span class="n">only_synthetic_frauds_df</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">target_count</span><span class="p">)</span> <span class="o">-</span> <span class="n">initial_count</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">)</span>
+        <span class="n">transactions_df_copy</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">transactions_df_copy</span><span class="p">,</span> <span class="n">only_synthetic_frauds_df</span><span class="p">],</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">transactions_df_copy</span></div>
+
+   
+<div class="viewcode-block" id="ADVO.fit_regressors"><a class="viewcode-back" href="../../advo.html#advo.advo.ADVO.fit_regressors">[docs]</a>    <span class="k">def</span> <span class="nf">fit_regressors</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+
+        <span class="n">features_prev</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="s1">&#39;prev_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>  <span class="bp">self</span><span class="o">.</span><span class="n">useful_features</span><span class="p">))</span>
+
+        <span class="n">X_train</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">couples</span><span class="p">[</span><span class="n">features_prev</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">feature_to_predict</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">useful_features</span><span class="p">:</span>
+            <span class="n">regressor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">regressors</span><span class="p">[</span><span class="n">feature_to_predict</span><span class="p">]</span>
+            <span class="n">y_train</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">couples</span><span class="p">[</span><span class="s1">&#39;next_&#39;</span><span class="o">+</span><span class="n">feature_to_predict</span><span class="p">]</span>
+            <span class="n">regressor</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span></div>
+            
+<div class="viewcode-block" id="ADVO.select_best_regressor"><a class="viewcode-back" href="../../advo.html#advo.advo.ADVO.select_best_regressor">[docs]</a>    <span class="k">def</span> <span class="nf">select_best_regressor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">candidate_regressors</span><span class="p">,</span> <span class="n">parameters_set</span><span class="p">):</span>
+            <span class="n">best_score</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">candidate_regressor</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">candidate_regressors</span><span class="p">):</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">regressor</span> <span class="o">=</span> <span class="n">candidate_regressors</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">search_parameters</span> <span class="o">=</span> <span class="n">parameters_set</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">tune_regressors</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fit_regressors</span><span class="p">()</span>
+
+                <span class="n">scores</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="n">naive_scores</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="k">for</span> <span class="n">feature_to_predict</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">useful_features</span><span class="p">:</span>
+                    <span class="n">regressor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">regressors</span><span class="p">[</span><span class="n">feature_to_predict</span><span class="p">]</span>
+                    <span class="n">scores</span><span class="p">[</span><span class="n">feature_to_predict</span><span class="p">]</span> <span class="o">=</span> <span class="n">regressor</span><span class="o">.</span><span class="n">score</span>
+                    <span class="n">naive_scores</span><span class="p">[</span><span class="n">feature_to_predict</span><span class="p">]</span> <span class="o">=</span> <span class="n">regressor</span><span class="o">.</span><span class="n">naive_score</span>
+                <span class="n">scores_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">scores</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;score&#39;</span><span class="p">])</span>
+                <span class="n">naives_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">naive_scores</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;naive_score&#39;</span><span class="p">])</span>
+                <span class="n">merged_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">scores_df</span><span class="p">,</span> <span class="n">naives_df</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Regressor: &#39;</span><span class="p">,</span> <span class="n">candidate_regressor</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">merged_df</span><span class="p">)</span>
+
+                <span class="n">mean_value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">scores</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+
+                <span class="k">if</span> <span class="n">mean_value</span> <span class="o">&gt;</span> <span class="n">best_score</span><span class="p">:</span>
+                    <span class="n">best_score</span> <span class="o">=</span> <span class="n">mean_value</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">best_regressor</span> <span class="o">=</span> <span class="n">candidate_regressor</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Best regressor: &#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">best_regressor</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">regressor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">best_regressor</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">search_parameters</span> <span class="o">=</span> <span class="n">parameters_set</span><span class="p">[</span><span class="n">candidate_regressors</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">best_regressor</span><span class="p">)]</span></div>
+
+<div class="viewcode-block" id="ADVO.fit_resample"><a class="viewcode-back" href="../../advo.html#advo.advo.ADVO.fit_resample">[docs]</a>    <span class="k">def</span> <span class="nf">fit_resample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_transactions</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">create_couples</span><span class="p">()</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">tune_regressors</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fit_regressors</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">transactions_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">enrich_dataframe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">transactions_df</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">transactions_df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">useful_features</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">transactions_df</span><span class="p">[</span><span class="s1">&#39;TX_FRAUD&#39;</span><span class="p">]</span></div></div>
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Daniele Lunghi, Gian Marco Paldino.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

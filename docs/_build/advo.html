@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>advo package &mdash; ADV-O 0.2.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="advo.generator package" href="advo.generator.html" />
+    <link rel="prev" title="advo" href="modules.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> ADV-O
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">advo</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">advo package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#subpackages">Subpackages</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="advo.generator.html">advo.generator package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="advo.utils.html">advo.utils package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-advo.advo">advo.advo module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#advo.advo.ADVO"><code class="docutils literal notranslate"><span class="pre">ADVO</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-advo">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">ADV-O</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">advo</a></li>
+      <li class="breadcrumb-item active">advo package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/advo.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="advo-package">
+<h1>advo package<a class="headerlink" href="#advo-package" title="Permalink to this heading"></a></h1>
+<section id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="advo.generator.html">advo.generator package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="advo.generator.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advo.generator.html#module-advo.generator.customers">advo.generator.customers module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="advo.generator.html#advo.generator.customers.generate_customer_profiles_table"><code class="docutils literal notranslate"><span class="pre">generate_customer_profiles_table()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="advo.generator.html#module-advo.generator.generator">advo.generator.generator module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="advo.generator.html#advo.generator.generator.Generator"><code class="docutils literal notranslate"><span class="pre">Generator</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="advo.generator.html#advo.generator.generator.Generator.n_customers"><code class="docutils literal notranslate"><span class="pre">Generator.n_customers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="advo.generator.html#advo.generator.generator.Generator.n_terminals"><code class="docutils literal notranslate"><span class="pre">Generator.n_terminals</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="advo.generator.html#advo.generator.generator.Generator.radius"><code class="docutils literal notranslate"><span class="pre">Generator.radius</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="advo.generator.html#advo.generator.generator.Generator.nb_days"><code class="docutils literal notranslate"><span class="pre">Generator.nb_days</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="advo.generator.html#advo.generator.generator.Generator.start_date"><code class="docutils literal notranslate"><span class="pre">Generator.start_date</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="advo.generator.html#advo.generator.generator.Generator.random_state"><code class="docutils literal notranslate"><span class="pre">Generator.random_state</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="advo.generator.html#advo.generator.generator.Generator.max_days_from_compromission"><code class="docutils literal notranslate"><span class="pre">Generator.max_days_from_compromission</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="advo.generator.html#advo.generator.generator.Generator.terminal_profiles_table"><code class="docutils literal notranslate"><span class="pre">Generator.terminal_profiles_table</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="advo.generator.html#advo.generator.generator.Generator.customer_profiles_table"><code class="docutils literal notranslate"><span class="pre">Generator.customer_profiles_table</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="advo.generator.html#advo.generator.generator.Generator.x_y_terminals"><code class="docutils literal notranslate"><span class="pre">Generator.x_y_terminals</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="advo.generator.html#advo.generator.generator.Generator.fraudsters_mean"><code class="docutils literal notranslate"><span class="pre">Generator.fraudsters_mean</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="advo.generator.html#advo.generator.generator.Generator.fraudsters_var"><code class="docutils literal notranslate"><span class="pre">Generator.fraudsters_var</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="advo.generator.html#advo.generator.generator.Generator.generate"><code class="docutils literal notranslate"><span class="pre">Generator.generate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="advo.generator.html#advo.generator.generator.Generator.export"><code class="docutils literal notranslate"><span class="pre">Generator.export()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="advo.generator.html#id0"><code class="docutils literal notranslate"><span class="pre">Generator.generate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="advo.generator.html#advo.generator.generator.Generator.load"><code class="docutils literal notranslate"><span class="pre">Generator.load()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="advo.generator.html#module-advo.generator.radius">advo.generator.radius module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="advo.generator.html#advo.generator.radius.get_list_terminals_within_radius"><code class="docutils literal notranslate"><span class="pre">get_list_terminals_within_radius()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="advo.generator.html#advo.generator.radius.get_list_terminals_within_radius_from_point"><code class="docutils literal notranslate"><span class="pre">get_list_terminals_within_radius_from_point()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="advo.generator.html#module-advo.generator.terminals">advo.generator.terminals module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="advo.generator.html#advo.generator.terminals.generate_terminal_profiles_table"><code class="docutils literal notranslate"><span class="pre">generate_terminal_profiles_table()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="advo.generator.html#module-advo.generator.transactions">advo.generator.transactions module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="advo.generator.html#advo.generator.transactions.compromise_user"><code class="docutils literal notranslate"><span class="pre">compromise_user()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="advo.generator.html#advo.generator.transactions.generate_first_fraud"><code class="docutils literal notranslate"><span class="pre">generate_first_fraud()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="advo.generator.html#advo.generator.transactions.generate_following_fraud"><code class="docutils literal notranslate"><span class="pre">generate_following_fraud()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="advo.generator.html#advo.generator.transactions.generate_fraudulent_transactions"><code class="docutils literal notranslate"><span class="pre">generate_fraudulent_transactions()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="advo.generator.html#advo.generator.transactions.generate_genuine_transactions"><code class="docutils literal notranslate"><span class="pre">generate_genuine_transactions()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="advo.generator.html#module-advo.generator.utils">advo.generator.utils module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="advo.generator.html#advo.generator.utils.compute_first_amount"><code class="docutils literal notranslate"><span class="pre">compute_first_amount()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="advo.generator.html#advo.generator.utils.compute_first_centre"><code class="docutils literal notranslate"><span class="pre">compute_first_centre()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="advo.generator.html#advo.generator.utils.compute_first_time"><code class="docutils literal notranslate"><span class="pre">compute_first_time()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="advo.generator.html#advo.generator.utils.compute_new_amt"><code class="docutils literal notranslate"><span class="pre">compute_new_amt()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="advo.generator.html#advo.generator.utils.compute_new_centre"><code class="docutils literal notranslate"><span class="pre">compute_new_centre()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="advo.generator.html#advo.generator.utils.compute_time"><code class="docutils literal notranslate"><span class="pre">compute_time()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="advo.generator.html#module-advo.generator">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="advo.utils.html">advo.utils package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="advo.utils.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advo.utils.html#module-advo.utils.compute_metrics">advo.utils.compute_metrics module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="advo.utils.html#advo.utils.compute_metrics.compute_metrics_remove_cards"><code class="docutils literal notranslate"><span class="pre">compute_metrics_remove_cards()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="advo.utils.html#advo.utils.compute_metrics.compute_pk"><code class="docutils literal notranslate"><span class="pre">compute_pk()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="advo.utils.html#advo.utils.compute_metrics.evaluate_models"><code class="docutils literal notranslate"><span class="pre">evaluate_models()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="advo.utils.html#module-advo.utils.ctgan_wrapper">advo.utils.ctgan_wrapper module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="advo.utils.html#advo.utils.ctgan_wrapper.CTGANOverSampler"><code class="docutils literal notranslate"><span class="pre">CTGANOverSampler</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="advo.utils.html#advo.utils.ctgan_wrapper.CTGANOverSampler.fit_resample"><code class="docutils literal notranslate"><span class="pre">CTGANOverSampler.fit_resample()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="advo.utils.html#module-advo.utils.fraud_metrics">advo.utils.fraud_metrics module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="advo.utils.html#advo.utils.fraud_metrics.amount_saved"><code class="docutils literal notranslate"><span class="pre">amount_saved()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="advo.utils.html#advo.utils.fraud_metrics.apply_threshold"><code class="docutils literal notranslate"><span class="pre">apply_threshold()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="advo.utils.html#advo.utils.fraud_metrics.average_precision"><code class="docutils literal notranslate"><span class="pre">average_precision()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="advo.utils.html#advo.utils.fraud_metrics.count"><code class="docutils literal notranslate"><span class="pre">count()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="advo.utils.html#advo.utils.fraud_metrics.count_fraud"><code class="docutils literal notranslate"><span class="pre">count_fraud()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="advo.utils.html#advo.utils.fraud_metrics.f_score"><code class="docutils literal notranslate"><span class="pre">f_score()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="advo.utils.html#advo.utils.fraud_metrics.false_negative"><code class="docutils literal notranslate"><span class="pre">false_negative()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="advo.utils.html#advo.utils.fraud_metrics.false_positive"><code class="docutils literal notranslate"><span class="pre">false_positive()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="advo.utils.html#advo.utils.fraud_metrics.pk"><code class="docutils literal notranslate"><span class="pre">pk()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="advo.utils.html#advo.utils.fraud_metrics.plot_f_score_curve"><code class="docutils literal notranslate"><span class="pre">plot_f_score_curve()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="advo.utils.html#advo.utils.fraud_metrics.plot_precision_recall_curve"><code class="docutils literal notranslate"><span class="pre">plot_precision_recall_curve()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="advo.utils.html#advo.utils.fraud_metrics.pr_auc"><code class="docutils literal notranslate"><span class="pre">pr_auc()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="advo.utils.html#advo.utils.fraud_metrics.pr_auc_from_precision_recall_curve"><code class="docutils literal notranslate"><span class="pre">pr_auc_from_precision_recall_curve()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="advo.utils.html#advo.utils.fraud_metrics.precision"><code class="docutils literal notranslate"><span class="pre">precision()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="advo.utils.html#advo.utils.fraud_metrics.precision_recall_curve"><code class="docutils literal notranslate"><span class="pre">precision_recall_curve()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="advo.utils.html#advo.utils.fraud_metrics.recall"><code class="docutils literal notranslate"><span class="pre">recall()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="advo.utils.html#advo.utils.fraud_metrics.sort_in_unison"><code class="docutils literal notranslate"><span class="pre">sort_in_unison()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="advo.utils.html#advo.utils.fraud_metrics.true_negative"><code class="docutils literal notranslate"><span class="pre">true_negative()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="advo.utils.html#advo.utils.fraud_metrics.true_positive"><code class="docutils literal notranslate"><span class="pre">true_positive()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="advo.utils.html#module-advo.utils.kde">advo.utils.kde module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="advo.utils.html#advo.utils.kde.compute_kde_difference_auc"><code class="docutils literal notranslate"><span class="pre">compute_kde_difference_auc()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="advo.utils.html#module-advo.utils">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
+</section>
+<section id="module-advo.advo">
+<span id="advo-advo-module"></span><h2>advo.advo module<a class="headerlink" href="#module-advo.advo" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="advo.advo.ADVO">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">advo.advo.</span></span><span class="sig-name descname"><span class="pre">ADVO</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">transactions_df=None,</span> <span class="pre">n_jobs=1,</span> <span class="pre">training_frac=0.8,</span> <span class="pre">sampling_strategy=0.5,</span> <span class="pre">random_state=1,</span> <span class="pre">verbose=False,</span> <span class="pre">searcher:</span> <span class="pre">~typing.Type[~sklearn.model_selection._split.BaseCrossValidator]</span> <span class="pre">=</span> <span class="pre">&lt;class</span> <span class="pre">'sklearn.model_selection._search.RandomizedSearchCV'&gt;,</span> <span class="pre">candidate_regressors=None,</span> <span class="pre">search_parameters:</span> <span class="pre">~typing.Dict[str,</span> <span class="pre">~typing.Any]</span> <span class="pre">=</span> <span class="pre">{'alpha':</span> <span class="pre">[0.1,</span> <span class="pre">1,</span> <span class="pre">2,</span> <span class="pre">5,</span> <span class="pre">10],</span> <span class="pre">'fit_intercept':</span> <span class="pre">[True,</span> <span class="pre">False]},</span> <span class="pre">regressor:</span> <span class="pre">~typing.Type[~sklearn.base.BaseEstimator]</span> <span class="pre">=</span> <span class="pre">Ridge()</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/advo/advo.html#ADVO"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#advo.advo.ADVO" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>ADVO: An Adversary model of fraudsters behaviour to improve oversampling in credit card fraud detection.</p>
+<p>This class implements an adversarial model of fraudsters’ behavior that can be used to improve oversampling in credit
+card fraud detection. The model uses transactions data to create pairs of fraudulent transactions for each customer, and
+trains regression models to predict future fraudulent transactions for each customer.</p>
+<p>The class provides methods for generating transactions data, loading transactions from a file, creating pairs of
+fraudulent transactions, tuning the hyperparameters of regression models, fitting the regression models to data, and
+generating new synthetic transactions using the trained models.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="advo.advo.ADVO.transactions_df">
+<span class="sig-name descname"><span class="pre">transactions_df</span></span><a class="headerlink" href="#advo.advo.ADVO.transactions_df" title="Permalink to this definition"></a></dt>
+<dd><p>a dataframe containing the transactions data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="advo.advo.ADVO.n_jobs">
+<span class="sig-name descname"><span class="pre">n_jobs</span></span><a class="headerlink" href="#advo.advo.ADVO.n_jobs" title="Permalink to this definition"></a></dt>
+<dd><p>the number of cores to use when running certain methods in parallel.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="advo.advo.ADVO.random_state">
+<span class="sig-name descname"><span class="pre">random_state</span></span><a class="headerlink" href="#advo.advo.ADVO.random_state" title="Permalink to this definition"></a></dt>
+<dd><p>the random seed to use when generating transactions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="advo.advo.ADVO.verbose">
+<span class="sig-name descname"><span class="pre">verbose</span></span><a class="headerlink" href="#advo.advo.ADVO.verbose" title="Permalink to this definition"></a></dt>
+<dd><p>whether to print progress bars when running certain methods in parallel.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="advo.advo.ADVO.training_frac">
+<span class="sig-name descname"><span class="pre">training_frac</span></span><a class="headerlink" href="#advo.advo.ADVO.training_frac" title="Permalink to this definition"></a></dt>
+<dd><p>the fraction of transactions to use for training the regression models.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="advo.advo.ADVO.sampling_strategy">
+<span class="sig-name descname"><span class="pre">sampling_strategy</span></span><a class="headerlink" href="#advo.advo.ADVO.sampling_strategy" title="Permalink to this definition"></a></dt>
+<dd><p>the fraction of fraudulent transactions to achieve when oversampling.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="advo.advo.ADVO.useful_features">
+<span class="sig-name descname"><span class="pre">useful_features</span></span><a class="headerlink" href="#advo.advo.ADVO.useful_features" title="Permalink to this definition"></a></dt>
+<dd><p>a list of the names of the features to use when training the regression models.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>List[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="advo.advo.ADVO.regressors">
+<span class="sig-name descname"><span class="pre">regressors</span></span><a class="headerlink" href="#advo.advo.ADVO.regressors" title="Permalink to this definition"></a></dt>
+<dd><p>a dictionary containing the trained regression models, with the features to predict as
+keys.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>Dict[str, Any]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="advo.advo.ADVO.searcher">
+<span class="sig-name descname"><span class="pre">searcher</span></span><a class="headerlink" href="#advo.advo.ADVO.searcher" title="Permalink to this definition"></a></dt>
+<dd><p>the search cross-validation object to use for hyperparameter tuning.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>Type[BaseSearchCV]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="advo.advo.ADVO.search_parameters">
+<span class="sig-name descname"><span class="pre">search_parameters</span></span><a class="headerlink" href="#advo.advo.ADVO.search_parameters" title="Permalink to this definition"></a></dt>
+<dd><p>a dictionary containing the parameters to use when tuning the regression models.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>Dict[str, Any]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="advo.advo.ADVO.regressor">
+<span class="sig-name descname"><span class="pre">regressor</span></span><a class="headerlink" href="#advo.advo.ADVO.regressor" title="Permalink to this definition"></a></dt>
+<dd><p>the regressor object to use for training the regression models.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>Type[BaseEstimator]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="advo.advo.ADVO.create_couples">
+<span class="sig-name descname"><span class="pre">create_couples</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/advo/advo.html#ADVO.create_couples"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#advo.advo.ADVO.create_couples" title="Permalink to this definition"></a></dt>
+<dd><p>Create couples of fraudulent transactions for each customer.</p>
+<p>This method uses the <cite>transactions_df</cite> and <cite>terminal_profiles_table</cite> attributes of the <cite>generator</cite> attribute to create
+a table of fraudulent transactions. It then groups the transactions by customer, and applies the <cite>_make_couples</cite> method
+to each group in order to create couples of fraudulent transactions for each customer. The results are stored in the
+<cite>couples</cite> attribute of the current instance.</p>
+<p>This method can run in parallel using multiple cores if the <cite>n_jobs</cite> attribute is set to a value greater than 1.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="advo.advo.ADVO.enrich_dataframe">
+<span class="sig-name descname"><span class="pre">enrich_dataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">transactions_df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="reference internal" href="_modules/advo/advo.html#ADVO.enrich_dataframe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#advo.advo.ADVO.enrich_dataframe" title="Permalink to this definition"></a></dt>
+<dd><p>Adds multiple layers of predicted fraudulent transactions to a dataframe of transactions until a specified percentage of fraud is reached.</p>
+<p>This method filters the input dataframe to only include rows with a value of 1 in the ‘TX_FRAUD’ column,
+and groups the remaining rows by the values in the ‘CUSTOMER_ID’ column. It then applies the ‘_oversample_df’
+method to each group of transactions, adding the predicted fraudulent transactions to the original dataframe.
+This process is repeated until the specified percentage of fraud is reached. The resulting dataframe is then
+sampled to ensure that the exact percentage of fraud is maintained.</p>
+<p>Args:
+transactions_df: A pandas DataFrame containing transaction data.
+percentage: A float specifying the target percentage of fraud in the resulting dataframe.</p>
+<p>Returns:
+A new pandas DataFrame with the original transaction data and the added layers of predicted fraudulent transactions.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="advo.advo.ADVO.fit_regressors">
+<span class="sig-name descname"><span class="pre">fit_regressors</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/advo/advo.html#ADVO.fit_regressors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#advo.advo.ADVO.fit_regressors" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="advo.advo.ADVO.fit_resample">
+<span class="sig-name descname"><span class="pre">fit_resample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X_train</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_train</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/advo/advo.html#ADVO.fit_resample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#advo.advo.ADVO.fit_resample" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="advo.advo.ADVO.generate_transactions">
+<span class="sig-name descname"><span class="pre">generate_transactions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_customers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_terminals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/advo/advo.html#ADVO.generate_transactions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#advo.advo.ADVO.generate_transactions" title="Permalink to this definition"></a></dt>
+<dd><p>Generate transactions after creating a Generator instance.</p>
+<p>This method generates transactions after creating a <cite>Generator</cite> instance to hold the data. The
+<cite>Generator</cite> instance is stored in the <cite>generator</cite> attribute of the current instance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n_customers</strong> (<em>int</em>) – the number of customers to generate.</p></li>
+<li><p><strong>n_terminals</strong> (<em>int</em>) – the number of terminals to generate.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="advo.advo.ADVO.load_trasactions">
+<span class="sig-name descname"><span class="pre">load_trasactions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/advo/advo.html#ADVO.load_trasactions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#advo.advo.ADVO.load_trasactions" title="Permalink to this definition"></a></dt>
+<dd><p>Load transactions from a file.</p>
+<p>This method loads transactions from a file. The file can be either a csv or a pickle file. The loaded transactions
+are stored in the <cite>transactions_df</cite> attribute of the current instance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>filename</strong> (<em>str</em>) – the name of the file to load the transactions from.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="advo.advo.ADVO.select_best_regressor">
+<span class="sig-name descname"><span class="pre">select_best_regressor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">candidate_regressors</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters_set</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/advo/advo.html#ADVO.select_best_regressor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#advo.advo.ADVO.select_best_regressor" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="advo.advo.ADVO.set_transactions">
+<span class="sig-name descname"><span class="pre">set_transactions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X_train</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_train</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/advo/advo.html#ADVO.set_transactions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#advo.advo.ADVO.set_transactions" title="Permalink to this definition"></a></dt>
+<dd><p>Set the transactions data.</p>
+<p>This method sets the transactions data. The transactions data is stored in the <cite>transactions_df</cite> attribute of the
+current instance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X_train</strong> (<em>pd.DataFrame</em>) – a DataFrame containing the features of the transactions.</p></li>
+<li><p><strong>y_train</strong> (<em>pd.Series</em>) – a Series containing the labels of the transactions.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="advo.advo.ADVO.tune_best_regressors">
+<span class="sig-name descname"><span class="pre">tune_best_regressors</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/advo/advo.html#ADVO.tune_best_regressors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#advo.advo.ADVO.tune_best_regressors" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="advo.advo.ADVO.tune_regressors">
+<span class="sig-name descname"><span class="pre">tune_regressors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">metric:</span> <span class="pre">~typing.Callable[[~numpy.ndarray,</span> <span class="pre">~numpy.ndarray],</span> <span class="pre">float]</span> <span class="pre">=</span> <span class="pre">&lt;function</span> <span class="pre">r2_score&gt;</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/advo/advo.html#ADVO.tune_regressors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#advo.advo.ADVO.tune_regressors" title="Permalink to this definition"></a></dt>
+<dd><p>Tunes the hyperparameters of a set of regression models using a search algorithm.
+The regressor will be part of the self.regressors dictionary, with the feature to predict as key.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>searcher</strong> – An object that implements a search algorithm, such as GridSearchCV or RandomizedSearchCV.</p></li>
+<li><p><strong>search_parameters</strong> – A dictionary of hyperparameters for the searcher.</p></li>
+<li><p><strong>regressor</strong> – A regression model to be tuned.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-advo">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-advo" title="Permalink to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="modules.html" class="btn btn-neutral float-left" title="advo" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="advo.generator.html" class="btn btn-neutral float-right" title="advo.generator package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Daniele Lunghi, Gian Marco Paldino.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

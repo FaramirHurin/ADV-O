@@ -1,4 +1,4 @@
-from ctgan import CTGAN
+#from ctgan import CTGAN
 import pandas as pd 
 
 class CTGANOverSampler():
@@ -12,7 +12,8 @@ class CTGANOverSampler():
         frauds_df = df.loc[df['TX_FRAUD']==1]
         num_frauds = frauds_df.shape[0]
         num_synthetic_frauds = int((self.sampling_strategy)*df.shape[0]) - num_frauds
-        ctgan = CTGAN(epochs=self.epochs, cuda=self.cuda)
+        #ctgan = CTGAN(epochs=self.epochs, cuda=self.cuda)
+        ctgan = None
         ctgan.fit(frauds_df)
         synthetic_data = ctgan.sample(num_synthetic_frauds)
 
