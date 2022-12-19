@@ -14,10 +14,10 @@
 -->
 </p>
 
-> An Adversary model of fraudsters’ behaviour to improve oversampling in credit card fraud detection
-This is the repository for the code of the paper "An Adversary model of fraudsters’ behaviour to improve oversampling in credit card fraud detection" by Daniele Lunghi, Gian Marco Paldino, Olivier Caelen, and Gianluca Bontempi. 
-The code in this repository is intended to make the experiments in the paper reproducible. 
-The repository is expected to be extended in the future.
+> An Adversary model of fraudsters’ behaviour to improve oversampling in credit card fraud detection <br>
+This is the repository for the code of the paper "An Adversary model of fraudsters’ behaviour to improve oversampling in credit card fraud detection" by Daniele Lunghi, Gian Marco Paldino, Olivier Caelen, and Gianluca Bontempi. <br>
+The code in this repository is intended to make the experiments in the paper reproducible. <br>
+The repository is expected to be extended in the future. <br>
 
 
 ### 🏠 [Homepage](homepage)
@@ -34,10 +34,10 @@ python main.py
 ```
 
 ## Execution
-The code will execute the experiments on synthetic data that have been included in the paper. 
-The output of the code will provide Table 6, 7, 8 of the paper. 
-N.B. CTGAN is disabled by default, because it requires a specific Python version, pytorch, and makes the experiments slower.
-It can be added by uncommenting the corresponding lines. 
+The code will execute the experiments on synthetic data that have been included in the paper. <br>
+The output of the code will provide Table 6, 7, 8 of the paper. <br>
+N.B. CTGAN is disabled by default, because it requires a specific Python version, pytorch, and makes the experiments slower.<br>
+It can be added by uncommenting the corresponding lines. <br>
 ```sh
 Regressor:  MLPRegressor(max_iter=2000, random_state=42)
              x_terminal_id  y_terminal_id  TX_AMOUNT
