@@ -7,13 +7,11 @@
   <a href="https://opensource.org/licenses/Apache-2.0" target="_blank">
     <img alt="License: Apache License, Version 2.0" src="https://img.shields.io/badge/license-Apache%202-blue" />
   </a>
-    </a>
-      <a href="https://codecov.io/gh/kefranabg/readme-md-generator">
+<!--
+  <a href="https://codecov.io/gh/kefranabg/readme-md-generator">
     <img src="https://codecov.io/gh/kefranabg/readme-md-generator/branch/master/graph/badge.svg" />
   </a>
-  <a href="https://twitter.com/gmpal_" target="_blank">
-    <img alt="Twitter: @gmpal_" src="https://img.shields.io/twitter/follow/authortwitter.svg" />
-  </a>
+-->
 </p>
 
 > An Adversary model of fraudsters’ behaviour to improve oversampling in credit card fraud detection
