@@ -1,6 +1,6 @@
 from sklearn.model_selection import train_test_split
-from advo.advo import ADVO
-from advo.generator.generator import Generator
+# from advo.advo import ADVO
+# from advo.generator.generator import Generator
 
 from imblearn.over_sampling import SMOTE, RandomOverSampler, KMeansSMOTE
 from imblearn.ensemble import BalancedRandomForestClassifier
@@ -11,8 +11,13 @@ from sklearn.neural_network import MLPRegressor
 from sklearn.neighbors import NearestNeighbors
 from sklearn.cluster import MiniBatchKMeans
 
-from advo.utils.compute_metrics import evaluate_models
-from advo.utils.kde import compute_kde_difference_auc
+
+from advo.generator import Generator
+from advo.advo import ADVO
+from advo.utils import evaluate_models, compute_kde_difference_auc, fraud_metrics
+
+# from advo.utils.compute_metrics import evaluate_models
+# from advo.utils.kde import compute_kde_difference_auc
 #from experiments.ctgan_wrapper import CTGANOverSampler
 #import torch
 
@@ -49,15 +54,15 @@ def make_classification():
 
 
     # Generate transactions data using the GENERATOR instance
-    generator = Generator(n_customers=N_USERS, n_terminals=N_TERMINALS)
+    gen = Generator(n_customers=N_USERS, n_terminals=N_TERMINALS)
     #generator.generate()
     #generator.export()
 
-    generator.load()
+    gen.load()
 
 
     # Train Test Split 
-    transactions_df = generator.transactions_df.merge(generator.terminal_profiles_table, left_on='TERMINAL_ID', right_on='TERMINAL_ID', how='left')
+    transactions_df = gen.transactions_df.merge(gen.terminal_profiles_table, left_on='TERMINAL_ID', right_on='TERMINAL_ID', how='left')
     X, y = transactions_df.drop(columns=['TX_FRAUD']), transactions_df['TX_FRAUD']
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=RANDOM_STATE) 
     
