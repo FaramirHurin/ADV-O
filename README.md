@@ -5,8 +5,14 @@
     <img alt="Documentation" src="https://img.shields.io/badge/documentation-yes-brightgreen.svg" />
   </a>
   <a href="https://opensource.org/licenses/Apache-2.0" target="_blank">
-    <img alt="License: Apache License, Version 2.0" src="https://img.shields.io/badge/license-Apache%202-blue" />
+    <img alt="License: Apache License, Version 2.0" src="https://img.shields.io/badge/license-Apache%202-blue" /
   </a>
+  <a href="https://github.com/FaramirHurin/ADV-O" target="_blank">
+    <img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/FaramirHurin/ADV-O?style=social">
+  </a>
+   
+
+  
 <!--
   <a href="https://codecov.io/gh/kefranabg/readme-md-generator">
     <img src="https://codecov.io/gh/kefranabg/readme-md-generator/branch/master/graph/badge.svg" />
