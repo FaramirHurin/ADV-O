@@ -5,8 +5,14 @@
     <img alt="Documentation" src="https://img.shields.io/badge/documentation-yes-brightgreen.svg" />
   </a>
   <a href="https://opensource.org/licenses/Apache-2.0" target="_blank">
-    <img alt="License: Apache License, Version 2.0" src="https://img.shields.io/badge/license-Apache%202-blue" />
+    <img alt="License: Apache License, Version 2.0" src="https://img.shields.io/badge/license-Apache%202-blue" /
   </a>
+  <a href="https://github.com/FaramirHurin/ADV-O" target="_blank">
+    <img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/FaramirHurin/ADV-O?style=social">
+  </a>
+   
+
+  
 <!--
   <a href="https://codecov.io/gh/kefranabg/readme-md-generator">
     <img src="https://codecov.io/gh/kefranabg/readme-md-generator/branch/master/graph/badge.svg" />
@@ -22,7 +28,6 @@ The repository is expected to be extended in the future. <br>
 
 ### 🏠 [Homepage](homepage)
 
-### ✨ [Demo](demo)
 
 ## Install and Usage
 
@@ -33,7 +38,8 @@ pip install -r requirements.txt
 python main.py
 ```
 
-## Execution
+### ✨ [Demo](demo)
+
 The code will execute the experiments on synthetic data that have been included in the paper. <br>
 The output of the code will provide Table 6, 7, 8 of the paper. <br>
 N.B. CTGAN is disabled by default, because it requires a specific Python version, pytorch, and makes the experiments slower.<br>
@@ -109,7 +115,7 @@ python -m unittest
 
 ## 🤝 Contributing
 
-Contributions, issues and feature requests are welcome!<br />Feel free to check [issues page](issuesurl). You can also take a look at the [contributing guide](contributionguide).
+Contributions, issues and feature requests are welcome!<br />Feel free to check [issues page](https://github.com/FaramirHurin/ADV-O/issues). You can also take a look at the [contributing guide](https://github.com/FaramirHurin/ADV-O/blob/main/contributing.rst).
 
 ## Show your support
 
