@@ -4,8 +4,8 @@
   <a href="docs" target="_blank">
     <img alt="Documentation" src="https://img.shields.io/badge/documentation-yes-brightgreen.svg" />
   </a>
-  <a href="licenseurl" target="_blank">
-    <img alt="License: licensename" src="https://img.shields.io/badge/License-licensename-yellow.svg" />
+  <a href="https://opensource.org/licenses/Apache-2.0" target="_blank">
+    <img alt="License: Apache License, Version 2.0" src="https://img.shields.io/badge/License-licensename-yellow.svg" />
   </a>
     </a>
       <a href="https://codecov.io/gh/kefranabg/readme-md-generator">
@@ -120,7 +120,7 @@ Give a ⭐️ if this project helped you!
 ## 📝 License
 
 Copyright © 2022 [Daniele Lunghi](https://github.com/FaramirHurin).<br />
-This project is [licensename](licenseurl) licensed.
+This project is [Apache License, Version 2.0](https://opensource.org/licenses/Apache-2.0) licensed.
 
 ***
 _This README was generated with ❤️ by [readme-md-generator](https://github.com/kefranabg/readme-md-generator)_
