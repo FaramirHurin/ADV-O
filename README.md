@@ -11,8 +11,8 @@
       <a href="https://codecov.io/gh/kefranabg/readme-md-generator">
     <img src="https://codecov.io/gh/kefranabg/readme-md-generator/branch/master/graph/badge.svg" />
   </a>
-  <a href="https://twitter.com/authortwitter" target="_blank">
-    <img alt="Twitter: authortwitter" src="https://img.shields.io/twitter/follow/authortwitter.svg?style=social" />
+  <a href="https://twitter.com/gmpal_" target="_blank">
+    <img alt="Twitter: gmpal_" src="https://img.shields.io/twitter/follow/authortwitter.svg" />
   </a>
 </p>
 
