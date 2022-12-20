@@ -10,11 +10,6 @@ from sklearn.linear_model import Ridge
 from sklearn.metrics import r2_score
 import pickle
 
-from advo.generator.generator import Generator
-
-
-
-
 class ADVO():
     
 

@@ -109,24 +109,14 @@ def make_classification():
     for X, y in Xy:
         fit_predict(X,y,BalancedRandomForestClassifier(n_estimators=N_TREES ,n_jobs=N_JOBS, random_state=RANDOM_STATE) , X_test[sel], predictions_proba, discrete_predictions)
 
-    trapzs = compute_kde_difference_auc(Xy,sel, names)
-    
-    #save trapz in a file
-    trapzs.to_csv('trapz.csv', index=False)
-
     # Compute metrics
     K_needed = [50, 100, 200, 500, 1000, 2000]
     _, all_metrics = evaluate_models(predictions_proba, discrete_predictions, X_test['CUSTOMER_ID'], names, y_test, K_needed)
 
-    ranking = all_metrics.rank(axis=1, ascending=False)
-
-    #save all_metrics in a file
+    trapzs = compute_kde_difference_auc(Xy,sel, names)
+    trapzs.to_csv('trapz.csv', index=False)
     all_metrics.to_csv('all_metrics.csv', index=False)
-    #save ranking in a file
-    ranking.to_csv('ranking.csv', index=False)
-
     print(trapzs)
-    print(ranking)
     print(all_metrics)
 
 
