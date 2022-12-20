@@ -20,9 +20,9 @@
 -->
 </p>
 
-> An Adversary model of fraudsters’ behaviour to improve oversampling in credit card fraud detection <br>
+> An adversary model of fraudsters’ behaviour to improve oversampling in credit card fraud detection <br>
 This is the repository for the code of the paper "An Adversary model of fraudsters’ behaviour to improve oversampling in credit card fraud detection" by Daniele Lunghi, Gian Marco Paldino, Olivier Caelen, and Gianluca Bontempi. <br>
-The code in this repository is intended to make the experiments in the paper reproducible. <br>
+This repository is intended to make the experiments in the paper reproducible. <br>
 The repository is expected to be extended in the future. <br>
 
 
