@@ -29,7 +29,7 @@ The repository is expected to be extended in the future. <br>
 ### 🏠 [Homepage](https://gmpal.github.io/ADV-O/)
 
 
-## Install and Usage
+## 🖥️ Install and Usage
 
 ```sh
 git clone https://github.com/FaramirHurin/ADV-O.git
@@ -38,7 +38,7 @@ pip install -r requirements.txt
 python main.py
 ```
 
-### ✨ [Demo](demo)
+### 🦾 Demo
 
 The code will execute the experiments on synthetic data that have been included in the paper. <br>
 The output of the code will provide Table 6, 7, 8 of the paper. <br>
@@ -76,14 +76,14 @@ PK500       0.612000           0.398000  0.502000  0.404000     0.400000  0.5540
 PK1000      0.475000           0.421000  0.462000  0.439000     0.404000  0.485000
 PK2000      0.359000           0.383500  0.397000  0.390500     0.378000  0.406500
 ```
-## ✨The Generator
+## 🧠 The Generator
 The generator simulates genuine and fraudulent transactions and is based on a customer-terminal-transaction structure, where a group of customers selects a set of customers to perform various transactions. A two-dimensional vector, represented as a location, characterizes each terminal. A location also describes each customer.
 Customers then iteratively choose among the terminals close to them they use to generate transactions. Terminals must be within a max distance from the customer, and their probability of being selected is higher the closer they are to the customer. The amount of each transaction is independently drawn from a Normal distribution, whose variance and mean depend only on the encoded habits of the user. 
 Then, as simulation time goes by, a portion of cardholders switches from the genuine to the fraudster category. 
 We represent the compromission of a user as an abrupt change in her location and spending habits, which are drawn from a different multivariate distribution representing the fraudsters population.
 We then model the dependency between any two consecutive frauds as a change in the features of the fraudster performing them, where the new location and spending habits are a nondeterministic function of the transaction just conducted
   
-## General Idea
+## 💡 General Idea
 The code begins by setting some constants, such as `SAMPLE_STRATEGY`, `N_JOBS`, `N_TREES`, `N_USERS`, `N_TERMINALS`, and `RANDOM_STATE`, which are used later in the code. The `RANDOM_GRID_*` variables define sets of hyperparameters that will be used to train and evaluate machine learning models using cross-validation. The `CANDIDATE_REGRESSORS` list specifies three machine learning models that will be trained and evaluated: a multi-layer perceptron regressor, a Ridge regressor, and a random forest regressor. The `CANDIDATE_GRIDS` list specifies the sets of hyperparameters that will be used for each of these models.
 
 It begins by loading the generated data. It then splits the data into a training set and a test set using the `train_test_split` function from sklearn.model_selection. The code then creates instances of several over-sampling techniques, including `SMOTE`, `RandomOverSampler`, and `KMeansSMOTE`, `CTGAN` (disabled by default), and `ADVO`, the proposed methodology. The code also creates instances of two ensemble classifiers: `BalancedRandomForestClassifier` and `RandomForestClassifier`.
@@ -98,13 +98,13 @@ Finally, the code uses the `compute_kde_difference_auc` function to compute the 
 
 
 
-## Run tests
+## ✅ Run tests
 
 ```sh
 python -m unittest
 ```
 
-## Authors
+## 👩🏻‍💻 Authors
 
 👤 **Daniele Lunghi**
 
