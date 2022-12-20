@@ -4,6 +4,7 @@ About
 Installation and Usage
 ----
 .. code-block:: bash
+
     git clone https://github.com/FaramirHurin/ADV-O.git
     cd ADV-O
     pip install -r requirements.txt
@@ -14,6 +15,7 @@ Output
 ----
 
 .. code-block:: bash
+
     Regressor:  MLPRegressor(max_iter=2000, random_state=42)
                 x_terminal_id  y_terminal_id  TX_AMOUNT
     score             0.852514       0.585098   0.938087
