@@ -156,6 +156,14 @@ class Generator():
                 pickle.dump(full_transactions_table,f)
     
     def load(self, filename='dataset.csv'):
+        """Loads data from a file into the TransactionData object.
+
+        The file can be in either CSV or pickle format, as determined by the file extension. If the file extension is not
+        recognized, a ValueError will be raised.
+
+        Args:
+            filename (str): The name of the file to load the data from. Default is 'dataset.csv'.
+        """
         #if filename ends with '.csv' then load csv
         #if filename ends with '.pkl' then load pickle
         #else raise error
