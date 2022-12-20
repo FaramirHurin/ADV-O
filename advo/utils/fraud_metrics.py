@@ -255,16 +255,6 @@ def pk(y_true, y_score, rank, type="tx", sorted=False, cards=None):
 
 
 def precision_recall_curve(y_true, y_score, type="tx", cards=None):
-  """
-  Computes the precision recall curve
-
-  :param y_true: The true labels
-  :param y_score: The scores given by the model
-  :param type: either "tx" or "card"
-  :param cards: If type is "card", array of pan_ids
-  :return: array of precisions, array of recalls, array of thresholds
-  """
-
   if type == "tx":
     return sklearn.metrics.precision_recall_curve(y_true=y_true, probas_pred=y_score)
   elif type == "card":
@@ -288,20 +278,6 @@ def precision_recall_curve(y_true, y_score, type="tx", cards=None):
 
 def plot_precision_recall_curve(y_true, y_score, type="tx", cards=None, title=None, plot_save_path=None,
                                 precisions_save_path=None, recalls_save_path=None, thresholds_save_path=None):
-  """
-  Plots the precision recall curve
-
-  :param y_true: The true labels
-  :param y_score: The scores given by the model
-  :param type: either "tx" or "card"
-  :param cards: If type is "card", array of pan_ids
-  :param title: Title of the plot
-  :param plot_save_path: Path where the plot will be saved (png format)
-  :param precisions_save_path: Path where the array of precisions will be saved (npy format)
-  :param recalls_save_path: Path where the array of recalls will be saved (npy format)
-  :param thresholds_save_path: Path where the array of thresholds will be saved (npy format)
-  """
-
   precisions, recalls, thresholds = precision_recall_curve(
       y_true, y_score, type=type, cards=cards)
 
@@ -341,19 +317,6 @@ def plot_precision_recall_curve(y_true, y_score, type="tx", cards=None, title=No
 def plot_f_score_curve(y_true, y_score, type="tx", cards=None, title=None, plot_save_path=None,
                        thresholds_save_path=None, precisions_save_path=None, recalls_save_path=None,
                        f_scores_save_path=None):
-  """
-  Plots the F-score curve
-
-  :param y_true: The true labels
-  :param y_score: The scores given by the model
-  :param type: either "tx" or "card"
-  :param cards: If type is "card", array of pan_ids
-  :param title: Title of the plot
-  :param plot_save_path: Path where the plot will be saved (png format)
-  :param thresholds_save_path: Path where the array of thresholds will be saved (npy format)
-  :param f_scores_save_path: Path where the array of f-scores will be saved (npy format)
-  """
-
   precisions, recalls, thresholds = precision_recall_curve(
       y_true, y_score, type=type, cards=cards)
   thresholds = np.append(thresholds, 1.0)
@@ -395,16 +358,6 @@ def plot_f_score_curve(y_true, y_score, type="tx", cards=None, title=None, plot_
 
 
 def average_precision(y_true, y_score, recall_value, sorted=False, reference_ratio=None):
-  """
-  Evaluate the Average Precision up to a given recall value.
-
-  :param y_true: The true labels
-  :param y_score: The scores given by the model
-  :param recall_value: The recall value up to which the average precision must be calculated
-  :param sorted indicates if the y values are sorted
-  :param reference_ratio: the reference ratio for calibration
-  :return: the Average Precision
-  """
   if sorted:
     y_true_sorted = y_true
     y_score_sorted = y_score

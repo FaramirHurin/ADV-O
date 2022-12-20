@@ -19,7 +19,7 @@ class Generator():
     about customers, terminals, and the transactions themselves, and can be exported
     in various formats.
     
-    Attributes:
+    Parameters:
         n_customers (int): The number of customers to include in the dataset.
         n_terminals (int): The number of terminals to include in the dataset.
         radius (int): The radius within which a customer can use a terminal.
@@ -35,12 +35,6 @@ class Generator():
         x_y_terminals (numpy.ndarray): The x-y coordinates of each terminal.
         fraudsters_mean (float): The mean transaction amount for fraudsters.
         fraudsters_var (float): The variance in transaction amount for fraudsters.
-    
-    Methods:
-        generate(): Generate the synthetic transactions dataset.
-        export(filename: str, format: str): Export the generated dataset to a file.
-        _generate_transactions_table(customer_profile: pandas.DataFrame): Generate a table
-            of transactions for a given customer.
     """
     
     def __init__(self, n_customers=50, n_terminals=10, radius=20, nb_days=8, start_date="2018-04-01", random_state = 2, \
@@ -81,7 +75,7 @@ class Generator():
         """
         This function takes the customer profile and returns a DataFrame of transactions for the customer.
 
-        Parameters:
+        Args:
         customer_profile (pd.DataFrame): A DataFrame containing the customer profile.
 
         Returns:
@@ -118,17 +112,13 @@ class Generator():
         return customer_transactions
 
     def generate(self) -> None:
-        """Generates transactions data for the customers in this dataset.
+        """Generate the synthetic transactions dataset.
 
-        This function groups the customer profiles by customer ID and then generates
-        transactions data for each group using the `_generate_transactions_table`
-        function. The generated transactions data is stored in the `transactions_df`
-        attribute of this object.
-
-        Returns:
-            None
+        This function generates the synthetic transactions dataset and stores it in the
+        `transactions_df` attribute of this object. This function also stores the terminal
+        profiles in the `terminal_profiles_table` attribute of this object.
         """
-        
+
         groups = self.customer_profiles_table.groupby('CUSTOMER_ID')
         self.transactions_df = groups.apply(lambda x: self._generate_transactions_table(customer_profile=x.iloc[0])).reset_index(drop=True)    
 
