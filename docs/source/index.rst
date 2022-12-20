@@ -10,7 +10,10 @@ Welcome to ADVO's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   usage
+   config
    modules
+   about
 
 Indices and tables
 ==================
