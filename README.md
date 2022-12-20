@@ -26,7 +26,7 @@ The code in this repository is intended to make the experiments in the paper rep
 The repository is expected to be extended in the future. <br>
 
 
-### 🏠 [Homepage](https://gmpal.github.io/ADV-O/)
+## Visit our 🏠 [Homepage](https://gmpal.github.io/ADV-O/) for the documentation!
 
 
 ## 🖥️ Install and Usage
