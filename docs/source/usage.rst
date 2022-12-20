@@ -1,7 +1,7 @@
-About
+Installation and Usage
 =====
 
-Installation and Usage
+Run
 ----
 .. code-block:: bash
 
