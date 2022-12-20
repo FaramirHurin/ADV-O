@@ -9,9 +9,12 @@ jobs:
       - name: Install requirements
         run: |
           pip install -r requirements.txt
+      - name: uninstall numpy
+        run: |
+          pip uninstall numpy
       - name: Install dependencies
         run: |
-          pip install sphinx furo
+          pip install sphinx furo numpy
       - name: Sphinx build
         run: |
           sphinx-build docs/source _build
