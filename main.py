@@ -20,7 +20,7 @@ from ADVO.utils import evaluate_models, compute_kde_difference_auc
 
 
 SAMPLE_STRATEGY = 0.18
-N_JOBS = 35
+N_JOBS = 6
 N_TREES = 20
 N_USERS = 10000
 N_TERMINALS = 1000
@@ -68,7 +68,10 @@ def make_classification():
     advo = ADVO(n_jobs=N_JOBS,sampling_strategy=SAMPLE_STRATEGY,random_state=RANDOM_STATE)
     advo.set_transactions(X_train, y_train)
     advo.create_couples()
-    advo.select_best_regressor(candidate_regressors=CANDIDATE_REGRESSORS,parameters_set=CANDIDATE_GRIDS)
+    regressor_scores = advo.select_best_regressor(candidate_regressors=CANDIDATE_REGRESSORS,parameters_set=CANDIDATE_GRIDS)
+    print("Table 6: Synthetic data: R2 scores for the predicted features for various regressors.")
+    print(regressor_scores.round(2))
+
     advo.tune_best_regressors()
     advo.fit_regressors()
     advo.transactions_df = advo.enrich_dataframe(advo.transactions_df)
@@ -106,13 +109,19 @@ def make_classification():
     # Compute metrics
     K_needed = [50, 100, 200, 500, 1000, 2000]
     _, all_metrics = evaluate_models(predictions_proba, discrete_predictions, X_test['CUSTOMER_ID'], names, y_test, K_needed)
+    
+    print("\n\nTable 7: Synthetic data: accuracy of oversampling algorithms. All oversampling algorithms have been tested using a Balanced Random Forest. No oversampling has been tested with a classic Random Forest ('Baseline'),  and a Balanced Random Forest ('Baseline balanced').")
+    print(all_metrics.round(2))
 
     trapzs = compute_kde_difference_auc(Xy,sel, names)
+    
+    print("\n\nTable 8: Synthetic data: AUC of absolute differences between kde")
+    print(trapzs.round(2))
+    
+
+    regressor_scores.to_csv('regressor_scores.csv', index=False)
     trapzs.to_csv('trapz.csv', index=False)
     all_metrics.to_csv('all_metrics.csv', index=False)
-    print(trapzs)
-    print(all_metrics)
-
 
 if __name__ == '__main__':
     make_classification()

@@ -4,7 +4,7 @@ from typing import List, Tuple, Union, Optional
 import sklearn
 
 
-def sort_in_unison(y_true: List[int], y_score: List[float], cards: Optional[List[str]]) -> Union[Tuple[List[int], List[float]], Tuple[List[int], List[float], List[str]]]:
+def sort_in_unison(y_true: List[int], y_score: List[float], cards: Optional[List[str]] = None) -> Union[Tuple[List[int], List[float]], Tuple[List[int], List[float], List[str]]]:
     """
     Sorts the `y_true` and `y_score` lists in descending order based on the `y_score` values. 
     If the `cards` parameter is provided, it is sorted in the same order as `y_true` and `y_score`.

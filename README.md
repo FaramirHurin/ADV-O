@@ -45,36 +45,35 @@ The output of the code will provide Table 6, 7, 8 of the paper. <br>
 N.B. CTGAN is disabled by default, because it requires a specific Python version, pytorch, and makes the experiments slower.<br>
 It can be added by uncommenting the corresponding lines. <br>
 ```sh
-Regressor:  MLPRegressor(max_iter=2000, random_state=42)
+Table 6: Synthetic data: R2 scores for the predicted features for various regressors.
+                                              x_terminal_id  y_terminal_id  TX_AMOUNT
+MLPRegressor(max_iter=2000, random_state=42)           0.85           0.59       0.94
+Ridge(random_state=42)                                 0.85           0.58       0.93
+RandomForestRegressor(random_state=42)                 0.85           0.59       0.90
+Naive                                                  0.39           0.54       0.91
+
+
+Table 7: Synthetic data: accuracy of oversampling algorithms. All oversampling algorithms have been tested using a Balanced Random Forest. No oversampling has been tested with a classic Random Forest ('Baseline'),  and a Balanced Random Forest ('Baseline balanced').
+            Baseline  Baseline_balanced  SMOTE  Random  KMeansSMOTE  ADVO
+PRAUC           0.32               0.37   0.36    0.37         0.36  0.37
+PRAUC_Card      0.45               0.50   0.46    0.49         0.48  0.48
+Precision       0.34               0.23   0.27    0.26         0.25  0.27
+Recall          0.29               0.89   0.68    0.72         0.73  0.69
+F1 score        0.31               0.36   0.39    0.38         0.37  0.39
+PK50            0.76               0.36   0.56    0.30         0.40  0.42
+PK100           0.78               0.37   0.52    0.38         0.39  0.45
+PK200           0.74               0.38   0.50    0.44         0.36  0.55
+PK500           0.61               0.40   0.50    0.40         0.40  0.55
+PK1000          0.48               0.42   0.46    0.44         0.40  0.48
+PK2000          0.36               0.38   0.40    0.39         0.38  0.41
+
+
+Table 8: Synthetic data: AUC of absolute differences between kde
              x_terminal_id  y_terminal_id  TX_AMOUNT
-score             0.852514       0.585098   0.938087
-naive_score       0.392595       0.540160   0.906686
-Regressor:  Ridge(random_state=42)
-             x_terminal_id  y_terminal_id  TX_AMOUNT
-score             0.848494       0.579815   0.925387
-naive_score       0.392595       0.540160   0.906686
-Regressor:  RandomForestRegressor(random_state=42)
-             x_terminal_id  y_terminal_id  TX_AMOUNT
-score             0.845694       0.585861   0.903093
-naive_score       0.392595       0.540160   0.906686
-Best regressor:  MLPRegressor(max_iter=2000, random_state=42)
-             x_terminal_id  y_terminal_id  TX_AMOUNT
-SMOTE             0.109430       0.100991   0.183195
-Random            0.046015       0.105073   0.020810
-KMeansSMOTE       0.045930       0.104494   0.021049
-ADVO              0.086780       0.116524   0.033137
-            Baseline  Baseline_balanced     SMOTE    Random  KMeansSMOTE      ADVO
-PRAUC       0.321631           0.374427  0.358808  0.368367     0.357233  0.367125
-PRAUC_Card  0.454525           0.500294  0.464808  0.494833     0.480953  0.479956
-Precision   0.336567           0.227430  0.268898  0.262045     0.252546  0.267644
-Recall      0.290874           0.888746  0.681393  0.719123     0.727830  0.694615
-F1 score    0.312057           0.362179  0.385619  0.384119     0.374979  0.386402
-PK50        0.760000           0.360000  0.560000  0.300000     0.400000  0.420000
-PK100       0.780000           0.370000  0.520000  0.380000     0.390000  0.450000
-PK200       0.740000           0.375000  0.505000  0.435000     0.365000  0.545000
-PK500       0.612000           0.398000  0.502000  0.404000     0.400000  0.554000
-PK1000      0.475000           0.421000  0.462000  0.439000     0.404000  0.485000
-PK2000      0.359000           0.383500  0.397000  0.390500     0.378000  0.406500
+SMOTE                 0.11           0.10       0.18
+Random                0.05           0.11       0.02
+KMeansSMOTE           0.05           0.10       0.02
+ADVO                  0.09           0.12       0.03
 ```
 ## ✨The Generator
 The generator simulates genuine and fraudulent transactions and is based on a customer-terminal-transaction structure, where a group of customers selects a set of customers to perform various transactions. A two-dimensional vector, represented as a location, characterizes each terminal. A location also describes each customer.
