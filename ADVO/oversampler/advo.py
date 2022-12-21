@@ -85,10 +85,9 @@ class ADVO():
         self.transactions_df = generator.transactions_df
 
     def set_transactions(self, X_train, y_train) -> None:
-        """ Set the transactions data.
-
-        This method sets the transactions data. The transactions data is stored in the `transactions_df` attribute of the
-        current instance.
+        """ Standard setter method for the attribute transactions_df. 
+        
+        This method takes as input a set of transactions features and labels, merges them, and stores them in the attribute transactions_df.
 
         Args:
             X_train (pd.DataFrame): a DataFrame containing the features of the transactions.
@@ -335,7 +334,7 @@ class ADVO():
             self.regressor = self.best_regressor
             self.search_parameters = parameters_set[candidate_regressors.index(self.best_regressor)]
             return merged_scores_df
-            
+
     def fit_resample(self, X_train, y_train):
 
         self.set_transactions(X_train, y_train)
