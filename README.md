@@ -28,7 +28,19 @@ The repository is expected to be extended in the future. <br>
 
 ## Visit our 🏠 [Homepage](https://FaramirHurin.github.io/ADV-O/) for the documentation!
 
+This work is based on the [transaction data simulator](https://fraud-detection-handbook.github.io/fraud-detection-handbook/Chapter_3_GettingStarted/SimulatedDataset.html) described in the [Fraud Detection Handbook](https://fraud-detection-handbook.github.io/fraud-detection-handbook/Foreword.html) by [Le Borge et al](https://fraud-detection-handbook.github.io/fraud-detection-handbook/Foreword.html#authors)
 
+If you use this work, you should cite: 
+```
+@book{leborgne2022fraud,
+title={Reproducible Machine Learning for Credit Card Fraud Detection - Practical Handbook},
+author={Le Borgne, Yann-A{\"e}l and Siblini, Wissam and Lebichot, Bertrand and Bontempi, Gianluca},
+url={https://github.com/Fraud-Detection-Handbook/fraud-detection-handbook},
+year={2022},
+publisher={Universit{\'e} Libre de Bruxelles}
+}
+```
+  
 ## 🖥️ Install and Usage
 
 ```sh
