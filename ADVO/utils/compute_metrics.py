@@ -5,7 +5,25 @@ import numpy as np
 import pandas as pd
 
 
-def compute_metrics_remove_cards(ytest,prediction_scores,id_cards_test,id_cards_fraud_train):
+def compute_metrics_remove_cards(ytest: pd.Series,
+                                 prediction_scores: np.ndarray,
+                                 id_cards_test: pd.Series,
+                                 id_cards_fraud_train: np.ndarray) -> Tuple[float, float, float, float, float, float, float, float, float, float, float, float]:
+    """
+    Compute various classification metrics for a model's predictions, including accuracy, precision, recall, f1 score, 
+    and partial AUC (pAUC). The pAUCs are computed for different percentiles (pk10, pk20, pk50, pk100, pk300, pk1000) 
+    and for the entire population (prauc) and a reference population (cprauc). 
+
+    Parameters:
+    - ytest: A pandas Series with the true labels for the test set.
+    - prediction_scores: A numpy array with the prediction scores for the test set.
+    - id_cards_test: A pandas Series with the card IDs for the test set.
+    - id_cards_fraud_train: A numpy array with the card IDs that were labeled as fraud in the training set.
+
+    Returns:
+    - A tuple with the values for the following metrics: accuracy, precision, recall, f1 score, pk10, pk20, pk50, pk100, 
+      pk300, pk1000, prauc, cprauc.
+    """
     ref_prc = 0.0033
     ref_prc_card = 0.0025     
     
@@ -38,7 +56,18 @@ def compute_metrics_remove_cards(ytest,prediction_scores,id_cards_test,id_cards_
 
 
 
-def compute_pk(trueY, predictions, K):
+def compute_pk(trueY: np.ndarray, predictions: np.ndarray, K: int) -> float:
+    """
+    Compute the precision for the top K predictions.
+
+    Parameters:
+    - trueY: A numpy array with the true labels.
+    - predictions: A numpy array with the prediction scores.
+    - K: An integer specifying the number of top predictions to consider.
+
+    Returns:
+    - The precision for the top K predictions.
+    """
     ordered_predicitons = np.sort(predictions)
     value = ordered_predicitons[-K]
     indices = np.where(predictions >= value)
