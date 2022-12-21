@@ -85,10 +85,9 @@ class ADVO():
         self.transactions_df = generator.transactions_df
 
     def set_transactions(self, X_train, y_train) -> None:
-        """ Set the transactions data.
-
-        This method sets the transactions data. The transactions data is stored in the `transactions_df` attribute of the
-        current instance.
+        """ Standard setter method for the attribute transactions_df. 
+        
+        This method takes as input a set of transactions features and labels, merges them, and stores them in the attribute transactions_df.
 
         Args:
             X_train (pd.DataFrame): a DataFrame containing the features of the transactions.
@@ -309,6 +308,8 @@ class ADVO():
             
     def select_best_regressor(self, candidate_regressors, parameters_set):
             best_score = 0
+            naive_scores = {}
+            scores_df = pd.DataFrame()
             for idx, candidate_regressor in enumerate(candidate_regressors):
 
                 self.regressor = candidate_regressors[idx]
@@ -317,26 +318,22 @@ class ADVO():
                 self.fit_regressors()
 
                 scores = {}
-                naive_scores = {}
                 for feature_to_predict in self.useful_features:
                     regressor = self.regressors[feature_to_predict]
                     scores[feature_to_predict] = regressor.score
                     naive_scores[feature_to_predict] = regressor.naive_score
-                scores_df = pd.DataFrame(scores, index=['score'])
-                naives_df = pd.DataFrame(naive_scores, index=['naive_score'])
-                merged_df = pd.concat([scores_df, naives_df], axis=0)
-                print('Regressor: ', candidate_regressor)
-                print(merged_df)
+                single_scores_df = pd.DataFrame(scores, index=[candidate_regressor])
+                scores_df = pd.concat([scores_df, single_scores_df], axis=0)
 
                 mean_value = np.array(list(scores.values())).mean()
 
                 if mean_value > best_score:
                     best_score = mean_value
                     self.best_regressor = candidate_regressor
-
-            print('Best regressor: ', self.best_regressor)
+            merged_scores_df = pd.concat([scores_df, pd.DataFrame(naive_scores, index=['Naive'])], axis=0)
             self.regressor = self.best_regressor
             self.search_parameters = parameters_set[candidate_regressors.index(self.best_regressor)]
+            return merged_scores_df
 
     def fit_resample(self, X_train, y_train):
 

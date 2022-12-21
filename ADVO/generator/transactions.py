@@ -1,41 +1,10 @@
 import numpy as np
 import pandas as pd 
 import random
-from .utils import *
-from .radius import *
+from .generator import *
+from .terminals import *
 
 from typing import List, Union
-
-class Transaction():
-    def __init__(self, transaction_id, x, y, amount, time, terminal_id, customer_id):
-        self.transaction_id = transaction_id
-        self.x = x
-        self.y = y
-        self.amount = amount
-        self.time = time
-        self.terminal_id = terminal_id
-        self.customer_id = customer_id
-
-    def __str__(self):
-        return "Transaction ID: " + str(self.transaction_id) + ", x: " + str(self.x) + ", y: " + str(self.y) + ", amount: " + str(self.amount) + ", time: " + str(self.time) + ", terminal ID: " + str(self.terminal_id) + ", customer ID: " + str(self.customer_id)
-
-    def get_dataframe(self):
-        return pd.DataFrame({'transaction_id': [self.transaction_id], 'x': [self.x], 'y': [self.y], 'amount': [self.amount], 'time': [self.time], 'terminal_id': [self.terminal_id], 'customer_id': [self.customer_id]})
-
-    def get_distance_to_terminal(self, terminal):
-        return self.get_distance_to_point(terminal.x, terminal.y)
-
-    def get_distance_to_point(self, x, y):
-        return np.sqrt(np.square(self.x - x) + np.square(self.y - y))
-
-    def get_distance_to_customer(self, customer):
-        return self.get_distance_to_point(customer.x, customer.y)
-
-    def get_distance_to_transaction(self, transaction):
-        return self.get_distance_to_point(transaction.x, transaction.y)
-
-    def get_distance(self, x, y):
-        return np.sqrt(np.square(self.x - x) + np.square(self.y - y))
 
 
 # TODO: refactor this 
