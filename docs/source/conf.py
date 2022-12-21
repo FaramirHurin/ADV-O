@@ -8,17 +8,16 @@
 
 import os
 import sys
-path = os.path.abspath('../../')
+path = os.path.abspath('../../ADVO/')
 print(path)
 sys.path.insert(0, path)
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'ADV-O'
+project = 'ADVO'
 copyright = '2022, Daniele Lunghi, Gian Marco Paldino'
 author = 'Daniele Lunghi, Gian Marco Paldino'
-release = '0.2.0'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -39,3 +38,4 @@ exclude_patterns = []
 
 html_theme = 'furo'
 html_static_path = ['_static']
+html_logo = "advo2.png"

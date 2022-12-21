@@ -67,9 +67,9 @@ def count(y_true: List[int], type: str, cards: Optional[List[str]]) -> Union[int
         return y_true.size
     elif type == "card":
         if cards is not None:
-          return np.unique(cards).size
+            return np.unique(cards).size
         else:
-          raise ValueError(
+            raise ValueError(
               "cards values are None while trying to calculate the count for cards")
     else:
         raise ValueError("count for " + str(type) + " is not implemented")

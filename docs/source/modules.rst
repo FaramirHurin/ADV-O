@@ -1,7 +1,9 @@
-advo
-====
+Documentation
+=============
 
 .. toctree::
    :maxdepth: 4
 
-   advo
+   generator
+   oversampler
+   utils

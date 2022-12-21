@@ -1,5 +1,5 @@
-Installation and Usage
-=====
+Usage
+======
 
 Run
 ----
@@ -12,7 +12,7 @@ Run
 
  
 Output
-----
+------
 
 .. code-block:: bash
 
