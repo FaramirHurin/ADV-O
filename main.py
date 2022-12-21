@@ -74,7 +74,7 @@ def make_classification():
 
     advo.tune_best_regressors()
     advo.fit_regressors()
-    advo.transactions_df = advo.enrich_dataframe(advo.transactions_df)
+    advo.transactions_df = advo.insert_synthetic_frauds(advo.transactions_df)
     advo_tuple = advo.transactions_df[advo.useful_features], advo.transactions_df['TX_FRAUD']
     
     kmeans_smote = KMeansSMOTE(n_jobs=N_JOBS, kmeans_estimator=MiniBatchKMeans(n_init=3),sampling_strategy=SAMPLE_STRATEGY, cluster_balance_threshold=0.1, random_state=RANDOM_STATE).fit_resample(X_train[sel], y_train)

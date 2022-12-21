@@ -187,13 +187,13 @@ class ADVO():
             self.regressors[feature_to_predict] = regressor
 
     def tune_regressors(self, metric: Callable[[np.ndarray, np.ndarray], float] = r2_score) -> None:
-        """Tunes the hyperparameters of a set of regression models using a search algorithm.
-        The regressor will be part of the self.regressors dictionary, with the feature to predict as key.
+        """
+        Tunes the hyperparameters of one regressor per feature specified in the self.useful_features attribute. 
+        All regressors belong to the same family specified by the 'self.regressor' parameter. 
+        The set of hyperparameter-tuned regressors is stored in the self.regressors attribute.
 
         Args:
-            searcher: An object that implements a search algorithm, such as GridSearchCV or RandomizedSearchCV.
-            search_parameters: A dictionary of hyperparameters for the searcher.
-            regressor: A regression model to be tuned.
+            metric: the evaluation metric for the score of the regressors
         
         Returns:
             None
@@ -251,7 +251,7 @@ class ADVO():
 
         return new_frauds
 
-    def enrich_dataframe(self, transactions_df: pd.DataFrame) -> pd.DataFrame:
+    def insert_synthetic_frauds(self, transactions_df: pd.DataFrame) -> pd.DataFrame:
         """
         Adds multiple layers of predicted fraudulent transactions to a dataframe of transactions until a specified percentage of fraud is reached.
 
@@ -342,7 +342,7 @@ class ADVO():
         
         self.tune_regressors()
         self.fit_regressors()
-        self.transactions_df = self.enrich_dataframe(self.transactions_df)
+        self.transactions_df = self.insert_synthetic_frauds(self.transactions_df)
         return self.transactions_df[self.useful_features], self.transactions_df['TX_FRAUD']
 
 
