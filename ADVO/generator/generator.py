@@ -42,23 +42,15 @@ class Generator():
             self.transactions.extend(customer.transactions)
 
     def get_transactions_df(self) -> pd.DataFrame:
-        transactions_df = pd.DataFrame()
-        for transaction in self.transactions:
-            transactions_df = pd.concat([transactions_df, transaction.get_dataframe()])
-        transactions_df['tx_datetime'] = pd.to_datetime(transactions_df['tx_time'] + transactions_df['tx_day'] * 86400 , unit='s', origin=self.start_date)
-        return transactions_df.round(2)
+        transactions_list = [transaction.get_dataframe() for transaction in self.transactions]
+        return pd.concat(transactions_list).round(2)
 
     def get_terminals_df(self) -> pd.DataFrame:
-        terminals_df = pd.DataFrame()
-        for terminal in self.terminals:
-            terminals_df = pd.concat([terminals_df, terminal.get_dataframe()])
-        return terminals_df.round(2)
+        terminals_list = [terminal.get_dataframe() for terminal in self.terminals]
+        return pd.concat(terminals_list).round(2)
 
     def get_customers_df(self) -> pd.DataFrame:
-        customers_df = pd.DataFrame()
-        for customer in self.customers:
-            customers_df = pd.concat([customers_df, customer.get_dataframe()])
-        return customers_df.round(2)
-
+        customers_list = [customer.get_dataframe() for customer in self.customers]
+        return pd.concat(customers_list).round(2)
 
 
