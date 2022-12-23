@@ -57,8 +57,10 @@ from ADVO.generator import Generator
 
 # Create a generator object
 generator = Generator(random_state=42)
+
 # Generate 100 terminals, 500 customers, and transaction data for 8 days
 generator.generate()
+
 # Access the generated data
 terminals_df, customers_df, transactions_df = generator.get_dataframes()
 ```
@@ -102,61 +104,61 @@ transactions_df_eng = feature_engineering(generator, transactions_df)
 the resulting dataframe (shuffled and transposed for clarity), would look like this: 
 
 ```
-                                                   115                  164                   79                  223                  435
-tx_time                                          34313                31424                37519                62507                46308
-tx_day                                               7                    7                    6                    5                    2
-customer_id                                        131                   21                   44                  171                   57
-terminal_id                                         43                   26                  148                   43                   43
-amount                                             0.0                 27.4                15.27               404.59               123.15
-is_fraud                                         False                False                False                 True                 True
-transaction_id                                    2272                  319                  752                 2982                 1023
-tx_datetime                        2018-04-08 09:31:53  2018-04-08 08:43:44  2018-04-07 10:25:19  2018-04-06 17:21:47  2018-04-03 12:51:48
-is_weekend                                        True                 True                 True                False                False
-during_night                                     False                 True                False                False                False
-hour                                                 9                    8                   10                   17                   12
-day_of_week                                          6                    6                    5                    4                    1
-month                                                4                    4                    4                    4                    4
-distance_to_terminal                              4.83                  1.7                 5.36                 2.23                 3.64
-customer_id_nb_tx_1days                            3.0                  3.0                  5.0                  5.0                  1.0
-customer_id_nb_tx_7days                           31.0                 21.0                 24.0                 31.0                 20.0
-customer_id_nb_tx_30days                         114.0                 74.0                 88.0                105.0                 89.0
-terminal_id_nb_tx_1days                           57.0                 12.0                  6.0                 43.0                 15.0
-terminal_id_nb_tx_7days                          232.0                 47.0                 27.0                132.0                 32.0
-terminal_id_nb_tx_30days                         332.0                290.0                167.0                246.0                162.0
-terminal_id_nb_frauds_1days                       26.0                  7.0                  1.0                 17.0                 12.0
-terminal_id_nb_frauds_7days                      122.0                 28.0                  7.0                 79.0                 30.0
-terminal_id_nb_frauds_30days                     170.0                  0.0                 43.0                  0.0                  0.0
-customer_id_min_tx_1days                           0.0                11.68                15.27               320.32               123.15
-customer_id_max_tx_1days                        153.71                 27.4                53.67               427.86               123.15
-customer_id_mean_tx_1days                        67.44                21.93                37.21               383.69               123.15
-customer_id_std_tx_1days                           0.0                  0.0                  0.0                  0.0                  0.0
-customer_id_median_tx_1days                        0.0                  0.0                  0.0                  0.0                  0.0
-customer_id_min_tx_7days                           0.0                 3.64                  0.0                 0.65                  0.0
-customer_id_max_tx_7days                         422.2                85.74               148.84               427.86               168.53
-customer_id_mean_tx_7days                       142.75                 23.5                56.84               125.37                63.62
-customer_id_std_tx_7days                         21.35                  0.0                  0.0                  0.0                  0.0
-customer_id_median_tx_7days                      124.5                17.74                27.99               150.84                63.07
-customer_id_min_tx_30days                          0.0                  0.0                  0.0                  0.0                  0.0
-customer_id_max_tx_30days                        422.2                  0.0               148.84               427.86               168.53
-customer_id_mean_tx_30days                       60.82                  0.0                34.06                52.68                42.45
-customer_id_std_tx_30days                          0.0                  0.0                  0.0                  0.0                  0.0
-customer_id_median_tx_30days                     75.77                  0.0                23.26                82.86                38.18
-terminal_id_min_tx_1days                           0.0                 1.54                15.27                  0.0                 0.92
-terminal_id_max_tx_1days                        205.13               192.57                53.67               427.86               256.42
-terminal_id_mean_tx_1days                        57.42                32.02                33.94                90.52                53.69
-terminal_id_std_tx_1days                           0.0                  0.0                  0.0                  0.0                  0.0
-terminal_id_median_tx_1days                        0.0                  0.0                  0.0                  0.0                  0.0
-terminal_id_min_tx_7days                           0.0                 1.54                  0.7                  0.0                 0.92
-terminal_id_max_tx_7days                        567.66               563.87               115.71               427.86               563.87
-terminal_id_mean_tx_7days                        71.39                53.97                46.12                73.39                63.34
-terminal_id_std_tx_7days                         29.62                57.21                  0.0                39.94                52.39
-terminal_id_median_tx_7days                      11.27                19.57                36.43                23.12                 29.3
-terminal_id_min_tx_30days                          0.0                  0.0                  0.0                  0.0                  0.0
-terminal_id_max_tx_30days                       567.66                  0.0               371.33                  0.0                  0.0
-terminal_id_mean_tx_30days                       65.02                  0.0                49.57                  0.0                  0.0
-terminal_id_std_tx_30days                          0.0                  0.0                  0.0                  0.0                  0.0
-terminal_id_median_tx_30days                     40.13                  0.0                44.89                  0.0                  0.0
-customer_nb_prev_tx_same_terminal                   26                   14                   18                   16                    2
-tx_angle                                         43.93                44.91                37.89                43.93                43.93
-tx_location                                 North-East           North-East           North-East           North-East           North-East
+                                                   299                  503                  280                  478
+tx_time                                          83557                44733                37698                31721
+tx_day                                               5                    7                    5                    7
+customer_id                                         55                   60                    5                   59
+terminal_id                                         45                  106                   59                   63
+amount                                           42.09                 7.86                119.4                70.67
+is_fraud                                          True                 True                False                False
+transaction_id                                     944                 1037                   76                 1026
+tx_datetime                        2022-12-22 23:12:37  2022-12-24 12:25:33  2022-12-22 10:28:18  2022-12-24 08:48:41
+is_weekend                                       False                 True                False                 True
+during_night                                      True                False                False                 True
+hour                                                23                   12                   10                    8
+day_of_week                                          3                    5                    3                    5
+month                                               12                   12                   12                   12
+distance_to_terminal                             13.48                73.76                 7.27                11.19
+customer_id_nb_tx_1days                            3.0                  3.0                  3.0                  6.0
+customer_id_nb_tx_7days                           19.0                 19.0                 16.0                 25.0
+customer_id_nb_tx_30days                          81.0                 76.0                 75.0                 78.0
+terminal_id_nb_tx_1days                           32.0                  6.0                 11.0                 29.0
+terminal_id_nb_tx_7days                          113.0                 41.0                 33.0                131.0
+terminal_id_nb_tx_30days                         251.0                137.0                126.0                291.0
+terminal_id_nb_frauds_1days                       19.0                  1.0                  6.0                  6.0
+terminal_id_nb_frauds_7days                       71.0                  8.0                 53.0                 41.0
+terminal_id_nb_frauds_30days                       0.0                178.0                  0.0                181.0
+customer_id_min_tx_1days                         42.09                 0.25                 23.7                  0.0
+customer_id_max_tx_1days                         97.82                 7.86                119.4               114.13
+customer_id_mean_tx_1days                        69.59                 4.97                 61.7                52.09
+customer_id_std_tx_1days                           0.0                  0.0                  0.0                  0.0
+customer_id_median_tx_1days                        0.0                  0.0                  0.0                  0.0
+customer_id_min_tx_7days                          9.04                  0.0                  1.1                  0.0
+customer_id_max_tx_7days                        145.25               114.13                119.4               114.13
+customer_id_mean_tx_7days                        67.81                51.52                 48.5                52.97
+customer_id_std_tx_7days                           0.0                  0.0                14.31                  0.0
+customer_id_median_tx_7days                      40.73                28.47                 18.2                26.21
+customer_id_min_tx_30days                          0.0                  0.0                  0.0                  0.0
+customer_id_max_tx_30days                       165.62               196.09                  0.0               196.09
+customer_id_mean_tx_30days                       54.32                44.29                  0.0                45.82
+customer_id_std_tx_30days                          0.0                  0.0                  0.0                  0.0
+customer_id_median_tx_30days                     42.75                35.67                  0.0                35.07
+terminal_id_min_tx_1days                          0.58                 7.86                 2.55                  0.0
+terminal_id_max_tx_1days                        142.88                75.14                192.5               157.86
+terminal_id_mean_tx_1days                        35.94                56.56                45.34                67.08
+terminal_id_std_tx_1days                           0.0                  0.0                  0.0                  0.0
+terminal_id_median_tx_1days                        0.0                  0.0                  0.0                  0.0
+terminal_id_min_tx_7days                           0.0                 1.58                  0.0                  0.0
+terminal_id_max_tx_7days                        175.84               148.03               196.09               231.84
+terminal_id_mean_tx_7days                        34.18                55.68                33.45                50.51
+terminal_id_std_tx_7days                         11.01                  0.0                  0.0                 8.89
+terminal_id_median_tx_7days                       14.0                30.38                 9.64                15.01
+terminal_id_min_tx_30days                          0.0                  0.0                  0.0                  0.0
+terminal_id_max_tx_30days                          0.0               231.84                  0.0               231.84
+terminal_id_mean_tx_30days                         0.0                 42.4                  0.0                40.57
+terminal_id_std_tx_30days                          0.0                  0.0                  0.0                  0.0
+terminal_id_median_tx_30days                       0.0                23.77                  0.0                20.06
+customer_nb_prev_tx_same_terminal                    8                    0                   10                   11
+tx_angle                                         43.95                15.91                 49.0                46.96
+tx_location                                 North-East                North           North-East           North-East
 ```

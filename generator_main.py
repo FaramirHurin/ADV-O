@@ -17,5 +17,5 @@ if __name__ == "__main__":
     print(terminals_df.head())
     print(customers_df.head())
     print(transactions_df.head())
-    print(transactions_df_eng.sample(frac=1)[150:155].T)
+    print(transactions_df_eng.sample(frac=1)[150:154].T)
        
