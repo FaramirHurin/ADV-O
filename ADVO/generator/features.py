@@ -1,5 +1,9 @@
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from matplotlib.patches import Circle
+
 
 def feature_engineering(generator, transactions_df, decimals=2):
 
@@ -74,3 +78,67 @@ def feature_engineering(generator, transactions_df, decimals=2):
         transactions_df = transactions_df.infer_objects()
         transactions_df.loc[:,transactions_df.select_dtypes(['float64']).columns] = transactions_df.select_dtypes(['float64']).round(decimals=decimals)
         return transactions_df           
+
+
+class GeneratedDataPlotter():
+
+    def __init__(self, generator):
+        self.generator = generator
+        self.terminals_df, self.customers_df, self.transactions_df = generator.get_dataframes()
+
+
+    def plot_terminals_and_customers(self, figsize=(10, 10), alpha=0.02):
+        fig, ax = plt.subplots(figsize=figsize)
+        ax.scatter(self.terminals_df['x_terminal'], self.terminals_df['y_terminal'], color='blue', label='Terminal')
+        ax.scatter(self.customers_df['x_customer'], self.customers_df['y_customer'], color='red', label='Customer')
+        for i, row in self.customers_df.iterrows():
+            ax.add_patch(Circle((row['x_customer'], row['y_customer']), self.generator.customers[row['customer_id']].radius, color='green', alpha=alpha))
+        ax.legend(loc = 'upper left')
+        ax.set_xlim([0, 100])
+        ax.set_ylim([0, 100])
+        plt.show()
+
+    def plot_num_transactions_per_day(self,  figsize=(10, 10)):
+        fig, ax = plt.subplots(figsize=figsize)
+        ax.plot(self.transactions_df.groupby('tx_day')['amount'].count(), label='Number of transactions')
+        ax.set_ylabel('Number of transactions')
+        ax.set_xlabel('Day')
+        ax.legend()
+        plt.show()
+
+    def plot_avg_amount_per_day(self,  figsize=(10, 10)):
+        fig, ax = plt.subplots(figsize=figsize)
+        ax.plot(self.transactions_df.groupby('tx_day').mean()['amount'], label='Average amount per transaction')
+        ax.set_ylabel('Average amount per transaction')
+        ax.set_xlabel('Day')
+        ax.legend()
+        plt.show()
+
+    def plot_total_amount_per_day(self,  figsize=(10, 10)):
+        fig, ax = plt.subplots(figsize=figsize)
+        ax.plot(self.transactions_df.groupby('tx_day').sum()['amount'], label='Total amount spent')
+        ax.set_ylabel('Total amount spent')
+        ax.set_xlabel('Day')
+        ax.legend()
+        plt.show()
+
+    def plot_coordinate_history(self, customer_id, genuine_color='g', fraud_color='r', arrow_color='k'):
+        customer = self.generator.customers[customer_id]
+        plt.plot(customer.x_history['genuine'], customer.y_history['genuine'], f'{genuine_color}.')
+        plt.plot(customer.x_history['fraud'], customer.y_history['fraud'], f'{fraud_color}.')
+        plt.xlabel('X coordinate')
+        plt.ylabel('Y coordinate')
+        
+        for i in range(len(customer.x_history['genuine']) - 1):
+            plt.arrow(customer.x_history['genuine'][i], customer.y_history['genuine'][i], 
+                    customer.x_history['genuine'][i+1] - customer.x_history['genuine'][i], 
+                    customer.y_history['genuine'][i+1] - customer.y_history['genuine'][i],
+                    color=arrow_color, width=0.01, head_width=0.5, head_length=2, length_includes_head=True)
+        for i in range(len(customer.x_history['fraud']) - 1):
+            plt.arrow(customer.x_history['fraud'][i], customer.y_history['fraud'][i], 
+                    customer.x_history['fraud'][i+1] - customer.x_history['fraud'][i], 
+                    customer.y_history['fraud'][i+1] - customer.y_history['fraud'][i],
+                    color=arrow_color, width=0.01, head_width=0.5, head_length=2, length_includes_head=True)
+        
+        plt.show()
+    

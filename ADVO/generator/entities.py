@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 from typing import List, Tuple
 
 FRAUDULENT_MEAN_AMOUNT_FACTOR = 0.9
@@ -14,6 +15,8 @@ class Customer():
         self.customer_id = customer_id
         self.x = x
         self.y = y
+        self.x_history = {'genuine': [], 'fraud': []}
+        self.y_history = {'genuine': [], 'fraud': []}
         self.radius = radius
         self.mean_amt = mean_amt
         self.std_amt = std_amt
@@ -36,7 +39,8 @@ class Customer():
             dist = terminal.distance_to_point(self.x, self.y)
             if dist < self.radius:
                 self.available_terminals.append(terminal)
-                self.available_terminals_weights.append(np.exp(-dist**2))
+                # self.available_terminals_weights.append(np.exp(-dist**2))
+                self.available_terminals_weights.append(1/dist)
         # Normalize weights so that they sum to 1
         self.available_terminals_weights = [weight / sum(self.available_terminals_weights) for weight in self.available_terminals_weights]
 
@@ -44,7 +48,7 @@ class Customer():
     def generate_transactions(self, n_days):
         
         if not len(self.available_terminals):  # Check if there are available terminals
-            raise ValueError("This customer does not have available terminals, make sure you have called the set_available_terminals functions and that the radius is not too small")
+            raise ValueError(f"Customer {self.customer_id} does not have available terminals, make sure you have called the set_available_terminals functions and that the radius is not too small")
         
         self.transactions = []
         days_from_compromission = 0  # Number of max frauds days before card blocking
@@ -64,6 +68,7 @@ class Customer():
             time_tx_seconds = int(np.clip(np.random.normal(86400 / 2, 20000), 0, 86400)) # Mean 12pm, std 5.5h
             amount = np.round(np.clip(np.random.normal(self.mean_amt, self.std_amt),0, None), decimals=2)
             terminal = self.random_state.choice(self.available_terminals, p=self.available_terminals_weights)
+            self._update_coordinate_history(terminal)
             transaction = Transaction(time_tx_seconds,day, self, terminal, amount, False)
             self.transactions.append(transaction)
  
@@ -73,6 +78,7 @@ class Customer():
                 # If the last transaction was not fraud, generate a first fraud 
                 self.x = np.random.beta(a=70, b=30) * 100
                 self.y = np.random.beta(a=20, b=80) * 100
+                
                 self.mean_amt = np.random.normal(self.mean_amt) * FRAUDULENT_MEAN_AMOUNT_FACTOR
                 self.std_amt = np.random.normal(self.std_amt) * FRAUDULENT_STD_AMOUNT_FACTOR
                 self.set_available_terminals(self.all_terminals)
@@ -80,13 +86,15 @@ class Customer():
                 time_tx_seconds = int(np.clip(np.random.normal(86400 / 2, 20000), 0, 86400))
                 amount = np.round(np.clip(np.random.normal(loc=self.mean_amt, scale=self.std_amt), 0, None), decimals=2)
                 terminal = self.random_state.choice(self.available_terminals, p=self.available_terminals_weights)
+                self._update_coordinate_history(terminal, fraud=True)
                 transaction = Transaction(time_tx_seconds,day, self, terminal, amount, True)
                 self.transactions.append(transaction)
             else: 
                 # If the last transaction was fraud, generate a following fraud
                 last_transaction = self.transactions[-1]
                 last_terminal_x, last_terminal_y, last_fraud_day, last_fraud_time, last_fraud_amount = last_transaction.terminal.x, last_transaction.terminal.y, last_transaction.day, last_transaction.tx_time, last_transaction.amount
-                self.x, self.y = self._set_following_fraud_coordinates(last_terminal_x, last_terminal_y)
+                self.x, self.y = self._set_following_fraudster_coordinates(last_terminal_x, last_terminal_y)
+                
                 self.set_available_terminals(self.all_terminals)
                 if day == last_fraud_day: # if not the first fraud of the day 
                     time_tx_seconds = int(np.clip(last_fraud_time + abs(np.random.normal(loc=0, scale=30000)), 0, 86400))
@@ -94,10 +102,11 @@ class Customer():
                     time_tx_seconds = int(np.clip(np.random.normal(86400 / 2, 20000), 0, 86400))
                 amount = np.abs(np.random.normal(1.1 * last_fraud_amount - 0.2 * last_terminal_x + 0.7 + last_terminal_y * 0.1, self.std_amt / 2))
                 terminal = self.random_state.choice(self.available_terminals, p=self.available_terminals_weights)
+                self._update_coordinate_history(terminal, fraud=True)
                 transaction = Transaction(time_tx_seconds,day, self, terminal, amount, True)
                 self.transactions.append(transaction)
 
-    def _set_following_fraud_coordinates(self, last_terminal_x, last_terminal_y):
+    def _set_following_fraudster_coordinates(self, last_terminal_x, last_terminal_y):
         small_x = last_terminal_x / 100
         small_y = last_terminal_y / 100
 
@@ -106,9 +115,19 @@ class Customer():
 
         return  np.random.beta(a=X, b=5) * 100, np.random.beta(a=Y, b=5) * 100
 
+    def _update_coordinate_history(self, terminal, fraud=False):
+        if fraud:
+            self.x_history['fraud'].append(terminal.x)
+            self.y_history['fraud'].append(terminal.y)
+        else:
+            self.x_history['genuine'].append(terminal.x)
+            self.y_history['genuine'].append(terminal.y)
+
     def get_dataframe(self) -> pd.DataFrame:
         customers_df = pd.DataFrame(data=[self.customer_id, self.x, self.y, self.mean_amt, self.std_amt, self.mean_n_transactions, bool(self.compromised) ] , index=['customer_id', 'x_customer', 'y_customer', 'mean_amount', 'std_amount', 'mean_nb_tx_per_day', 'compromised']).T
         return customers_df
+
+
 
 class Terminal():
 
