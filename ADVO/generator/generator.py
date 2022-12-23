@@ -18,7 +18,7 @@ class Generator():
             terminal = Terminal(terminal_id, x_terminal_id, y_terminal_id, random_state=self.random_state)
             self.terminals.append(terminal)
 
-    def generate_customers(self, n_customers=500, radius=20, max_days_from_compromission=3, compromission_probability=0.03):
+    def generate_customers(self, n_customers=200, radius=20, max_days_from_compromission=3, compromission_probability=0.03):
         if not len(self.terminals):
             raise ValueError("You need to generate terminals before generating customers")
         
@@ -41,17 +41,28 @@ class Generator():
             customer.generate_transactions(nb_days_to_generate)
             self.transactions.extend(customer.transactions)
 
-    def get_terminals_df(self) -> pd.DataFrame:
+    def generate(self):
+        self.generate_terminals()
+        self.generate_customers()
+        self.generate_transactions()
+
+    def get_terminals_df(self, decimals=2) -> pd.DataFrame:
         terminals_list = [terminal.get_dataframe() for terminal in self.terminals]
-        return pd.concat(terminals_list).round(2)
+        terminal_df = pd.concat(terminals_list).infer_objects()
+        terminal_df.loc[:,terminal_df.select_dtypes(['float64']).columns] = terminal_df.select_dtypes(['float64']).round(decimals)
+        return terminal_df.reset_index(drop=True)
 
-    def get_customers_df(self) -> pd.DataFrame:
+    def get_customers_df(self, decimals=2) -> pd.DataFrame:
         customers_list = [customer.get_dataframe() for customer in self.customers]
-        return pd.concat(customers_list).round(2)
+        customers_df = pd.concat(customers_list).infer_objects()
+        customers_df.loc[:,customers_df.select_dtypes(['float64']).columns] = customers_df.select_dtypes(['float64']).round(decimals)
+        return customers_df.reset_index(drop=True)
 
-    def get_transactions_df(self) -> pd.DataFrame:
+    def get_transactions_df(self, decimals=2) -> pd.DataFrame:
         transactions_list = [transaction.get_dataframe() for transaction in self.transactions]
-        transactions_df = pd.concat(transactions_list)
-        transactions_df["transaction_id"] = transactions_df.index
-        transactions_df["tx_datetime"] = pd.to_datetime(transactions_df.tx_day * 86400 + transactions_df.tx_time, unit="s", origin=self.start_date)
-        return transactions_df.round(2)
+        transactions_df = pd.concat(transactions_list).infer_objects()
+        transactions_df.loc[:,transactions_df.select_dtypes(['float64']).columns] = transactions_df.select_dtypes(['float64']).round(decimals)
+        return transactions_df.reset_index(drop=True)
+
+    def get_dataframes(self, decimals=2):
+        return self.get_terminals_df(decimals), self.get_customers_df(decimals), self.get_transactions_df(decimals)

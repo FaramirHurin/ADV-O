@@ -1,7 +1,9 @@
 import pandas as pd
 import numpy as np
 
-def feature_engineering(generator, transactions_df):
+def feature_engineering(generator, transactions_df, decimals=2):
+
+        transactions_df = transactions_df.copy()
         #TODO: NO DELAY for now
         #TODO: I believe they look into the future: discuss this 
         transactions_df["transaction_id"] = transactions_df.index
@@ -53,10 +55,22 @@ def feature_engineering(generator, transactions_df):
         df_grouped = transactions_df.groupby(['customer_id', 'terminal_id'])
         transactions_df['customer_nb_prev_tx_same_terminal'] = df_grouped['transaction_id'].transform(lambda x: x.shift(1).notnull().sum())
         transactions_df['customer_nb_prev_tx_same_terminal'].fillna(0, inplace=True)
+        
+        x_terminal =  transactions_df['terminal_id'].apply(lambda x: generator.terminals[x].x)
+        y_terminal =  transactions_df['terminal_id'].apply(lambda x: generator.terminals[x].y)
+        transactions_df['tx_angle'] = np.arctan2(y_terminal, x_terminal).apply(lambda x: np.rad2deg(x))
 
+        # Create a new column called "direction" that indicates the direction of the transaction based
+        # on the angle between the terminal and the origin
+        transactions_df['tx_location'] = np.where((transactions_df['tx_angle'] > 0) & (transactions_df['tx_angle'] <= 22.5), 'North',
+                                                np.where((transactions_df['tx_angle'] > 22.5) & (transactions_df['tx_angle'] <= 67.5), 'North-East',
+                                                np.where((transactions_df['tx_angle'] > 67.5) & (transactions_df['tx_angle'] <= 112.5), 'East',
+                                                np.where((transactions_df['tx_angle'] > 112.5) & (transactions_df['tx_angle'] <= 157.5), 'South-East',
+                                                np.where((transactions_df['tx_angle'] > 157.5) & (transactions_df['tx_angle'] <= 180) | (transactions_df['tx_angle'] < 0) & (transactions_df['tx_angle'] >= -22.5), 'South',
+                                                np.where((transactions_df['tx_angle'] < -22.5) & (transactions_df['tx_angle'] >= -67.5), 'South-West',
+                                                np.where((transactions_df['tx_angle'] < -67.5) & (transactions_df['tx_angle'] >= -112.5), 'West',
+                                                np.where((transactions_df['tx_angle'] < -112.5) & (transactions_df['tx_angle'] >= -157.5), 'North-West', 'Other'))))))))
 
-        # Number of transactions per day: You could create a new column that represents the average number of transactions that the customer makes per day over a specific time period (e.g., past 7 days, past month, past year). This could be useful if you suspect that customers who make a large number of transactions per day are more likely to be fraudulent.
-
-        # Terminal type: You could create a new column that indicates the type of terminal where the transaction took place (e.g., ATM, point-of-sale terminal, online). This could be useful if you suspect that certain types of terminals are more likely to be used for fraudulent transactions.
-
+        transactions_df = transactions_df.infer_objects()
+        transactions_df.loc[:,transactions_df.select_dtypes(['float64']).columns] = transactions_df.select_dtypes(['float64']).round(decimals=decimals)
         return transactions_df           

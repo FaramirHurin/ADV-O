@@ -107,7 +107,7 @@ class Customer():
         return  np.random.beta(a=X, b=5) * 100, np.random.beta(a=Y, b=5) * 100
 
     def get_dataframe(self) -> pd.DataFrame:
-        customers_df = pd.DataFrame(data=[self.customer_id, self.x, self.y, self.mean_amt, self.std_amt, self.mean_n_transactions, self.compromised ] , index=['customer_id', 'x_customer', 'y_customer', 'mean_amount', 'std_amount', 'mean_nb_tx_per_day', 'compromised'])
+        customers_df = pd.DataFrame(data=[self.customer_id, self.x, self.y, self.mean_amt, self.std_amt, self.mean_n_transactions, bool(self.compromised) ] , index=['customer_id', 'x_customer', 'y_customer', 'mean_amount', 'std_amount', 'mean_nb_tx_per_day', 'compromised']).T
         return customers_df
 
 class Terminal():
@@ -133,7 +133,7 @@ class Transaction():
         self.customer = customer
         self.terminal = terminal
         self.amount = amount
-        self.is_fraud = is_fraud
+        self.is_fraud = is_fraud        
     
     def get_dataframe(self) -> pd.DataFrame:
         return pd.DataFrame([[self.tx_time, self.day, self.customer. customer_id,self. terminal.terminal_id, self.amount, self.is_fraud]], columns=['tx_time', 'tx_day', 'customer_id', 'terminal_id','amount', 'is_fraud'])
