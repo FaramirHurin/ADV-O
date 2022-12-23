@@ -1,4 +1,4 @@
-from ADVO.generator import Generator
+from ADVO.generator import Generator, feature_engineering
 
 if __name__ == "__main__":
 
@@ -7,9 +7,9 @@ if __name__ == "__main__":
     generator.generate_customers(n_customers = 500)
     generator.generate_transactions(nb_days_to_generate = 8, start_date = "2018-04-01")
     
-    
-    terminals_df = generator.get_terminals_df()
-    customers_df = generator.get_customers_df()
     transactions_df = generator.get_transactions_df()
 
-    print(transactions_df.head(10))
+    transactions_df_eng = feature_engineering(generator, transactions_df)
+
+    print(transactions_df_eng.head())
+       

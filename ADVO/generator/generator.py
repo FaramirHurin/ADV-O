@@ -41,10 +41,6 @@ class Generator():
             customer.generate_transactions(nb_days_to_generate)
             self.transactions.extend(customer.transactions)
 
-    def get_transactions_df(self) -> pd.DataFrame:
-        transactions_list = [transaction.get_dataframe() for transaction in self.transactions]
-        return pd.concat(transactions_list).round(2)
-
     def get_terminals_df(self) -> pd.DataFrame:
         terminals_list = [terminal.get_dataframe() for terminal in self.terminals]
         return pd.concat(terminals_list).round(2)
@@ -53,4 +49,9 @@ class Generator():
         customers_list = [customer.get_dataframe() for customer in self.customers]
         return pd.concat(customers_list).round(2)
 
-
+    def get_transactions_df(self) -> pd.DataFrame:
+        transactions_list = [transaction.get_dataframe() for transaction in self.transactions]
+        transactions_df = pd.concat(transactions_list)
+        transactions_df["transaction_id"] = transactions_df.index
+        transactions_df["tx_datetime"] = pd.to_datetime(transactions_df.tx_day * 86400 + transactions_df.tx_time, unit="s", origin=self.start_date)
+        return transactions_df.round(2)
