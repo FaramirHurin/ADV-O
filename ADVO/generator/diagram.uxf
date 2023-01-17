@@ -1,0 +1,72 @@
+<diagram program="umletino" version="15.0.0"><zoom_level>6</zoom_level><help_text>Space for diagram notes</help_text><element><id>UMLClass</id><coordinates><x>306</x><y>525</y><w>150</w><h>204</h></coordinates><panel_attributes>&lt;&lt;Customer&gt;&gt;
+Package::generator.entities
+--
+- customer_id: int
+- x: float
+- y: float
+- radius: float
+- mean_amt: float
+- std_amt: float
+- mean_n_transactions:int
+- max_days_from_compromission:int
+- compromission_probability: float
+- random_state: np.random.RandomState
+- compromised: bool = False
+--
+#set_available_terminals(terminals): None
+#generate_transactions(n_days): None
+#get_dataframe(): pd.DataFrame
+--
+Responsibilities
+-- Represents a customer
+-- Sets the available terminals
+-- Generates transactions for 
+a customer</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>624</x><y>525</y><w>126</w><h>114</h></coordinates><panel_attributes>&lt;&lt;Terminal&gt;&gt;
+Package::generator.entities
+--
+- terminal_id: int
+- x: float
+- y: float
+- random_state: np.random.RandomState
+--
+#distance_to_point(x: float, y: float): float
+#get_dataframe(): pd.DataFrame
+--
+Responsibilities
+-- Represents a Terminal</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>480</x><y>363</y><w>126</w><h>120</h></coordinates><panel_attributes>&lt;&lt;Transaction&gt;&gt;
+Package::generator.entities
+--
+- tx_time: int 
+- day: int
+- customer: Customer
+- terminal: Terminal
+- amount: float
+- is_fraud: bool
+--
+#get_dataframe(): pd.DataFrame
+--
+Responsibilities
+-- Represents a Transaction</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>456</x><y>87</y><w>168</w><h>216</h></coordinates><panel_attributes>&lt;&lt;Generator&gt;&gt;
+Package::generator
+{Some Properties}
+--
+- random_state = np.random.RandomState
+- terminals = List(Terminals)
+- customers = List(Customers)
+- transactions = List(Transactions)
+--
+#generate_terminals(n_terminals):None
+#generate_customers(n_customers, radius, 
+max_days_from_compromission, 
+compromission_probability): None
+#generate_transactions(nb_days_to_generate, 
+start_date):None
+#generate():None
+# get_terminals_df():pd.DataFrame
+# get_customers_df():pd.DataFrame
+# get_transactions_df():pd.DataFrame
+# get_dataframes():pd.DataFrame
+--
+Responsibilities
+-- Handles the generation of transactions for all 
+customers and terminals</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>534</x><y>477</y><w>168</w><h>60</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>260;80;260;60;10;60;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>372</x><y>477</y><w>180</w><h>60</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>10;80;10;60;280;60;280;10</additional_attributes></element><element><id>Relation</id><coordinates><x>540</x><y>297</y><w>18</w><h>78</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>10;110;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>372</x><y>297</y><w>186</w><h>240</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>10;380;10;60;290;60;290;10</additional_attributes></element><element><id>Relation</id><coordinates><x>540</x><y>297</y><w>162</w><h>240</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>250;380;250;60;10;60;10;10</additional_attributes></element></diagram>
