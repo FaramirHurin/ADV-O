@@ -65,7 +65,7 @@ def make_classification():
     predictions_proba = []
     discrete_predictions = []
 
-    advo = ADVO(n_jobs=N_JOBS,sampling_strategy=SAMPLE_STRATEGY,random_state=RANDOM_STATE)
+    advo = ADVO(n_jobs=N_JOBS,sampling_strategy=SAMPLE_STRATEGY,random_state=RANDOM_STATE, mimo=True)
     advo.set_transactions(X_train, y_train)
     advo.create_couples()
     regressor_scores = advo.select_best_regressor(candidate_regressors=CANDIDATE_REGRESSORS,parameters_set=CANDIDATE_GRIDS)

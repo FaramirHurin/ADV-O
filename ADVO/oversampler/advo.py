@@ -37,6 +37,7 @@ class ADVO():
         searcher (Type[BaseSearchCV]): the search cross-validation object to use for hyperparameter tuning.
         search_parameters (Dict[str, Any]): a dictionary containing the parameters to use when tuning the regression models.
         regressor (Type[BaseEstimator]): the regressor object to use for training the regression models.
+        mimo (bool): whether to use a multi-input multi-output regressor.
     """
 
 
@@ -50,7 +51,8 @@ class ADVO():
                 searcher: Type[BaseCrossValidator] = RandomizedSearchCV,
                 candidate_regressors = None,
                 search_parameters: Dict[str, Any] = {'alpha': [0.1, 1, 2, 5, 10], 'fit_intercept': [True, False]},
-                regressor: Type[BaseEstimator] = Ridge()):
+                regressor: Type[BaseEstimator] = Ridge(),
+                mimo = False):
         self.transactions_df = transactions_df
         self.n_jobs = n_jobs
         self.random_state = random_state
@@ -63,6 +65,7 @@ class ADVO():
         self.candidate_regressors = candidate_regressors
         self.search_parameters = search_parameters
         self.regressor = regressor
+        self.mimo = mimo
   
 
         # TODO: let the user choose progress_bar and use_memory_fs
@@ -119,7 +122,7 @@ class ADVO():
         self.transactions_df = self.transactions_df.reset_index(drop=True)
 
 
-    def _make_couples(self, group: pd.DataFrame) -> pd.DataFrame: 
+    def _make_consecutive_couples(self, group: pd.DataFrame) -> pd.DataFrame: 
         """
         Create couples of fraudulent transactions for a given customer group.
 
@@ -144,6 +147,34 @@ class ADVO():
         else: 
             return couples_df
             
+    def _make_all_couples(self, group: pd.DataFrame) -> pd.DataFrame: 
+        """
+        Create all possible couples of fraudulent transactions for a given customer group.
+
+        This method takes a DataFrame representing a group of fraudulent transactions for a single customer. It sorts the
+        transactions by date, and then creates all possible couples of transactions by iterating through the transactions
+        and pairing each transaction with all subsequent transactions in the list. The resulting couples are stored in a
+        DataFrame and returned.
+
+        Args:
+            group (pandas.DataFrame): a DataFrame representing a group of fraudulent transactions for a single customer.
+
+        Returns:
+            pandas.DataFrame: a DataFrame containing all possible couples of fraudulent transactions for the given customer.
+        """
+        group = group.sort_values(['TX_DATETIME'], axis=0, ascending=True)
+        couples_df = pd.DataFrame(columns=[*'prev_' + group.columns, *'next_' + group.columns])
+        if group.shape[0] > 1:
+            group_as_list = group.values
+            for i, first_tr in enumerate(group_as_list[:-1]):
+                for second_tr in group_as_list[i+1:]:
+                    a_series = pd.Series([*first_tr, *second_tr], index=couples_df.columns).to_frame().T
+                    couples_df = pd.concat([couples_df, a_series])
+            return couples_df
+        else:
+            return couples_df
+
+
     def create_couples(self):
         """
         Create couples of fraudulent transactions for each customer.
@@ -165,9 +196,9 @@ class ADVO():
         #TODO: let the user choose the columns to keep...
         grouped = clean_frauds_df.groupby('CUSTOMER_ID')
         if self.n_jobs == 1:
-            results = grouped.apply(self._make_couples)
+            results = grouped.apply(self._make_all_couples)
         else:
-            results = grouped.parallel_apply(self._make_couples)
+            results = grouped.parallel_apply(self._make_all_couples)
 
         results.reset_index(inplace=True, drop=True)
         results.drop(['prev_CUSTOMER_ID', 'next_CUSTOMER_ID'], axis = 1, inplace=True)
@@ -179,12 +210,19 @@ class ADVO():
         features_prev = list(map(lambda x: 'prev_' + str(x),  self.useful_features))
         X_train = training_set[features_prev]
 
-        for feature_to_predict in self.useful_features:
-            y_train = training_set['next_'+feature_to_predict]
+        if not self.mimo:
+            for feature_to_predict in self.useful_features:
+                y_train = training_set['next_'+feature_to_predict]
+                search =  self.searcher(self.regressor, self.search_parameters, n_jobs=self.n_jobs, random_state=self.random_state)
+                search.fit(X_train, y_train)
+                regressor = search.best_estimator_
+                self.regressors[feature_to_predict] = regressor
+        else:
+            y_train = training_set[['next_'+feature for feature in self.useful_features]]
             search =  self.searcher(self.regressor, self.search_parameters, n_jobs=self.n_jobs, random_state=self.random_state)
             search.fit(X_train, y_train)
             regressor = search.best_estimator_
-            self.regressors[feature_to_predict] = regressor
+            self.regressors = regressor
 
     def tune_regressors(self, metric: Callable[[np.ndarray, np.ndarray], float] = r2_score) -> None:
         """
@@ -205,19 +243,33 @@ class ADVO():
         X_train = training_set[features_prev]
         X_test = test_set[features_prev]
 
-        for feature_to_predict in self.useful_features:
-            y_train = training_set['next_'+feature_to_predict]
-            y_test = test_set['next_'+feature_to_predict]
-            y_naive = X_test['prev_'+feature_to_predict]
+        if not self.mimo:
+            for feature_to_predict in self.useful_features:
+                y_train = training_set['next_'+feature_to_predict]
+                y_test = test_set['next_'+feature_to_predict]
+                y_naive = X_test['prev_'+feature_to_predict]
+                search =  self.searcher(self.regressor, self.search_parameters, n_jobs=self.n_jobs, random_state=self.random_state)
+                search.fit(X_train, y_train)
+                regressor = search.best_estimator_
+                y_hat = regressor.predict(X_test)
+                regressor.score = metric(y_test, y_hat)
+                regressor.naive_score = metric(y_test, y_naive)
+                regressor.feature_names = X_train.columns
+                self.regressors[feature_to_predict] = regressor
+            
+        else:
+            y_train = training_set[['next_'+feature for feature in self.useful_features]]
+            y_test = test_set[['next_'+feature for feature in self.useful_features]]
+            y_naive = X_test[['prev_'+feature for feature in self.useful_features]]
             search =  self.searcher(self.regressor, self.search_parameters, n_jobs=self.n_jobs, random_state=self.random_state)
             search.fit(X_train, y_train)
             regressor = search.best_estimator_
             y_hat = regressor.predict(X_test)
+            #TODO: check if metric is a function of the whole vector or of each element
             regressor.score = metric(y_test, y_hat)
             regressor.naive_score = metric(y_test, y_naive)
             regressor.feature_names = X_train.columns
-            self.regressors[feature_to_predict] = regressor
-        
+            self.regressors = regressor
         #save regressors in pickle file
         with open("regressors.pkl", 'wb') as f:
             pickle.dump(self.regressors, f)
@@ -301,11 +353,15 @@ class ADVO():
 
         X_train = self.couples[features_prev]
 
-        for feature_to_predict in self.useful_features:
-            regressor = self.regressors[feature_to_predict]
-            y_train = self.couples['next_'+feature_to_predict]
-            regressor.fit(X_train, y_train)
-            
+        if not self.mimo:
+            for feature_to_predict in self.useful_features:
+                regressor = self.regressors[feature_to_predict]
+                y_train = self.couples['next_'+feature_to_predict]
+                regressor.fit(X_train, y_train)
+        else:
+            y_train = self.couples[['next_'+feature for feature in self.useful_features]]
+            self.regressor.fit(X_train, y_train)
+                
     def select_best_regressor(self, candidate_regressors, parameters_set):
             best_score = 0
             naive_scores = {}
