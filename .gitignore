@@ -48,3 +48,6 @@ coverage.xml
 
 # Sphinx documentation
 _build/
+
+# Private data
+realdata/
