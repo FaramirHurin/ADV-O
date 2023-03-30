@@ -18,7 +18,7 @@ class Generator():
             terminal = Terminal(terminal_id, x_terminal_id, y_terminal_id, random_state=self.random_state)
             self.terminals.append(terminal)
 
-    def generate_customers(self, n_customers=200, radius=20, max_days_from_compromission=3, compromission_probability=0.03):
+    def generate_customers(self, n_customers=200, radius=20, max_days_from_compromission=3, compromission_probability=0.03, avg_tx_per_day = [0,2], trx_std_amt = 3 ):
         if not len(self.terminals):
             raise ValueError("You need to generate terminals before generating customers")
         
@@ -27,8 +27,8 @@ class Generator():
             
             x_customer_id, y_customer_id = np.random.uniform(0, 100), np.random.uniform(0, 100)
             mean_amount = np.random.uniform(5, 100)  
-            std_amount = mean_amount / 2  
-            mean_nb_tx_per_day = np.random.uniform(0, 4)
+            std_amount = trx_std_amt
+            mean_nb_tx_per_day = np.random.uniform(avg_tx_per_day[0], avg_tx_per_day[1])
             
             customer = Customer(customer_id, x_customer_id, y_customer_id, radius, mean_amount, std_amount, mean_nb_tx_per_day, max_days_from_compromission, compromission_probability, random_state=self.random_state)
             customer.set_available_terminals(self.terminals)

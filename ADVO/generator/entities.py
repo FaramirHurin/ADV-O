@@ -79,8 +79,8 @@ class Customer():
                 self.x = np.random.beta(a=70, b=30) * 100
                 self.y = np.random.beta(a=20, b=80) * 100
                 
-                self.mean_amt = np.random.normal(self.mean_amt) * FRAUDULENT_MEAN_AMOUNT_FACTOR
-                self.std_amt = np.random.normal(self.std_amt) * FRAUDULENT_STD_AMOUNT_FACTOR
+                self.mean_amt = np.random.normal(self.mean_amt) * FRAUDULENT_MEAN_AMOUNT_FACTOR #TODO Change with mean of users * FRAUDULENT_MEAN_AMOUNT_FACTOR
+                self.std_amt = np.random.normal(self.std_amt) * FRAUDULENT_STD_AMOUNT_FACTOR  #TODO Repeat for standard amount
                 self.set_available_terminals(self.all_terminals)
                 
                 time_tx_seconds = int(np.clip(np.random.normal(86400 / 2, 20000), 0, 86400))
