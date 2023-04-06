@@ -9,12 +9,11 @@ from sklearn.linear_model import Ridge
 from sklearn.neural_network import MLPRegressor
 from sklearn.neighbors import NearestNeighbors
 from sklearn.cluster import MiniBatchKMeans
-from datetime import timedelta, datetime
-import time
+from datetime import timedelta
 
 
 from ADVO.generator import Generator
-from ADVO.oversampler import ADVO
+from ADVO.oversampler import ADVO, TimeGANOverSampler
 from ADVO.utils import evaluate_models, compute_kde_difference_auc
 
 #from ADVO.oversampler import CTGANOverSampler
@@ -55,50 +54,32 @@ def run_advo(X_train, y_train, window_counter):
 
 def make_classification(train_size_days=20, test_size_days=2):
 
-    np.random.seed(RANDOM_STATE)
-    #torch.manual_seed(RANDOM_STATE)
-
-    # Generate transactions data using the GENERATOR instance
-    gen = Generator()
-    gen.generate()
-    transactions_df = gen.get_transactions_df().merge(gen.get_terminals_df(), left_on='TERMINAL_ID', right_on='TERMINAL_ID', how='left')
-    transactions_df['TX_DATETIME'] =  datetime.strptime('2018-04-01', '%Y-%m-%d') +pd.to_timedelta(transactions_df['TX_DAY'], unit='d') + pd.to_timedelta(transactions_df['TX_TIME'], unit='s')
-    
-    # transactions_df = pd.read_csv('dataset.csv', parse_dates=['TX_DATETIME'])
+    #transactions_df = Generator().generate(filename='dataset_six_months.csv',nb_days_to_generate=180)
+    transactions_df = pd.read_csv('utils/dataset_six_months.csv', parse_dates=['TX_DATETIME'])
 
     start_date, end_date = transactions_df['TX_DATETIME'].min(), transactions_df['TX_DATETIME'].max()
     
-    window_start = start_date
-    window_end = start_date + timedelta(days=train_size_days)
-
-    window_counter = 0
-    
+    window_start, window_end, window_counter  = start_date, start_date + timedelta(days=train_size_days), 0
     while window_end <= end_date:
         print('Window: ', window_counter, ' - ', window_start, ' - ', window_end)
 
+        # Split data into train and test according to the window
         train_mask, test_mask = (transactions_df['TX_DATETIME'] >= window_start) & (transactions_df['TX_DATETIME'] < window_end), (transactions_df['TX_DATETIME'] >= window_end) & (transactions_df['TX_DATETIME'] < window_end + timedelta(days=test_size_days))
         X_train, y_train, X_test, y_test = transactions_df[train_mask].drop(columns=['TX_FRAUD']), transactions_df[train_mask]['TX_FRAUD'], transactions_df[test_mask].drop(columns=['TX_FRAUD']), transactions_df[test_mask]['TX_FRAUD']
-
         training_variables, predictions_proba, discrete_predictions = ['X_TERMINAL', 'Y_TERMINAL', 'TX_AMOUNT'], [], []
 
+        # Oversample data using ADVO, SMOTE, RandomOverSampler and KMeansSMOTE
         advo = run_advo(X_train, y_train, window_counter)
         kmeans_smote = KMeansSMOTE(n_jobs=N_JOBS, kmeans_estimator=MiniBatchKMeans(n_init=3),sampling_strategy=SAMPLE_STRATEGY, cluster_balance_threshold=0.01, random_state=RANDOM_STATE).fit_resample(X_train[training_variables], y_train)
         smote = SMOTE(k_neighbors=NearestNeighbors(n_jobs=N_JOBS),sampling_strategy=SAMPLE_STRATEGY,random_state=RANDOM_STATE).fit_resample(X_train[training_variables], y_train)
         random = RandomOverSampler(sampling_strategy=SAMPLE_STRATEGY, random_state=RANDOM_STATE).fit_resample(X_train[training_variables], y_train)
-        
-        # ctgan = CTGANOverSampler(sampling_strategy=SAMPLE_STRATEGY).fit_resample(X_train[training_variables], y_train)
-        # Xy = [(X_train[training_variables], y_train), kmeans_smote, smote, random, ctgan, (advo.transactions_df[advo.useful_features], advo.transactions_df['TX_FRAUD'])]
-        # names = ['Baseline','Baseline_balanced', 'SMOTE','Random', 'KMeansSMOTE', 'CTGAN', 'ADVO']
-
-        Xy = [(X_train[training_variables], y_train), kmeans_smote, smote, random, (advo.transactions_df[advo.useful_features], advo.transactions_df['TX_FRAUD'])]
-        names = ['Baseline','Baseline_balanced', 'SMOTE','Random', 'KMeansSMOTE', 'ADVO']
-
-
+        timegan = TimeGANOversampler(sampling_strategy=SAMPLE_STRATEGY, random_state=RANDOM_STATE).fit_resample(X_train[training_variables+'CUSTOMER_ID'], y_train)
         # Fit and predict using Balanced Random Forest for not-oversampled data AND oversampled data
+        names = ['Baseline','Baseline_balanced', 'SMOTE','Random', 'KMeansSMOTE', 'ADVO']
+        Xy = [(X_train[training_variables], y_train), kmeans_smote, smote, random, (advo.transactions_df[advo.useful_features], advo.transactions_df['TX_FRAUD'])]
         fit_predict(X_train[training_variables],y_train, RandomForestClassifier(n_estimators=N_TREES ,n_jobs=N_JOBS, random_state=RANDOM_STATE) , X_test[training_variables], predictions_proba, discrete_predictions)
         for X, y in Xy:
             fit_predict(X,y,BalancedRandomForestClassifier(n_estimators=N_TREES ,n_jobs=N_JOBS, random_state=RANDOM_STATE) , X_test[training_variables], predictions_proba, discrete_predictions)
-
 
         # Compute metrics
         _, all_metrics = evaluate_models(predictions_proba, discrete_predictions, X_test['CUSTOMER_ID'], names, y_test, K_needed = [50, 100, 200, 500, 1000, 2000])
@@ -107,12 +88,18 @@ def make_classification(train_size_days=20, test_size_days=2):
         trapzs.to_csv('results/trapz_'+str(window_counter)+'.csv', index=False)
         
 
-        window_start = window_end
-        window_end = window_end + timedelta(days=train_size_days)
-        window_counter += 1
-
+        window_start, window_end, window_counter  = window_end, window_end + timedelta(days=train_size_days), window_counter + 1
         print('Window ', window_counter, ' done')
 
-
 if __name__ == '__main__':
+    np.random.seed(RANDOM_STATE)
+    #torch.manual_seed(RANDOM_STATE)
     make_classification(train_size_days=20, test_size_days=2)
+
+
+''' to include ctgan
+    ctgan = CTGANOverSampler(sampling_strategy=SAMPLE_STRATEGY).fit_resample(X_train[training_variables], y_train)
+    names = ['Baseline','Baseline_balanced', 'SMOTE','Random', 'KMeansSMOTE', 'CTGAN', 'ADVO']
+    Xy = [(X_train[training_variables], y_train), kmeans_smote, smote, random, ctgan, (advo.transactions_df[advo.useful_features], advo.transactions_df['TX_FRAUD'])]
+
+'''
