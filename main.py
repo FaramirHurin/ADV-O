@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 from sklearn.model_selection import train_test_split
 from imblearn.over_sampling import SMOTE, RandomOverSampler, KMeansSMOTE
 from imblearn.ensemble import BalancedRandomForestClassifier
@@ -8,6 +9,8 @@ from sklearn.linear_model import Ridge
 from sklearn.neural_network import MLPRegressor
 from sklearn.neighbors import NearestNeighbors
 from sklearn.cluster import MiniBatchKMeans
+from datetime import timedelta, datetime
+import time
 
 
 from ADVO.generator import Generator
@@ -16,8 +19,6 @@ from ADVO.utils import evaluate_models, compute_kde_difference_auc
 
 #from ADVO.oversampler import CTGANOverSampler
 #import torch
-
-
 
 SAMPLE_STRATEGY = 0.18
 N_JOBS = 6
@@ -40,88 +41,84 @@ def fit_predict(X_train,y_train,learner, X_test, predictions_proba, discrete_pre
     y_hat_proba = learner.predict_proba(X_test)[:,1]
     predictions_proba.append(y_hat_proba)
     discrete_predictions.append(y_hat)
-    
-def make_classification():
+
+def run_advo(X_train, y_train):
+    advo = ADVO(n_jobs=N_JOBS,sampling_strategy=SAMPLE_STRATEGY,random_state=RANDOM_STATE, mimo=False)
+    advo.set_transactions(X_train, y_train)
+    advo.create_couples()
+    regressor_scores = advo.select_best_regressor(candidate_regressors=CANDIDATE_REGRESSORS,parameters_set=CANDIDATE_GRIDS)
+    advo.tune_best_regressors()
+    advo.fit_regressors()
+    advo.transactions_df = advo.insert_synthetic_frauds(advo.transactions_df)
+    return advo,regressor_scores
+
+def make_classification(train_size_days=20, test_size_days=2):
 
     np.random.seed(RANDOM_STATE)
     #torch.manual_seed(RANDOM_STATE)
 
-
     # Generate transactions data using the GENERATOR instance
-    gen = Generator(n_customers=N_USERS, n_terminals=N_TERMINALS)
-    #generator.generate()
-    #generator.export()
-
-    gen.load()
-
-
-    # Train Test Split 
-    transactions_df = gen.transactions_df.merge(gen.terminal_profiles_table, left_on='TERMINAL_ID', right_on='TERMINAL_ID', how='left')
-    X, y = transactions_df.drop(columns=['TX_FRAUD']), transactions_df['TX_FRAUD']
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=RANDOM_STATE) 
+    gen = Generator()
+    gen.generate()
+    transactions_df = gen.get_transactions_df().merge(gen.get_terminals_df(), left_on='TERMINAL_ID', right_on='TERMINAL_ID', how='left')
+    transactions_df['TX_DATETIME'] =  datetime.strptime('2018-04-01', '%Y-%m-%d') +pd.to_timedelta(transactions_df['TX_DAY'], unit='d') + pd.to_timedelta(transactions_df['TX_TIME'], unit='s')
     
-    # Initialize useful variables
-    sel = ['x_terminal_id', 'y_terminal_id', 'TX_AMOUNT']
-    predictions_proba = []
-    discrete_predictions = []
+    # transactions_df = pd.read_csv('dataset.csv', parse_dates=['TX_DATETIME'])
 
-    advo = ADVO(n_jobs=N_JOBS,sampling_strategy=SAMPLE_STRATEGY,random_state=RANDOM_STATE, mimo=True)
-    advo.set_transactions(X_train, y_train)
-    advo.create_couples()
-    regressor_scores = advo.select_best_regressor(candidate_regressors=CANDIDATE_REGRESSORS,parameters_set=CANDIDATE_GRIDS)
-    print("Table 6: Synthetic data: R2 scores for the predicted features for various regressors.")
-    print(regressor_scores.round(2))
-
-    advo.tune_best_regressors()
-    advo.fit_regressors()
-    advo.transactions_df = advo.insert_synthetic_frauds(advo.transactions_df)
-    advo_tuple = advo.transactions_df[advo.useful_features], advo.transactions_df['TX_FRAUD']
+    start_date, end_date = transactions_df['TX_DATETIME'].min(), transactions_df['TX_DATETIME'].max()
     
-    kmeans_smote = KMeansSMOTE(n_jobs=N_JOBS, kmeans_estimator=MiniBatchKMeans(n_init=3),sampling_strategy=SAMPLE_STRATEGY, cluster_balance_threshold=0.1, random_state=RANDOM_STATE).fit_resample(X_train[sel], y_train)
-    smote = SMOTE(k_neighbors=NearestNeighbors(n_jobs=N_JOBS),sampling_strategy=SAMPLE_STRATEGY,random_state=RANDOM_STATE).fit_resample(X_train[sel], y_train)
-    random = RandomOverSampler(sampling_strategy=SAMPLE_STRATEGY, random_state=RANDOM_STATE).fit_resample(X_train[sel], y_train)
-    #ctgan = CTGANOverSampler(sampling_strategy=SAMPLE_STRATEGY).fit_resample(X_train[sel], y_train)
+    window_start = start_date
+    window_end = start_date + timedelta(days=train_size_days)
 
-    # Specify oversampling strategies to compare 
-    Xy_resampled = [kmeans_smote, 
-                    smote, 
-                    random, 
-                    #ctgan, 
-                    advo_tuple]
+    window_counter = 0
+    while window_end <= end_date:
+        print('Window: ', window_counter, ' - ', window_start, ' - ', window_end)
+        # Select data for training and testing
+        train_mask = (transactions_df['TX_DATETIME'] >= window_start) & (transactions_df['TX_DATETIME'] < window_end)
+        test_mask = (transactions_df['TX_DATETIME'] >= window_end) & (transactions_df['TX_DATETIME'] < window_end + timedelta(days=test_size_days))
 
-    # Add not oversampled data as first element
-    Xy = [(X_train[sel], y_train)] + Xy_resampled 
-    
-    # Fit and predict using standard Random Forest for not-oversampled data only 
-    names = ['Baseline', 
-            'Baseline_balanced', 
-            'SMOTE', 
-            'Random', 
-            'KMeansSMOTE', 
-            #'CTGAN', 
-            'ADVO']
-            
-    fit_predict(X_train[sel],y_train, RandomForestClassifier(n_estimators=N_TREES ,n_jobs=N_JOBS, random_state=RANDOM_STATE) , X_test[sel], predictions_proba, discrete_predictions)
-    # Fit and predict using Balanced Random Forest for not-oversampled data AND oversampled data
-    for X, y in Xy:
-        fit_predict(X,y,BalancedRandomForestClassifier(n_estimators=N_TREES ,n_jobs=N_JOBS, random_state=RANDOM_STATE) , X_test[sel], predictions_proba, discrete_predictions)
+        X_train, y_train = transactions_df[train_mask].drop(columns=['TX_FRAUD']), transactions_df[train_mask]['TX_FRAUD']
+        X_test, y_test = transactions_df[test_mask].drop(columns=['TX_FRAUD']), transactions_df[test_mask]['TX_FRAUD']
 
-    # Compute metrics
-    K_needed = [50, 100, 200, 500, 1000, 2000]
-    _, all_metrics = evaluate_models(predictions_proba, discrete_predictions, X_test['CUSTOMER_ID'], names, y_test, K_needed)
-    
-    print("\n\nTable 7: Synthetic data: accuracy of oversampling algorithms. All oversampling algorithms have been tested using a Balanced Random Forest. No oversampling has been tested with a classic Random Forest ('Baseline'),  and a Balanced Random Forest ('Baseline balanced').")
-    print(all_metrics.round(2))
+        training_variables = ['X_TERMINAL', 'Y_TERMINAL', 'TX_AMOUNT']
+        predictions_proba = []
+        discrete_predictions = []
 
-    trapzs = compute_kde_difference_auc(Xy,sel, names)
-    
-    print("\n\nTable 8: Synthetic data: AUC of absolute differences between kde")
-    print(trapzs.round(2))
-    
+        advo, regressor_scores = run_advo(X_train, y_train)
+        
+        kmeans_smote = KMeansSMOTE(n_jobs=N_JOBS, kmeans_estimator=MiniBatchKMeans(n_init=3),sampling_strategy=SAMPLE_STRATEGY, cluster_balance_threshold=0.01, random_state=RANDOM_STATE).fit_resample(X_train[training_variables], y_train)
+        smote = SMOTE(k_neighbors=NearestNeighbors(n_jobs=N_JOBS),sampling_strategy=SAMPLE_STRATEGY,random_state=RANDOM_STATE).fit_resample(X_train[training_variables], y_train)
+        random = RandomOverSampler(sampling_strategy=SAMPLE_STRATEGY, random_state=RANDOM_STATE).fit_resample(X_train[training_variables], y_train)
+        
+        # ctgan = CTGANOverSampler(sampling_strategy=SAMPLE_STRATEGY).fit_resample(X_train[training_variables], y_train)
+        # Xy = [(X_train[training_variables], y_train), kmeans_smote, smote, random, ctgan, (advo.transactions_df[advo.useful_features], advo.transactions_df['TX_FRAUD'])]
+        # names = ['Baseline','Baseline_balanced', 'SMOTE','Random', 'KMeansSMOTE', 'CTGAN', 'ADVO']
 
-    regressor_scores.to_csv('regressor_scores.csv', index=False)
-    trapzs.to_csv('trapz.csv', index=False)
-    all_metrics.to_csv('all_metrics.csv', index=False)
+        Xy = [(X_train[training_variables], y_train), kmeans_smote, smote, random, (advo.transactions_df[advo.useful_features], advo.transactions_df['TX_FRAUD'])]
+        names = ['Baseline','Baseline_balanced', 'SMOTE','Random', 'KMeansSMOTE', 'ADVO']
+
+
+        # Fit and predict using Balanced Random Forest for not-oversampled data AND oversampled data
+        fit_predict(X_train[training_variables],y_train, RandomForestClassifier(n_estimators=N_TREES ,n_jobs=N_JOBS, random_state=RANDOM_STATE) , X_test[training_variables], predictions_proba, discrete_predictions)
+        for X, y in Xy:
+            fit_predict(X,y,BalancedRandomForestClassifier(n_estimators=N_TREES ,n_jobs=N_JOBS, random_state=RANDOM_STATE) , X_test[training_variables], predictions_proba, discrete_predictions)
+
+
+        # Compute metrics
+        _, all_metrics = evaluate_models(predictions_proba, discrete_predictions, X_test['CUSTOMER_ID'], names, y_test, K_needed = [50, 100, 200, 500, 1000, 2000])
+        trapzs = compute_kde_difference_auc(Xy,training_variables, names)
+        
+
+        regressor_scores.to_csv('results/regressor_scores_'+str(window_counter)+'.csv', index=False)
+        trapzs.to_csv('results/trapz_'+str(window_counter)+'.csv', index=False)
+        all_metrics.to_csv('results/all_metrics_'+str(window_counter)+'.csv', index=False)
+
+        window_start = window_end
+        window_end = window_end + timedelta(days=train_size_days)
+        window_counter += 1
+
+        print('Window ', window_counter, ' done')
+
 
 if __name__ == '__main__':
-    make_classification()
+    make_classification(train_size_days=20, test_size_days=2)

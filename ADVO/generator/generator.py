@@ -10,6 +10,7 @@ class Generator():
         self.terminals = []
         self.customers = []
         self.transactions = []
+        
 
     def generate_terminals(self, n_terminals = 100):
         self.terminals = []
@@ -34,7 +35,7 @@ class Generator():
             customer.set_available_terminals(self.terminals)
             self.customers.append(customer)        
             
-    def generate_transactions(self, nb_days_to_generate = 8, start_date="2018-04-01") -> None:
+    def generate_transactions(self, nb_days_to_generate = 180, start_date="2018-04-01") -> None:
         self.start_date = start_date
         #TODO: see how to parallelize
         for customer in self.customers:

@@ -59,7 +59,7 @@ class ADVO():
         self.training_frac = training_frac
         self.sampling_strategy = sampling_strategy
         #TODO: let the user choose the features to use
-        self.useful_features = ['x_terminal_id', 'y_terminal_id', 'TX_AMOUNT']
+        self.useful_features = ['X_TERMINAL', 'Y_TERMINAL', 'TX_AMOUNT']
         self.regressors = {}
         self.searcher = searcher
         self.candidate_regressors = candidate_regressors
@@ -190,7 +190,7 @@ class ADVO():
         full_frauds_table = self.transactions_df[self.transactions_df['TX_FRAUD'] == 1]
 
         #TODO: let the user choose the columns to keep...
-        interestig_columns = ['TX_DATETIME', 'CUSTOMER_ID', 'x_terminal_id', 'y_terminal_id', 'TX_AMOUNT', 'TX_FRAUD']
+        interestig_columns = ['TX_DATETIME', 'CUSTOMER_ID', 'X_TERMINAL', 'Y_TERMINAL', 'TX_AMOUNT', 'TX_FRAUD']
         clean_frauds_df = full_frauds_table[interestig_columns].sort_values(['TX_DATETIME'], axis=0, ascending=True)
 
         #TODO: let the user choose the columns to keep...
@@ -297,8 +297,8 @@ class ADVO():
         #new_frauds.loc[:, 'y_terminal_id'] = new_frauds.loc[:, 'y_terminal_id'].apply(lambda x: max(0, min(100, x)))
         
         new_frauds.loc[:, 'TX_AMOUNT'] = new_frauds.loc[:, 'TX_AMOUNT'].round(2)
-        new_frauds.loc[:, 'x_terminal_id'].clip(0, 100, inplace=True)
-        new_frauds.loc[:, 'y_terminal_id'].clip(0, 100, inplace=True)
+        new_frauds.loc[:, 'X_TERMINAL'].clip(0, 100, inplace=True)
+        new_frauds.loc[:, 'Y_TERMINAL'].clip(0, 100, inplace=True)
         
 
         return new_frauds
@@ -375,6 +375,8 @@ class ADVO():
 
                 scores = {}
                 for feature_to_predict in self.useful_features:
+                    print("######")
+                    print(self.regressors)
                     regressor = self.regressors[feature_to_predict]
                     scores[feature_to_predict] = regressor.score
                     naive_scores[feature_to_predict] = regressor.naive_score
