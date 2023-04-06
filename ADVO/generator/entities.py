@@ -124,7 +124,7 @@ class Customer():
             self.y_history['genuine'].append(terminal.y)
 
     def get_dataframe(self) -> pd.DataFrame:
-        customers_df = pd.DataFrame(data=[self.customer_id, self.x, self.y, self.mean_amt, self.std_amt, self.mean_n_transactions, bool(self.compromised) ] , index=['customer_id', 'x_customer', 'y_customer', 'mean_amount', 'std_amount', 'mean_nb_tx_per_day', 'compromised']).T
+        customers_df = pd.DataFrame(data=[self.customer_id, self.x, self.y, self.mean_amt, self.std_amt, self.mean_n_transactions, bool(self.compromised) ] , index=['CUSTOMER_ID', 'X_CUSTOMER', 'Y_CUSTOMER', 'MEAN_AMT', 'STD_AMT', 'MEAN_NB_TX_PER_DAY', 'COMPROMISED']).T
         return customers_df
 
 
@@ -142,7 +142,7 @@ class Terminal():
         return np.sqrt(np.sum(squared_diff_x_y))
 
     def get_dataframe(self) -> pd.DataFrame:
-        return pd.DataFrame([[self.terminal_id, self.x, self.y]], columns=['terminal_id', 'x_terminal', 'y_terminal'])
+        return pd.DataFrame([[self.terminal_id, self.x, self.y]], columns=['TERMINAL_ID', 'X_TERMINAL', 'Y_TERMINAL'])
 
 
 class Transaction():
@@ -155,4 +155,4 @@ class Transaction():
         self.is_fraud = is_fraud        
     
     def get_dataframe(self) -> pd.DataFrame:
-        return pd.DataFrame([[self.tx_time, self.day, self.customer. customer_id,self. terminal.terminal_id, self.amount, self.is_fraud]], columns=['tx_time', 'tx_day', 'customer_id', 'terminal_id','amount', 'is_fraud'])
+        return pd.DataFrame([[self.tx_time, self.day, self.customer. customer_id,self. terminal.terminal_id, self.amount, self.is_fraud]], columns=['TX_TIME', 'TX_DAY', 'CUSTOMER_ID', 'TERMINAL_ID','TX_AMOUNT', 'TX_FRAUD'])
