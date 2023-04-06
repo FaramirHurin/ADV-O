@@ -42,7 +42,7 @@ def fit_predict(X_train,y_train,learner, X_test, predictions_proba, discrete_pre
     predictions_proba.append(y_hat_proba)
     discrete_predictions.append(y_hat)
 
-def run_advo(X_train, y_train):
+def run_advo(X_train, y_train, window_counter):
     advo = ADVO(n_jobs=N_JOBS,sampling_strategy=SAMPLE_STRATEGY,random_state=RANDOM_STATE, mimo=False)
     advo.set_transactions(X_train, y_train)
     advo.create_couples()
@@ -50,7 +50,8 @@ def run_advo(X_train, y_train):
     advo.tune_best_regressors()
     advo.fit_regressors()
     advo.transactions_df = advo.insert_synthetic_frauds(advo.transactions_df)
-    return advo,regressor_scores
+    regressor_scores.to_csv('results/regressor_scores_'+str(window_counter)+'.csv', index=False)
+    return advo
 
 def make_classification(train_size_days=20, test_size_days=2):
 
@@ -71,21 +72,16 @@ def make_classification(train_size_days=20, test_size_days=2):
     window_end = start_date + timedelta(days=train_size_days)
 
     window_counter = 0
+    
     while window_end <= end_date:
         print('Window: ', window_counter, ' - ', window_start, ' - ', window_end)
-        # Select data for training and testing
-        train_mask = (transactions_df['TX_DATETIME'] >= window_start) & (transactions_df['TX_DATETIME'] < window_end)
-        test_mask = (transactions_df['TX_DATETIME'] >= window_end) & (transactions_df['TX_DATETIME'] < window_end + timedelta(days=test_size_days))
 
-        X_train, y_train = transactions_df[train_mask].drop(columns=['TX_FRAUD']), transactions_df[train_mask]['TX_FRAUD']
-        X_test, y_test = transactions_df[test_mask].drop(columns=['TX_FRAUD']), transactions_df[test_mask]['TX_FRAUD']
+        train_mask, test_mask = (transactions_df['TX_DATETIME'] >= window_start) & (transactions_df['TX_DATETIME'] < window_end), (transactions_df['TX_DATETIME'] >= window_end) & (transactions_df['TX_DATETIME'] < window_end + timedelta(days=test_size_days))
+        X_train, y_train, X_test, y_test = transactions_df[train_mask].drop(columns=['TX_FRAUD']), transactions_df[train_mask]['TX_FRAUD'], transactions_df[test_mask].drop(columns=['TX_FRAUD']), transactions_df[test_mask]['TX_FRAUD']
 
-        training_variables = ['X_TERMINAL', 'Y_TERMINAL', 'TX_AMOUNT']
-        predictions_proba = []
-        discrete_predictions = []
+        training_variables, predictions_proba, discrete_predictions = ['X_TERMINAL', 'Y_TERMINAL', 'TX_AMOUNT'], [], []
 
-        advo, regressor_scores = run_advo(X_train, y_train)
-        
+        advo = run_advo(X_train, y_train, window_counter)
         kmeans_smote = KMeansSMOTE(n_jobs=N_JOBS, kmeans_estimator=MiniBatchKMeans(n_init=3),sampling_strategy=SAMPLE_STRATEGY, cluster_balance_threshold=0.01, random_state=RANDOM_STATE).fit_resample(X_train[training_variables], y_train)
         smote = SMOTE(k_neighbors=NearestNeighbors(n_jobs=N_JOBS),sampling_strategy=SAMPLE_STRATEGY,random_state=RANDOM_STATE).fit_resample(X_train[training_variables], y_train)
         random = RandomOverSampler(sampling_strategy=SAMPLE_STRATEGY, random_state=RANDOM_STATE).fit_resample(X_train[training_variables], y_train)
@@ -106,12 +102,10 @@ def make_classification(train_size_days=20, test_size_days=2):
 
         # Compute metrics
         _, all_metrics = evaluate_models(predictions_proba, discrete_predictions, X_test['CUSTOMER_ID'], names, y_test, K_needed = [50, 100, 200, 500, 1000, 2000])
-        trapzs = compute_kde_difference_auc(Xy,training_variables, names)
-        
-
-        regressor_scores.to_csv('results/regressor_scores_'+str(window_counter)+'.csv', index=False)
-        trapzs.to_csv('results/trapz_'+str(window_counter)+'.csv', index=False)
         all_metrics.to_csv('results/all_metrics_'+str(window_counter)+'.csv', index=False)
+        trapzs = compute_kde_difference_auc(Xy,training_variables, names)
+        trapzs.to_csv('results/trapz_'+str(window_counter)+'.csv', index=False)
+        
 
         window_start = window_end
         window_end = window_end + timedelta(days=train_size_days)

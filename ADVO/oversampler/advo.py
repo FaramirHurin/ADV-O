@@ -271,7 +271,7 @@ class ADVO():
             regressor.feature_names = X_train.columns
             self.regressors = regressor
         #save regressors in pickle file
-        with open("regressors.pkl", 'wb') as f:
+        with open("utils/regressors.pkl", 'wb') as f:
             pickle.dump(self.regressors, f)
 
     def _oversample_df(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -374,9 +374,7 @@ class ADVO():
                 self.fit_regressors()
 
                 scores = {}
-                for feature_to_predict in self.useful_features:
-                    print("######")
-                    print(self.regressors)
+                for feature_to_predict in self.useful_features:                    
                     regressor = self.regressors[feature_to_predict]
                     scores[feature_to_predict] = regressor.score
                     naive_scores[feature_to_predict] = regressor.naive_score
