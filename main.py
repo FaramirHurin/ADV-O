@@ -13,7 +13,7 @@ from datetime import timedelta
 
 
 from ADVO.generator import Generator
-from ADVO.oversampler import ADVO
+from ADVO.oversampler import ADVO, TimeGANOverSampler
 from ADVO.utils import evaluate_models, compute_kde_difference_auc
 
 #from ADVO.oversampler import CTGANOverSampler
@@ -73,7 +73,7 @@ def make_classification(train_size_days=20, test_size_days=2):
         kmeans_smote = KMeansSMOTE(n_jobs=N_JOBS, kmeans_estimator=MiniBatchKMeans(n_init=3),sampling_strategy=SAMPLE_STRATEGY, cluster_balance_threshold=0.01, random_state=RANDOM_STATE).fit_resample(X_train[training_variables], y_train)
         smote = SMOTE(k_neighbors=NearestNeighbors(n_jobs=N_JOBS),sampling_strategy=SAMPLE_STRATEGY,random_state=RANDOM_STATE).fit_resample(X_train[training_variables], y_train)
         random = RandomOverSampler(sampling_strategy=SAMPLE_STRATEGY, random_state=RANDOM_STATE).fit_resample(X_train[training_variables], y_train)
-        
+        timegan = TimeGANOversampler(sampling_strategy=SAMPLE_STRATEGY, random_state=RANDOM_STATE).fit_resample(X_train[training_variables+'CUSTOMER_ID'], y_train)
         # Fit and predict using Balanced Random Forest for not-oversampled data AND oversampled data
         names = ['Baseline','Baseline_balanced', 'SMOTE','Random', 'KMeansSMOTE', 'ADVO']
         Xy = [(X_train[training_variables], y_train), kmeans_smote, smote, random, (advo.transactions_df[advo.useful_features], advo.transactions_df['TX_FRAUD'])]
