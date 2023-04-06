@@ -1,5 +1,6 @@
 import numpy as np 
 import pandas as pd
+from datetime import datetime, timedelta
 from ADVO.generator.entities import Terminal, Customer
 
 
@@ -42,10 +43,15 @@ class Generator():
             customer.generate_transactions(nb_days_to_generate)
             self.transactions.extend(customer.transactions)
 
-    def generate(self):
-        self.generate_terminals()
-        self.generate_customers()
-        self.generate_transactions()
+    def generate(self, filename='dataset.csv', n_terminals = 100, n_customers=200, radius=20, max_days_from_compromission=3, compromission_probability=0.03, nb_days_to_generate = 180, start_date="2018-04-01"):
+        self.generate_terminals( n_terminals)
+        self.generate_customers( n_customers, radius, max_days_from_compromission, compromission_probability)
+        self.generate_transactions( nb_days_to_generate, start_date)
+
+        transactions_df = self.get_transactions_df().merge(self.get_terminals_df(), left_on='TERMINAL_ID', right_on='TERMINAL_ID', how='left')
+        transactions_df['TX_DATETIME'] =  datetime.strptime(start_date, '%Y-%m-%d') +pd.to_timedelta(transactions_df['TX_DAY'], unit='d') + pd.to_timedelta(transactions_df['TX_TIME'], unit='s')
+        transactions_df.to_csv('utils/'+filename, index=False)
+        return transactions_df
 
     def get_terminals_df(self, decimals=2) -> pd.DataFrame:
         terminals_list = [terminal.get_dataframe() for terminal in self.terminals]
