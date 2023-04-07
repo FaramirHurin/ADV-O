@@ -13,11 +13,8 @@ from datetime import timedelta
 
 
 from ADVO.generator import Generator
-from ADVO.oversampler import ADVO, TimeGANOverSampler
+from ADVO.oversampler import ADVO, TimeGANOverSampler, CTGANOverSampler
 from ADVO.utils import evaluate_models, compute_kde_difference_auc
-
-#from ADVO.oversampler import CTGANOverSampler
-#import torch
 
 SAMPLE_STRATEGY = 0.18
 N_JOBS = 6
@@ -69,22 +66,25 @@ def make_classification(train_size_days=20, test_size_days=2):
         training_variables, predictions_proba, discrete_predictions = ['X_TERMINAL', 'Y_TERMINAL', 'TX_AMOUNT'], [], []
 
         # Oversample data using ADVO, SMOTE, RandomOverSampler and KMeansSMOTE
-        advo = run_advo(X_train, y_train, window_counter)
-        kmeans_smote = KMeansSMOTE(n_jobs=N_JOBS, kmeans_estimator=MiniBatchKMeans(n_init=3),sampling_strategy=SAMPLE_STRATEGY, cluster_balance_threshold=0.01, random_state=RANDOM_STATE).fit_resample(X_train[training_variables], y_train)
-        smote = SMOTE(k_neighbors=NearestNeighbors(n_jobs=N_JOBS),sampling_strategy=SAMPLE_STRATEGY,random_state=RANDOM_STATE).fit_resample(X_train[training_variables], y_train)
-        random = RandomOverSampler(sampling_strategy=SAMPLE_STRATEGY, random_state=RANDOM_STATE).fit_resample(X_train[training_variables], y_train)
-        timegan = TimeGANOversampler(sampling_strategy=SAMPLE_STRATEGY, random_state=RANDOM_STATE).fit_resample(X_train[training_variables+'CUSTOMER_ID'], y_train)
-        # Fit and predict using Balanced Random Forest for not-oversampled data AND oversampled data
-        names = ['Baseline','Baseline_balanced', 'SMOTE','Random', 'KMeansSMOTE', 'ADVO']
-        Xy = [(X_train[training_variables], y_train), kmeans_smote, smote, random, (advo.transactions_df[advo.useful_features], advo.transactions_df['TX_FRAUD'])]
+        # advo = run_advo(X_train, y_train, window_counter)
+        # kmeans_smote = KMeansSMOTE(n_jobs=N_JOBS, kmeans_estimator=MiniBatchKMeans(n_init=3),sampling_strategy=SAMPLE_STRATEGY, cluster_balance_threshold=0.01, random_state=RANDOM_STATE).fit_resample(X_train[training_variables], y_train)
+        # smote = SMOTE(k_neighbors=NearestNeighbors(n_jobs=N_JOBS),sampling_strategy=SAMPLE_STRATEGY,random_state=RANDOM_STATE).fit_resample(X_train[training_variables], y_train)
+        # random = RandomOverSampler(sampling_strategy=SAMPLE_STRATEGY, random_state=RANDOM_STATE).fit_resample(X_train[training_variables], y_train)
+        timegan = TimeGANOverSampler(sampling_strategy=SAMPLE_STRATEGY, epochs=100, seq_len=4, n_seq=3, hidden_dim=24, gamma=1, noise_dim = 32, dim = 128, batch_size = 32, log_step = 100, learning_rate = 5e-4,random_state=RANDOM_STATE).fit_resample(X_train[training_variables+['CUSTOMER_ID']], y_train)
+        print(timegan[0].tail(50))
+        # ctgan = CTGANOverSampler(sampling_strategy=SAMPLE_STRATEGY,random_state=RANDOM_STATE).fit_resample(X_train[training_variables], y_train)
+    
+        names = ['Baseline','Baseline_balanced', 'SMOTE','Random', 'KMeansSMOTE', 'CTGAN','TIMEGAN', 'ADVO']
+        Xy = [(X_train[training_variables], y_train), kmeans_smote, smote, random, ctgan, timegan, (advo.transactions_df[advo.useful_features], advo.transactions_df['TX_FRAUD'])]
+
         fit_predict(X_train[training_variables],y_train, RandomForestClassifier(n_estimators=N_TREES ,n_jobs=N_JOBS, random_state=RANDOM_STATE) , X_test[training_variables], predictions_proba, discrete_predictions)
         for X, y in Xy:
-            fit_predict(X,y,BalancedRandomForestClassifier(n_estimators=N_TREES ,n_jobs=N_JOBS, random_state=RANDOM_STATE) , X_test[training_variables], predictions_proba, discrete_predictions)
+            fit_predict(X,y, BalancedRandomForestClassifier(n_estimators=N_TREES ,n_jobs=N_JOBS, random_state=RANDOM_STATE) , X_test[training_variables], predictions_proba, discrete_predictions)
 
         # Compute metrics
         _, all_metrics = evaluate_models(predictions_proba, discrete_predictions, X_test['CUSTOMER_ID'], names, y_test, K_needed = [50, 100, 200, 500, 1000, 2000])
         all_metrics.to_csv('results/all_metrics_'+str(window_counter)+'.csv', index=False)
-        trapzs = compute_kde_difference_auc(Xy,training_variables, names)
+        trapzs = compute_kde_difference_auc(Xy, training_variables, names)
         trapzs.to_csv('results/trapz_'+str(window_counter)+'.csv', index=False)
         
 
@@ -93,13 +93,5 @@ def make_classification(train_size_days=20, test_size_days=2):
 
 if __name__ == '__main__':
     np.random.seed(RANDOM_STATE)
-    #torch.manual_seed(RANDOM_STATE)
-    make_classification(train_size_days=20, test_size_days=2)
-
-
-''' to include ctgan
-    ctgan = CTGANOverSampler(sampling_strategy=SAMPLE_STRATEGY).fit_resample(X_train[training_variables], y_train)
-    names = ['Baseline','Baseline_balanced', 'SMOTE','Random', 'KMeansSMOTE', 'CTGAN', 'ADVO']
-    Xy = [(X_train[training_variables], y_train), kmeans_smote, smote, random, ctgan, (advo.transactions_df[advo.useful_features], advo.transactions_df['TX_FRAUD'])]
-
-'''
+    
+    make_classification(train_size_days=21, test_size_days=7)
