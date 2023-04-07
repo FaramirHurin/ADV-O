@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from ydata_synthetic.synthesizers import ModelParameters
 from ydata_synthetic.synthesizers.timeseries import TimeGAN
+from sklearn.preprocessing import MinMaxScaler
 
 
 
@@ -31,11 +32,19 @@ class TimeGANOverSampler():
         return temp_data
 
 
-    def fit_resample(self, train_X, train_Y):
-        df = pd.concat([train_X, train_Y], axis=1)
-        frauds_df = df.loc[df['TX_FRAUD']==1]
-        frauds_df.drop(columns=['TX_FRAUD'], inplace=True)
-        groups = frauds_df.groupby("CUSTOMER_ID")
+    def fit_resample(self, X_train, y_train):
+        
+        df = pd.concat([X_train, y_train], axis=1)
+
+        frauds_df = df.loc[df['TX_FRAUD']==1].drop(columns=['TX_FRAUD']).copy()
+        variables = X_train.columns.drop(['CUSTOMER_ID'])
+        #min max scaler
+        min_max_scaler = MinMaxScaler(feature_range=(0, 1))
+        frauds_df_scaled = min_max_scaler.fit_transform(frauds_df[variables])
+        frauds_df_scaled = pd.DataFrame(frauds_df_scaled, columns=variables)
+        frauds_df_scaled['CUSTOMER_ID'] = frauds_df['CUSTOMER_ID'].reset_index(drop=True)
+
+        groups = frauds_df_scaled.groupby("CUSTOMER_ID")
 
         # Loop through each group
         subseries_list = []
@@ -46,7 +55,8 @@ class TimeGANOverSampler():
                 subseries_list.extend(subseries)    
             else:
                 continue
-        
+
+
         gan_args = ModelParameters(batch_size=self.batch_size,
                                 lr=self.learning_rate,
                                 noise_dim=self.noise_dim,
@@ -58,17 +68,20 @@ class TimeGANOverSampler():
 
         num_frauds = frauds_df.shape[0]
         num_synthetic_frauds = int((self.sampling_strategy)*df.shape[0]) - num_frauds
-
         synth_data = synth.sample(num_synthetic_frauds//self.seq_len)
 
         synthetic_data = pd.DataFrame()
         for i in range(len(synth_data)):
             synthetic_data = synthetic_data.append(pd.DataFrame(synth_data[i]), ignore_index=True)
 
-        synthetic_data['TX_FRAUD'] = 1
+        #demin max scaler
+        synthetic_data_unscaled = min_max_scaler.inverse_transform(synthetic_data)
+        synthetic_data_unscaled = pd.DataFrame(synthetic_data_unscaled, columns=variables)
+        synthetic_data_unscaled['TX_FRAUD'] = 1
         df.drop(columns=['CUSTOMER_ID'], inplace=True)
-        synthetic_data.columns = df.columns
-        augmented_df = pd.concat([synthetic_data, df], axis=0)
+        synthetic_data_unscaled.columns = df.columns
+        augmented_df = pd.concat([synthetic_data_unscaled, df], axis=0).reset_index(drop=True)
 
-        return augmented_df.drop(columns=['TX_FRAUD']), augmented_df['TX_FRAUD'], synthetic_data
+
+        return augmented_df.drop(columns=['TX_FRAUD']), augmented_df['TX_FRAUD']
 
