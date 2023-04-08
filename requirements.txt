@@ -8,4 +8,4 @@ scikit-learn
 scipy
 seaborn==0.12.2
 torch==1.13.1
-ydata-synthetic
+ydata-synthetic[all]
