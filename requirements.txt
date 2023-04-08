@@ -1,4 +1,4 @@
-ctgan==0.7.1
+ctgan
 functions==0.7.0
 imbalanced_learn==0.10.1
 imblearn==0.0
