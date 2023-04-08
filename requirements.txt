@@ -1,13 +1,11 @@
 ctgan
-functions==0.7.0
-imbalanced_learn==0.10.1
-imblearn==0.0
+imblearn
 matplotlib==3.7.1
 numpy==1.23.5
 pandarallel==1.6.4
 pandas==1.5.3
-scikit_learn==1.2.2
+scikit-learn
 scipy
 seaborn==0.12.2
 torch==1.13.1
-ydata_synthetic
+ydata-synthetic
