@@ -10,4 +10,4 @@ scikit_learn==1.2.2
 scipy
 seaborn==0.12.2
 torch==1.13.1
-ydata_synthetic==1.0.1
+ydata_synthetic
