@@ -11,6 +11,6 @@ nvidia-docker run \
 --shm-size=50G  \
 --volume "/media/hdd3/worldline_home:/app/worldline_home:Z" \
 --volume "/media/hdd3/dlunghi_docker_volume/CleanPipeline:/app/CleanPipeline:Z" \
---volume "/home/gpaldino/git/ADV-O:/app/ADV-O:Z"
+--volume "/home/gpaldino/git/ADV-O:/app/ADV-O:Z" \
 --publish 9999:9999 \
 advo-image
