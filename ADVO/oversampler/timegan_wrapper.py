@@ -1,7 +1,5 @@
 from os import path
 import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
 from ydata_synthetic.synthesizers import ModelParameters
 from ydata_synthetic.synthesizers.timeseries import TimeGAN
 from sklearn.preprocessing import MinMaxScaler
@@ -48,7 +46,7 @@ class TimeGANOverSampler():
 
         # Loop through each group
         subseries_list = []
-        for group_id, group_df in groups:
+        for _, group_df in groups:
             group_df.drop(columns=['CUSTOMER_ID'], inplace=True)
             if len(group_df) >= self.seq_len:
                 subseries = self._cut(group_df.values, self.seq_len)

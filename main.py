@@ -3,18 +3,15 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from imblearn.over_sampling import SMOTE, RandomOverSampler, KMeansSMOTE
 from imblearn.ensemble import BalancedRandomForestClassifier
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.linear_model import Ridge
 from sklearn.neural_network import MLPRegressor
 from sklearn.neighbors import NearestNeighbors
 from sklearn.cluster import MiniBatchKMeans
 from datetime import timedelta
-
-
-from ADVO.generator import Generator
-from ADVO.oversampler import ADVO, TimeGANOverSampler, CTGANOverSampler
-from ADVO.utils import evaluate_models, compute_kde_difference_auc
+from advo.generator import Generator
+from advo.oversampler import ADVO, TimeGANOverSampler, CTGANOverSampler
+from advo.utils import evaluate_models, compute_kde_difference_auc
 
 SAMPLE_STRATEGY = 0.18
 N_JOBS = 10
