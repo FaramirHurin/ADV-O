@@ -67,17 +67,15 @@ if __name__ == "__main__":
 
     # create a new dataframe where each row is a method, each column is a dataset, and the values are just the last metric
     methods = dataframe.columns
-    result_df = pd.DataFrame(columns=dataframes_dict.keys(), index=methods)
-
-    for dataset_name, df in dataframes_dict.items():
-        #TODO: call it 'PRAUC' in the results rather than picking the first row here
-        result_df[dataset_name] = df.iloc[1,:]
-
-    #TODO: remove random noise when we have the real results
-    result_df = result_df.applymap(lambda x: x + np.random.rand() / 10)
-    result_df = result_df.T
-
-    print(result_df)
     
-    ## FRIEDMAN TEST
-    perform_friedman_nemenyi_test("friedman_test", result_df)
+
+    metrics = ['PRAUC','PRAUC_C','Precision','Recall','F1','Pk50','Pk100','Pk200','Pk500','Pk1000','Pk2000']
+    
+    for idx,metric in enumerate(metrics):
+        result_df = pd.DataFrame(columns=dataframes_dict.keys(), index=methods)
+        for dataset_name, df in dataframes_dict.items():
+            #TODO: call it 'PRAUC' in the results rather than picking the first row here
+            result_df[dataset_name] = df.iloc[idx,:]
+
+        ## FRIEDMAN TEST
+        perform_friedman_nemenyi_test("friedman_test_"+metric, result_df)

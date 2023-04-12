@@ -107,13 +107,10 @@ class Customer():
                 self.transactions.append(transaction)
 
     def _set_following_fraudster_coordinates(self, last_terminal_x, last_terminal_y):
-        small_x = last_terminal_x / 100
-        small_y = last_terminal_y / 100
-
-        X = (small_x * 0.75 - 0.06 * small_y + 0.08 * small_x ** 2 + 0.5 * small_y ** 2 - small_x * small_y * 0.3) * 100
-        Y = (small_x * 0.3 + 0.85 * small_y - 0.3 * small_x ** 2 + 0.1 * small_y ** 2 - small_x * small_y * 0.3) * 100
-
-        return  np.random.beta(a=X, b=5) * 100, np.random.beta(a=Y, b=5) * 100
+        X = (np.sin(last_terminal_x) + np.cos(last_terminal_y) +2)/4 * 100
+        Y = (np.sin(last_terminal_y) + np.cos(last_terminal_x) +2)/4 * 100
+        
+        return  X,Y
 
     def _update_coordinate_history(self, terminal, fraud=False):
         if fraud:
