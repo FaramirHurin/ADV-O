@@ -1,7 +1,7 @@
 import numpy as np 
 import pandas as pd
 from datetime import datetime, timedelta
-from ADVO.generator.entities import Terminal, Customer
+from advo.generator.entities import Terminal, Customer
 
 
 class Generator():

@@ -363,7 +363,7 @@ class ADVO():
             self.regressor.fit(X_train, y_train)
                 
     def select_best_regressor(self, candidate_regressors, parameters_set):
-            best_score = 0
+            best_score = np.NINF
             naive_scores = {}
             scores_df = pd.DataFrame()
             for idx, candidate_regressor in enumerate(candidate_regressors):
