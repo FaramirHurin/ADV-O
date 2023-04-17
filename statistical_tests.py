@@ -12,16 +12,18 @@ from utils.orange_library import *
 
 RESULTS_FOLDER = "results/"
 
-def perform_friedman_nemenyi_test(filename, dataframe, alpha = 0.05):
+def perform_friedman_nemenyi_test(filename, metric, dataframe, alpha = 0.05):
     
     nrows = dataframe.shape[0]
     ncols = dataframe.shape[1]
     
+    print(dataframe)
     #perform ranking of the results
     ranking = pd.DataFrame(dataframe)
     for i in range(nrows):
-        ranking.iloc[i,:] = rankdata(dataframe.iloc[i,:])
+        ranking.iloc[i,:] = rankdata( 1 - dataframe.iloc[i,:])
     
+    print(ranking)
     #compute average of rankings
     avranks = [0]*ncols
     for i in range(ncols):
@@ -36,14 +38,14 @@ def perform_friedman_nemenyi_test(filename, dataframe, alpha = 0.05):
     critical_value = f.ppf(q = 1 - alpha, dfn = df1, dfd = df2)
 
     if (im > critical_value):
-        print("H0 Rejected, proceeding")
+        print(metric, "H0 Rejected, proceeding")
         
         cd = compute_CD(avranks, nrows, str(alpha))
-        path = RESULTS_FOLDER+filename+"_CD.png"
+        path = RESULTS_FOLDER+filename+"_"+metric+"_CD.png"
         graph_ranks(avranks, dataframe.columns, cd=cd, width=6, textspace=1, filename=path, bbox_inches="tight")
         
     else:
-        print("Cannot reject H0, stop.")
+        print(metric,"Cannot reject H0, stop.")
 
 
 
@@ -78,4 +80,4 @@ if __name__ == "__main__":
             result_df[dataset_name] = df.iloc[idx,:]
 
         ## FRIEDMAN TEST
-        perform_friedman_nemenyi_test("friedman_test_"+metric, result_df)
+        perform_friedman_nemenyi_test("friedman_test",metric, result_df.T)
