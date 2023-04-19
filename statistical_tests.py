@@ -20,7 +20,7 @@ def perform_friedman_nemenyi_test(filename, dataframe, alpha = 0.05):
     #perform ranking of the results
     ranking = pd.DataFrame(dataframe)
     for i in range(nrows):
-        ranking.iloc[i,:] = rankdata(dataframe.iloc[i,:])
+        ranking.iloc[i,:] = rankdata(1 - dataframe.iloc[i,:])
     
     #compute average of rankings
     avranks = [0]*ncols

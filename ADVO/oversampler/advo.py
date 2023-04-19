@@ -9,6 +9,7 @@ from sklearn.model_selection import BaseCrossValidator
 from sklearn.linear_model import Ridge
 from sklearn.metrics import r2_score
 import pickle
+from ..generator import  Generator
 
 class ADVO():
     

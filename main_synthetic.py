@@ -9,9 +9,9 @@ from sklearn.neural_network import MLPRegressor
 from sklearn.neighbors import NearestNeighbors
 from sklearn.cluster import MiniBatchKMeans
 from datetime import timedelta
-from advo.generator import Generator
-from advo.oversampler import ADVO, TimeGANOverSampler, CTGANOverSampler
-from advo.utils import evaluate_models, compute_kde_difference_auc
+from ADVO.generator import Generator
+from ADVO.oversampler import ADVO, TimeGANOverSampler, CTGANOverSampler
+from ADVO.utils import evaluate_models, compute_kde_difference_auc
 
 SAMPLE_STRATEGY = 0.18
 N_JOBS = 10
@@ -25,7 +25,7 @@ RANDOM_GRID_RIDGE = {'alpha': [int(x) for x in np.linspace(start = 0.001, stop =
 RANDOM_GRID_NN = {'hidden_layer_sizes': [int(x) for x in np.linspace(start = 1, stop = 41, num = 80)], 'alpha': [int(x) for x in np.linspace(start = 0.005, stop = 0.02, num = 100)]}
 
 
-CANDIDATE_REGRESSORS = [MLPRegressor(max_iter=2000, random_state=RANDOM_STATE), Ridge(random_state=RANDOM_STATE), RandomForestRegressor(random_state=RANDOM_STATE)]
+CANDIDATE_REGRESSORS = [MLPRegressor(max_iter=10000, random_state=RANDOM_STATE, hidden_layer_sizes=10), Ridge(random_state=RANDOM_STATE), RandomForestRegressor(random_state=RANDOM_STATE, n_estimators=10)]
 CANDIDATE_GRIDS = [RANDOM_GRID_NN, RANDOM_GRID_RIDGE, RANDOM_GRID_RF]
 
 def fit_predict(X_train,y_train,learner, X_test, predictions_proba, discrete_predictions):
@@ -40,15 +40,16 @@ def run_advo(X_train, y_train, window_counter):
     advo.set_transactions(X_train, y_train)
     advo.create_couples()
     regressor_scores = advo.select_best_regressor(candidate_regressors=CANDIDATE_REGRESSORS,parameters_set=CANDIDATE_GRIDS)
+    print(regressor_scores.iloc[:, :-1])
     advo.tune_best_regressors()
     advo.fit_regressors()
     advo.transactions_df = advo.insert_synthetic_frauds(advo.transactions_df)
     regressor_scores.to_csv('results/regressor_scores_'+str(window_counter)+'.csv', index=False)
     return advo
 
-def make_classification(train_size_days=20, test_size_days=2):
+def make_classification(train_size_days=2, test_size_days=1):
 
-    transactions_df = Generator().generate(filename='dataset_six_months.csv',nb_days_to_generate=365, max_days_from_compromission=5)
+    transactions_df = Generator().generate(filename='dataset_six_months.csv' ,nb_days_to_generate=10, n_terminals = 8000, n_customers=400, compromission_probability=0.1, max_days_from_compromission=15)
     #transactions_df = pd.read_csv('utils/dataset_six_months.csv', parse_dates=['TX_DATETIME'])
 
     start_date, end_date = transactions_df['TX_DATETIME'].min(), transactions_df['TX_DATETIME'].max()
@@ -89,5 +90,5 @@ def make_classification(train_size_days=20, test_size_days=2):
 
 if __name__ == '__main__':
     np.random.seed(RANDOM_STATE)
-    
-    make_classification(train_size_days=21, test_size_days=7)
+    print('Working')
+    make_classification(train_size_days=6, test_size_days=1)
