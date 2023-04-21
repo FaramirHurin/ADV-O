@@ -32,14 +32,14 @@ class Customer():
         self.available_terminals_weights = []
         self.transactions = []
 
+        self.kdtree = KDTree([(terminal.x, terminal.y) for terminal in self.all_terminals])
+
         self.set_available_terminals()
 
     def get_closest_terminal(self):
-        # Build the k-d tree
-        tree = KDTree([(terminal.x, terminal.y) for terminal in self.all_terminals])
-
+        
         # Find the index of the closest terminal and its distance
-        _, closest_index = tree.query((self.x, self.y))
+        _, closest_index = self.kdtree.query((self.x, self.y))
 
         # Get the closest terminal's coordinates
         closest_terminal = self.all_terminals[closest_index]
@@ -50,11 +50,8 @@ class Customer():
         self.available_terminals = []
         self.available_terminals_weights = []
 
-        # Build the k-d tree
-        tree = KDTree([(terminal.x, terminal.y) for terminal in self.all_terminals])
-
         # Find indices of terminals within the radius
-        indices_within_radius = tree.query_ball_point([self.x, self.y], self.radius)
+        indices_within_radius = self.kdtree.query_ball_point([self.x, self.y], self.radius)
 
         for index in indices_within_radius:
             terminal = self.all_terminals[index]

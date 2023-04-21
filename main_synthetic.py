@@ -50,7 +50,7 @@ def run_advo(X_train, y_train, window_counter):
 
 def make_classification(train_size_days=2, test_size_days=1):
 
-    transactions_df = Generator(n_jobs=N_JOBS).generate(filename='dataset_six_months.csv', nb_days_to_generate=180, max_days_from_compromission=3, n_terminals = N_TERMINALS, n_customers=N_USERS)
+    transactions_df = Generator(n_jobs=N_JOBS).generate(filename='dataset_six_months.csv', nb_days_to_generate=180, max_days_from_compromission=3, n_terminals = N_TERMINALS, n_customers=N_USERS, radius=30)
     #transactions_df = pd.read_csv('utils/dataset_six_months.csv', parse_dates=['TX_DATETIME'])
 
     start_date, end_date = transactions_df['TX_DATETIME'].min(), transactions_df['TX_DATETIME'].max()
