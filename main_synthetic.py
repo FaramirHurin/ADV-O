@@ -64,7 +64,7 @@ def make_classification(train_size_days=2, test_size_days=1):
 
         # Oversample data using ADVO, SMOTE, RandomOverSampler and KMeansSMOTE
         advo = run_advo(X_train, y_train, window_counter)
-        kmeans_smote = KMeansSMOTE(n_jobs=N_JOBS, kmeans_estimator=MiniBatchKMeans(n_init=3),sampling_strategy=SAMPLE_STRATEGY, cluster_balance_threshold=0.01, random_state=RANDOM_STATE).fit_resample(X_train[training_variables], y_train)
+        kmeans_smote = KMeansSMOTE(n_jobs=N_JOBS, kmeans_estimator=MiniBatchKMeans(n_init=3),sampling_strategy=SAMPLE_STRATEGY, cluster_balance_threshold=0.0025, random_state=RANDOM_STATE).fit_resample(X_train[training_variables], y_train)
         smote = SMOTE(k_neighbors=NearestNeighbors(n_jobs=N_JOBS),sampling_strategy=SAMPLE_STRATEGY,random_state=RANDOM_STATE).fit_resample(X_train[training_variables], y_train)
         random = RandomOverSampler(sampling_strategy=SAMPLE_STRATEGY, random_state=RANDOM_STATE).fit_resample(X_train[training_variables], y_train)
         timegan = TimeGANOverSampler(sampling_strategy=SAMPLE_STRATEGY, epochs=100, seq_len=4, n_seq=3, hidden_dim=24, gamma=1, noise_dim = 32, dim = 128, batch_size = 32, log_step = 100, learning_rate = 5e-4,random_state=RANDOM_STATE).fit_resample(X_train[training_variables+['CUSTOMER_ID']], y_train)
