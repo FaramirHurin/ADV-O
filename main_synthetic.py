@@ -48,7 +48,7 @@ def run_advo(X_train, y_train, window_counter):
 
 def make_classification(train_size_days=2, test_size_days=1):
 
-    transactions_df = Generator().generate(filename='dataset_six_months.csv' ,nb_days_to_generate=10, n_terminals = 8000, n_customers=400, compromission_probability=0.1, max_days_from_compromission=15)
+    transactions_df = Generator().generate(filename='dataset_six_months.csv',nb_days_to_generate=365, max_days_from_compromission=5)
     #transactions_df = pd.read_csv('utils/dataset_six_months.csv', parse_dates=['TX_DATETIME'])
 
     start_date, end_date = transactions_df['TX_DATETIME'].min(), transactions_df['TX_DATETIME'].max()
