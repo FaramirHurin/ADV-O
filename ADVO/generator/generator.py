@@ -36,7 +36,6 @@ class Generator():
                    terminal_profiles_table['y'], s=0.1,
                    color='blue')
         plt.title('Locations of terminals')
-        plt.show()
 
     def generate_customers(self, n_customers=200, radius=20, max_days_from_compromission=3, compromission_probability=0.03):
         if not len(self.terminals):
@@ -62,7 +61,6 @@ class Generator():
                     customer_profiles_table['y'], s=0.1,
                     color='red')
         plt.title('Locations of customers')
-        plt.show()
 
     def generate_transactions(self, nb_days_to_generate = 180, start_date="2018-04-01") -> None:
         self.start_date = start_date
