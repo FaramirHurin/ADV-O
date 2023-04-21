@@ -17,7 +17,7 @@ SAMPLE_STRATEGY = 0.18
 N_JOBS = 10
 N_TREES = 20
 N_USERS = 10000
-N_TERMINALS = 1000
+N_TERMINALS = 5000
 RANDOM_STATE = 42
 
 RANDOM_GRID_RF = {'n_estimators': [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000], 'max_features': [1, 'sqrt', 'log2'], 'max_depth': [5, 16, 28, 40, None], 'min_samples_split': [10, 25, 50], 'min_samples_leaf': [4, 8, 32], 'bootstrap': [True, False]}
