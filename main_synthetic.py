@@ -40,7 +40,6 @@ def run_advo(X_train, y_train, window_counter):
     advo.set_transactions(X_train, y_train)
     advo.create_couples()
     regressor_scores = advo.select_best_regressor(candidate_regressors=CANDIDATE_REGRESSORS,parameters_set=CANDIDATE_GRIDS)
-    print(regressor_scores.iloc[:, :-1])
     advo.tune_best_regressors()
     advo.fit_regressors()
     advo.transactions_df = advo.insert_synthetic_frauds(advo.transactions_df)
@@ -90,5 +89,4 @@ def make_classification(train_size_days=2, test_size_days=1):
 
 if __name__ == '__main__':
     np.random.seed(RANDOM_STATE)
-    print('Working')
     make_classification(train_size_days=6, test_size_days=1)
