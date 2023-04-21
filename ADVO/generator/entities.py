@@ -7,7 +7,7 @@ FRAUDULENT_MEAN_AMOUNT_FACTOR = 0.9
 FRAUDULENT_STD_AMOUNT_FACTOR = 1.3
 
 class Customer():
-    def __init__(self, customer_id: int, x: float, y: float, 
+    def __init__(self, customer_id: int, x: float, y: float,
                 radius: float, mean_amt: float, std_amt: float,
                 mean_n_transactions:int, max_days_from_compromission:int,
                 compromission_probability: float, random_state: np.random.RandomState, 
@@ -36,14 +36,15 @@ class Customer():
         self.available_terminals_weights = []
         
         for terminal in self.all_terminals:
-            dist = terminal.distance_to_point(self.x, self.y)
+            dist = terminal.distance_to_point(self.x, self.y) ** 3 ## Probabilty decreases with the cube of the distance
             if dist < self.radius:
                 self.available_terminals.append(terminal)
                 # self.available_terminals_weights.append(np.exp(-dist**2))
                 self.available_terminals_weights.append(1/dist)
         # Normalize weights so that they sum to 1
         self.available_terminals_weights = [weight / sum(self.available_terminals_weights) for weight in self.available_terminals_weights]
-
+        if len(self.available_terminals) == 0:
+            DEBUG=0
     #TODO: Add a parameter to specify the number of days to generate transactions for
     def generate_transactions(self, n_days):
         
@@ -62,6 +63,7 @@ class Customer():
                 else:
                     self._generate_genuine_transactions(today_n_transactions, day)
                     self.compromised = self.random_state.binomial(1, self.compromission_probability)
+        DEBUG = 0
 
     def _generate_genuine_transactions(self, today_n_transactions, day):
         for _ in range(today_n_transactions):
@@ -75,15 +77,19 @@ class Customer():
     def _generate_fraudulent_transactions(self, today_n_transactions, day):
         for _ in range(today_n_transactions):
             if not self.transactions[-1].is_fraud: 
-                # If the last transaction was not fraud, generate a first fraud 
-                self.x = np.random.beta(a=70, b=30) * 100
-                self.y = np.random.beta(a=20, b=80) * 100
+                # If the last transaction was not fraud, generate a first fraud
+                radius = np.random.beta(a=70, b=30) * 50
+                theta = np.random.beta(a=20, b=80) * 50
+                self.x = radius * np.cos(theta) # np.random.beta(a=70, b=30) * 100
+                self.y = radius * np.sin(theta) # np.random.beta(a=20, b=80) * 100
                 
                 self.mean_amt = np.random.normal(self.mean_amt) * FRAUDULENT_MEAN_AMOUNT_FACTOR
                 self.std_amt = np.random.normal(self.std_amt) * FRAUDULENT_STD_AMOUNT_FACTOR
                 self.set_available_terminals(self.all_terminals)
                 
                 time_tx_seconds = int(np.clip(np.random.normal(86400 / 2, 20000), 0, 86400))
+                while time_tx_seconds < self.transactions[-1].tx_time:
+                    time_tx_seconds = int(np.clip(np.random.normal(86400 / 2, 20000), 0, 86400))
                 amount = np.round(np.clip(np.random.normal(loc=self.mean_amt, scale=self.std_amt), 0, None), decimals=2)
                 terminal = self.random_state.choice(self.available_terminals, p=self.available_terminals_weights)
                 self._update_coordinate_history(terminal, fraud=True)
@@ -96,8 +102,11 @@ class Customer():
                 self.x, self.y = self._set_following_fraudster_coordinates(last_terminal_x, last_terminal_y)
                 
                 self.set_available_terminals(self.all_terminals)
-                if day == last_fraud_day: # if not the first fraud of the day 
-                    time_tx_seconds = int(np.clip(last_fraud_time + abs(np.random.normal(loc=0, scale=30000)), 0, 86400))
+                if day == last_fraud_day: # if not the first fraud of the day
+                    time_tx_seconds = int(np.clip(np.random.normal(86400 / 2, 20000), 0, 86400))
+                    while time_tx_seconds < self.transactions[-1].tx_time:
+                        time_tx_seconds = int(np.clip(np.random.normal(86400 / 2, 20000), 0, 86400))
+                    # time_tx_seconds = int(np.clip(last_fraud_time + abs(np.random.normal(loc=0, scale=30000)), 0, 86400))
                 else:
                     time_tx_seconds = int(np.clip(np.random.normal(86400 / 2, 20000), 0, 86400))
                 amount = np.abs(np.random.normal(1.1 * last_fraud_amount - 0.2 * last_terminal_x + 0.7 + last_terminal_y * 0.1, self.std_amt / 2))
@@ -107,9 +116,8 @@ class Customer():
                 self.transactions.append(transaction)
 
     def _set_following_fraudster_coordinates(self, last_terminal_x, last_terminal_y):
-        X = (np.sin(last_terminal_x) + np.cos(last_terminal_y) +2)/4 * 100
-        Y = (np.sin(last_terminal_y) + np.cos(last_terminal_x) +2)/4 * 100
-        
+        X = (np.sin(last_terminal_x) + np.cos(last_terminal_y))/2 * 50
+        Y = (np.sin(last_terminal_y) + np.cos(last_terminal_x))/2 * 50
         return  X,Y
 
     def _update_coordinate_history(self, terminal, fraud=False):

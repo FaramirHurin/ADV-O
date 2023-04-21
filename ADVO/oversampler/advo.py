@@ -9,6 +9,7 @@ from sklearn.model_selection import BaseCrossValidator
 from sklearn.linear_model import Ridge
 from sklearn.metrics import r2_score
 import pickle
+from ..generator import  Generator
 
 class ADVO():
     
@@ -196,9 +197,9 @@ class ADVO():
         #TODO: let the user choose the columns to keep...
         grouped = clean_frauds_df.groupby('CUSTOMER_ID')
         if self.n_jobs == 1:
-            results = grouped.apply(self._make_all_couples)
+            results = grouped.apply(self._make_consecutive_couples)
         else:
-            results = grouped.parallel_apply(self._make_all_couples)
+            results = grouped.parallel_apply(self._make_consecutive_couples)
 
         results.reset_index(inplace=True, drop=True)
         results.drop(['prev_CUSTOMER_ID', 'next_CUSTOMER_ID'], axis = 1, inplace=True)
