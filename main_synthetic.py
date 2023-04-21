@@ -12,12 +12,14 @@ from datetime import timedelta
 from ADVO.generator import Generator
 from ADVO.oversampler import ADVO, TimeGANOverSampler, CTGANOverSampler
 from ADVO.utils import evaluate_models, compute_kde_difference_auc
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 SAMPLE_STRATEGY = 0.18
 N_JOBS = 10
 N_TREES = 20
 N_USERS = 10000
-N_TERMINALS = 5000
+N_TERMINALS = 500
 RANDOM_STATE = 42
 
 RANDOM_GRID_RF = {'n_estimators': [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000], 'max_features': [1, 'sqrt', 'log2'], 'max_depth': [5, 16, 28, 40, None], 'min_samples_split': [10, 25, 50], 'min_samples_leaf': [4, 8, 32], 'bootstrap': [True, False]}
@@ -48,7 +50,7 @@ def run_advo(X_train, y_train, window_counter):
 
 def make_classification(train_size_days=2, test_size_days=1):
 
-    transactions_df = Generator().generate(filename='dataset_six_months.csv', nb_days_to_generate=365, max_days_from_compromission=5, n_terminals = N_TERMINALS, n_customers=N_USERS )
+    transactions_df = Generator(n_jobs=N_JOBS).generate(filename='dataset_six_months.csv', nb_days_to_generate=180, max_days_from_compromission=3, n_terminals = N_TERMINALS, n_customers=N_USERS, random_state=RANDOM_STATE)
     #transactions_df = pd.read_csv('utils/dataset_six_months.csv', parse_dates=['TX_DATETIME'])
 
     start_date, end_date = transactions_df['TX_DATETIME'].min(), transactions_df['TX_DATETIME'].max()

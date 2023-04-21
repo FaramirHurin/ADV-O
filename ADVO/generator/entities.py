@@ -2,6 +2,8 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from typing import List, Tuple
+import numpy as np
+from scipy.spatial import KDTree
 
 FRAUDULENT_MEAN_AMOUNT_FACTOR = 0.9
 FRAUDULENT_STD_AMOUNT_FACTOR = 1.3
@@ -11,7 +13,7 @@ class Customer():
                 radius: float, mean_amt: float, std_amt: float,
                 mean_n_transactions:int, max_days_from_compromission:int,
                 compromission_probability: float, random_state: np.random.RandomState, 
-                compromised: bool = False):
+                compromised: bool = False, terminals: List['Terminal'] = []):
         self.customer_id = customer_id
         self.x = x
         self.y = y
@@ -25,26 +27,48 @@ class Customer():
         self.max_days_from_compromission = max_days_from_compromission
         self.compromission_probability = compromission_probability
         self.random_state = random_state
-        self.all_terminals = []
-        self.available_terminals = []
-        self.available_terminals_weights = []
-        self.transactions = []
-        
-    def set_available_terminals(self, terminals):
         self.all_terminals = terminals
         self.available_terminals = []
         self.available_terminals_weights = []
-        
-        for terminal in self.all_terminals:
-            dist = terminal.distance_to_point(self.x, self.y) ** 3 ## Probabilty decreases with the cube of the distance
-            if dist < self.radius:
-                self.available_terminals.append(terminal)
-                # self.available_terminals_weights.append(np.exp(-dist**2))
-                self.available_terminals_weights.append(1/dist)
+        self.transactions = []
+
+        self.set_available_terminals()
+
+    def get_closest_terminal(self):
+        # Build the k-d tree
+        tree = KDTree([(terminal.x, terminal.y) for terminal in self.all_terminals])
+
+        # Find the index of the closest terminal and its distance
+        _, closest_index = tree.query((self.x, self.y))
+
+        # Get the closest terminal's coordinates
+        closest_terminal = self.all_terminals[closest_index]
+
+        return closest_terminal    
+
+    def set_available_terminals(self):
+        self.available_terminals = []
+        self.available_terminals_weights = []
+
+        # Build the k-d tree
+        tree = KDTree([(terminal.x, terminal.y) for terminal in self.all_terminals])
+
+        # Find indices of terminals within the radius
+        indices_within_radius = tree.query_ball_point([self.x, self.y], self.radius)
+
+        for index in indices_within_radius:
+            terminal = self.all_terminals[index]
+            dist = terminal.distance_to_point(self.x, self.y) ** 3
+            self.available_terminals.append(terminal)
+            self.available_terminals_weights.append(1/dist)
+
         # Normalize weights so that they sum to 1
-        self.available_terminals_weights = [weight / sum(self.available_terminals_weights) for weight in self.available_terminals_weights]
-        if len(self.available_terminals) == 0:
+        if len(self.available_terminals_weights) > 0:
+            self.available_terminals_weights = [weight / sum(self.available_terminals_weights) for weight in self.available_terminals_weights]
+        else:
             DEBUG=0
+
+
     #TODO: Add a parameter to specify the number of days to generate transactions for
     def generate_transactions(self, n_days):
         
@@ -69,7 +93,10 @@ class Customer():
         for _ in range(today_n_transactions):
             time_tx_seconds = int(np.clip(np.random.normal(86400 / 2, 20000), 0, 86400)) # Mean 12pm, std 5.5h
             amount = np.round(np.clip(np.random.normal(self.mean_amt, self.std_amt),0, None), decimals=2)
-            terminal = self.random_state.choice(self.available_terminals, p=self.available_terminals_weights)
+            
+            # terminal = self.random_state.choice(self.available_terminals, p=self.available_terminals_weights)
+            terminal = self.get_closest_terminal()
+
             self._update_coordinate_history(terminal)
             transaction = Transaction(time_tx_seconds,day, self, terminal, amount, False)
             self.transactions.append(transaction)
@@ -85,13 +112,16 @@ class Customer():
                 
                 self.mean_amt = np.random.normal(self.mean_amt) * FRAUDULENT_MEAN_AMOUNT_FACTOR
                 self.std_amt = np.random.normal(self.std_amt) * FRAUDULENT_STD_AMOUNT_FACTOR
-                self.set_available_terminals(self.all_terminals)
+                self.set_available_terminals()
                 
                 time_tx_seconds = int(np.clip(np.random.normal(86400 / 2, 20000), 0, 86400))
                 while time_tx_seconds < self.transactions[-1].tx_time:
                     time_tx_seconds = int(np.clip(np.random.normal(86400 / 2, 20000), 0, 86400))
                 amount = np.round(np.clip(np.random.normal(loc=self.mean_amt, scale=self.std_amt), 0, None), decimals=2)
-                terminal = self.random_state.choice(self.available_terminals, p=self.available_terminals_weights)
+                
+                # terminal = self.random_state.choice(self.available_terminals, p=self.available_terminals_weights)
+                terminal = self.get_closest_terminal()
+
                 self._update_coordinate_history(terminal, fraud=True)
                 transaction = Transaction(time_tx_seconds,day, self, terminal, amount, True)
                 self.transactions.append(transaction)
@@ -101,7 +131,7 @@ class Customer():
                 last_terminal_x, last_terminal_y, last_fraud_day, last_fraud_time, last_fraud_amount = last_transaction.terminal.x, last_transaction.terminal.y, last_transaction.day, last_transaction.tx_time, last_transaction.amount
                 self.x, self.y = self._set_following_fraudster_coordinates(last_terminal_x, last_terminal_y)
                 
-                self.set_available_terminals(self.all_terminals)
+                self.set_available_terminals()
                 if day == last_fraud_day: # if not the first fraud of the day
                     time_tx_seconds = int(np.clip(np.random.normal(86400 / 2, 20000), 0, 86400))
                     while time_tx_seconds < self.transactions[-1].tx_time:
@@ -110,7 +140,9 @@ class Customer():
                 else:
                     time_tx_seconds = int(np.clip(np.random.normal(86400 / 2, 20000), 0, 86400))
                 amount = np.abs(np.random.normal(1.1 * last_fraud_amount - 0.2 * last_terminal_x + 0.7 + last_terminal_y * 0.1, self.std_amt / 2))
-                terminal = self.random_state.choice(self.available_terminals, p=self.available_terminals_weights)
+                # terminal = self.random_state.choice(self.available_terminals, p=self.available_terminals_weights)
+                terminal = self.get_closest_terminal()
+                
                 self._update_coordinate_history(terminal, fraud=True)
                 transaction = Transaction(time_tx_seconds,day, self, terminal, amount, True)
                 self.transactions.append(transaction)
