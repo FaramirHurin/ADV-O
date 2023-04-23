@@ -7,16 +7,17 @@ from multiprocessing import Pool
 
 class Generator():
 
-    def __init__(self, random_state = 42, n_jobs = 1):
+    def __init__(self, radius=10, random_state = 42, n_jobs = 1):
         self.random_state = np.random.RandomState(random_state)
         self.terminals = []
         self.customers = []
         self.transactions = []
         self.n_jobs = n_jobs
+        self.radius = radius
         
 
     def generate_object(self):
-        r = np.random.random() * 50
+        r = np.random.random() * self.radius
         theta = np.random.random() * 2 * np.pi
         x = r * np.cos(theta)
         y = r * np.sin(theta)
@@ -107,7 +108,7 @@ class Generator():
         for result in results:
             self.transactions.extend(result)
 
-    def generate(self, filename='dataset.csv', n_terminals = 100, n_customers=200, radius=20, max_days_from_compromission=3, compromission_probability=0.03, nb_days_to_generate = 180, start_date="2018-04-01"):
+    def generate(self, filename='dataset.csv', n_terminals = 100, n_customers=200, radius=20, max_days_from_compromission=3, compromission_probability=0.02, nb_days_to_generate = 180, start_date="2018-04-01"):
         self.generate_terminals( n_terminals)
         self.generate_customers( n_customers, radius, max_days_from_compromission, compromission_probability)
         self.generate_transactions( nb_days_to_generate, start_date)

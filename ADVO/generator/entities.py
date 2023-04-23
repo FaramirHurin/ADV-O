@@ -5,8 +5,8 @@ from typing import List, Tuple
 import numpy as np
 from scipy.spatial import KDTree
 
-FRAUDULENT_MEAN_AMOUNT_FACTOR = 0.9
-FRAUDULENT_STD_AMOUNT_FACTOR = 1.3
+FRAUDULENT_MEAN_AMOUNT_FACTOR = 0.95
+FRAUDULENT_STD_AMOUNT_FACTOR = 1.1
 
 class Customer():
     def __init__(self, customer_id: int, x: float, y: float,
@@ -70,7 +70,9 @@ class Customer():
     def generate_transactions(self, n_days):
         
         if not len(self.available_terminals):  # Check if there are available terminals
-            raise ValueError(f"Customer {self.customer_id} does not have available terminals, make sure you have called the set_available_terminals functions and that the radius is not too small")
+            print('X and Y are' + str(self.x) + ' '+ str(self.y))
+            print(self.x, self.y)
+            raise ValueError(f"Customer {self.customer_id} does not have available terminals, make sure you have called the set_available_terminals functions and that the radius is not too small fjiedrfj0jedWSTFIJKRUY+LOPèòED3wsfjrtuy247+iklop890èò")
         
         self.transactions = []
         days_from_compromission = 0  # Number of max frauds days before card blocking
@@ -102,8 +104,8 @@ class Customer():
         for _ in range(today_n_transactions):
             if not self.transactions[-1].is_fraud: 
                 # If the last transaction was not fraud, generate a first fraud
-                radius = np.random.beta(a=70, b=30) * 50
-                theta = np.random.beta(a=20, b=80) * 50
+                radius = np.random.beta(a=70, b=30) * self.radius
+                theta = np.random.beta(a=20, b=80) * self.radius
                 self.x = radius * np.cos(theta) # np.random.beta(a=70, b=30) * 100
                 self.y = radius * np.sin(theta) # np.random.beta(a=20, b=80) * 100
                 
@@ -136,7 +138,7 @@ class Customer():
                     # time_tx_seconds = int(np.clip(last_fraud_time + abs(np.random.normal(loc=0, scale=30000)), 0, 86400))
                 else:
                     time_tx_seconds = int(np.clip(np.random.normal(86400 / 2, 20000), 0, 86400))
-                amount = np.abs(np.random.normal(1.1 * last_fraud_amount - 0.2 * last_terminal_x + 0.7 + last_terminal_y * 0.1, self.std_amt / 2))
+                amount = np.abs(np.random.normal(0.95 * last_fraud_amount + 0.2 * last_terminal_x + 0.7 + last_terminal_y * 0.1, self.std_amt / 2))
                 # terminal = self.random_state.choice(self.available_terminals, p=self.available_terminals_weights)
                 terminal = self.get_closest_terminal()
                 

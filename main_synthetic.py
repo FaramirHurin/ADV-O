@@ -16,7 +16,7 @@ import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 SAMPLE_STRATEGY = 0.18
-N_JOBS = 35
+N_JOBS = 20
 N_TREES = 20
 N_USERS = 10000
 N_TERMINALS = 1000
@@ -45,13 +45,13 @@ def run_advo(X_train, y_train, window_counter):
     advo.tune_best_regressors()
     advo.fit_regressors()
     advo.transactions_df = advo.insert_synthetic_frauds(advo.transactions_df)
-    regressor_scores.to_csv('results/regressor_scores_'+str(window_counter)+'.csv', index=False)
+    regressor_scores.to_csv('results_synthetic/regressor_scores_'+str(window_counter)+'.csv', index=False)
     return advo
 
 def make_classification(train_size_days=2, test_size_days=1):
 
-    transactions_df = Generator(n_jobs=N_JOBS).generate(filename='dataset_six_months.csv', nb_days_to_generate=180, max_days_from_compromission=3, n_terminals = N_TERMINALS, n_customers=N_USERS, radius=30)
-    #transactions_df = pd.read_csv('utils/dataset_six_months.csv', parse_dates=['TX_DATETIME'])
+    #transactions_df = Generator(n_jobs=N_JOBS).generate(filename='dataset_six_months.csv', nb_days_to_generate=180, max_days_from_compromission=3, n_terminals = N_TERMINALS, n_customers=N_USERS, radius=30)
+    transactions_df = pd.read_csv('utils/dataset_six_months.csv', parse_dates=['TX_DATETIME'])
 
     start_date, end_date = transactions_df['TX_DATETIME'].min(), transactions_df['TX_DATETIME'].max()
     
@@ -81,9 +81,9 @@ def make_classification(train_size_days=2, test_size_days=1):
 
         # Compute metrics
         _, all_metrics = evaluate_models(predictions_proba, discrete_predictions, X_test['CUSTOMER_ID'], names, y_test, K_needed = [50, 100, 200, 500, 1000, 2000])
-        all_metrics.to_csv('results/all_metrics_'+str(window_counter)+'.csv', index=False)
+        all_metrics.to_csv('results_synthetic/all_metrics_'+str(window_counter)+'.csv', index=False)
         trapzs = compute_kde_difference_auc(Xy, training_variables, names)
-        trapzs.to_csv('results/trapz_'+str(window_counter)+'.csv', index=False)
+        trapzs.to_csv('results_synthetic/trapz_'+str(window_counter)+'.csv', index=False)
         
 
         window_start, window_end, window_counter  = window_end, window_end + timedelta(days=train_size_days), window_counter + 1

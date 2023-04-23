@@ -10,7 +10,7 @@ import math
 
 from utils.orange_library import *
 
-RESULTS_FOLDER = "results_real/"
+RESULTS_FOLDER = "results_synthetic/"
 
 def perform_friedman_nemenyi_test(filename, dataframe, alpha = 0.05):
     
@@ -76,6 +76,6 @@ if __name__ == "__main__":
         for dataset_name, df in dataframes_dict.items():
             #TODO: call it 'PRAUC' in the results rather than picking the first row here
             result_df[dataset_name] = df.iloc[idx,:]
-        result_df.T.to_csv('results_real/dataFrame_results'+str(metric)+'.csv', index=True)
+        result_df.T.to_csv(RESULTS_FOLDER+'/dataFrame_results'+str(metric)+'.csv', index=True)
         ## FRIEDMAN TEST
         perform_friedman_nemenyi_test("friedman_test_"+metric, result_df.T)
