@@ -15,20 +15,22 @@ from ADVO.utils import evaluate_models, compute_kde_difference_auc
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
-SAMPLE_STRATEGY = 0.18
-N_JOBS = 20
+SAMPLE_STRATEGY = 0.1
+N_JOBS = 1
 N_TREES = 20
-N_USERS = 10000
+N_USERS = 28000
 N_TERMINALS = 1000
 RANDOM_STATE = 42
+COMPROMISSION_PROBABILITY = 0.001
+DAYS=100
 
 RANDOM_GRID_RF = {'n_estimators': [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000], 'max_features': [1, 'sqrt', 'log2'], 'max_depth': [5, 16, 28, 40, None], 'min_samples_split': [10, 25, 50], 'min_samples_leaf': [4, 8, 32], 'bootstrap': [True, False]}
 RANDOM_GRID_RIDGE = {'alpha': [int(x) for x in np.linspace(start = 0.001, stop = 1, num = 100)], 'fit_intercept': [True, False]}
-RANDOM_GRID_NN = {'hidden_layer_sizes': [int(x) for x in np.linspace(start = 1, stop = 41, num = 80)], 'alpha': [int(x) for x in np.linspace(start = 0.005, stop = 0.02, num = 100)]}
+#RANDOM_GRID_NN = {'hidden_layer_sizes': [int(x) for x in np.linspace(start = 1, stop = 41, num = 80)], 'alpha': [int(x) for x in np.linspace(start = 0.005, stop = 0.02, num = 100)]}
 
 
-CANDIDATE_REGRESSORS = [MLPRegressor(max_iter=10000, random_state=RANDOM_STATE, hidden_layer_sizes=10), Ridge(random_state=RANDOM_STATE), RandomForestRegressor(random_state=RANDOM_STATE, n_estimators=10)]
-CANDIDATE_GRIDS = [RANDOM_GRID_NN, RANDOM_GRID_RIDGE, RANDOM_GRID_RF]
+CANDIDATE_REGRESSORS = [ Ridge(random_state=RANDOM_STATE), RandomForestRegressor(random_state=RANDOM_STATE)]  #MLPRegressor(max_iter=10000, random_state=RANDOM_STATE, hidden_layer_sizes=10),
+CANDIDATE_GRIDS = [RANDOM_GRID_RIDGE, RANDOM_GRID_RF]  #RANDOM_GRID_NN,
 
 def fit_predict(X_train,y_train,learner, X_test, predictions_proba, discrete_predictions):
     learner.fit(X_train, y_train)
@@ -48,9 +50,9 @@ def run_advo(X_train, y_train, window_counter):
     regressor_scores.to_csv('results_synthetic/regressor_scores_'+str(window_counter)+'.csv', index=False)
     return advo
 
-def make_classification(train_size_days=2, test_size_days=1):
+def make_classification(train_size_days=10, test_size_days=10):
 
-    #transactions_df = Generator(n_jobs=N_JOBS).generate(filename='dataset_six_months.csv', nb_days_to_generate=180, max_days_from_compromission=3, n_terminals = N_TERMINALS, n_customers=N_USERS, radius=30)
+    transactions_df = Generator(n_jobs=1, radius=8).generate(filename='dataset_six_months.csv', nb_days_to_generate=DAYS, max_days_from_compromission=7, n_terminals = N_TERMINALS, n_customers=N_USERS, compromission_probability= COMPROMISSION_PROBABILITY)
     transactions_df = pd.read_csv('utils/dataset_six_months.csv', parse_dates=['TX_DATETIME'])
 
     start_date, end_date = transactions_df['TX_DATETIME'].min(), transactions_df['TX_DATETIME'].max()
@@ -66,7 +68,7 @@ def make_classification(train_size_days=2, test_size_days=1):
 
         # Oversample data using ADVO, SMOTE, RandomOverSampler and KMeansSMOTE
         advo = run_advo(X_train, y_train, window_counter)
-        kmeans_smote = KMeansSMOTE(n_jobs=N_JOBS, kmeans_estimator=MiniBatchKMeans(n_init=3),sampling_strategy=SAMPLE_STRATEGY, cluster_balance_threshold=0.0025, random_state=RANDOM_STATE).fit_resample(X_train[training_variables], y_train)
+        kmeans_smote = KMeansSMOTE(n_jobs=N_JOBS, kmeans_estimator=MiniBatchKMeans(n_init=3),sampling_strategy=SAMPLE_STRATEGY, cluster_balance_threshold=0.001, random_state=RANDOM_STATE).fit_resample(X_train[training_variables], y_train)
         smote = SMOTE(k_neighbors=NearestNeighbors(n_jobs=N_JOBS),sampling_strategy=SAMPLE_STRATEGY,random_state=RANDOM_STATE).fit_resample(X_train[training_variables], y_train)
         random = RandomOverSampler(sampling_strategy=SAMPLE_STRATEGY, random_state=RANDOM_STATE).fit_resample(X_train[training_variables], y_train)
         timegan = TimeGANOverSampler(sampling_strategy=SAMPLE_STRATEGY, epochs=100, seq_len=4, n_seq=3, hidden_dim=24, gamma=1, noise_dim = 32, dim = 128, batch_size = 32, log_step = 100, learning_rate = 5e-4,random_state=RANDOM_STATE).fit_resample(X_train[training_variables+['CUSTOMER_ID']], y_train)
@@ -82,8 +84,8 @@ def make_classification(train_size_days=2, test_size_days=1):
         # Compute metrics
         _, all_metrics = evaluate_models(predictions_proba, discrete_predictions, X_test['CUSTOMER_ID'], names, y_test, K_needed = [50, 100, 200, 500, 1000, 2000])
         all_metrics.to_csv('results_synthetic/all_metrics_'+str(window_counter)+'.csv', index=False)
-        trapzs = compute_kde_difference_auc(Xy, training_variables, names)
-        trapzs.to_csv('results_synthetic/trapz_'+str(window_counter)+'.csv', index=False)
+        #trapzs = compute_kde_difference_auc(Xy, training_variables, names)
+        #trapzs.to_csv('results_synthetic/trapz_'+str(window_counter)+'.csv', index=False)
         
 
         window_start, window_end, window_counter  = window_end, window_end + timedelta(days=train_size_days), window_counter + 1
@@ -91,4 +93,4 @@ def make_classification(train_size_days=2, test_size_days=1):
 
 if __name__ == '__main__':
     np.random.seed(RANDOM_STATE)
-    make_classification(train_size_days=6, test_size_days=1)
+    make_classification(train_size_days=20, test_size_days=20)

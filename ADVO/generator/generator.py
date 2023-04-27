@@ -3,6 +3,7 @@ import pandas as pd
 from datetime import datetime, timedelta
 from ADVO.generator.entities import Terminal, Customer
 import matplotlib.pyplot as plt
+
 from multiprocessing import Pool
 
 class Generator():
@@ -17,8 +18,12 @@ class Generator():
         
 
     def generate_object(self):
-        r = np.random.random() * self.radius
-        theta = np.random.random() * 2 * np.pi
+        r= np.random.beta(a=60, b=40) * self.radius
+        theta = np.random.beta(a=50, b=50) * self.radius
+        #self.x = radius * np.cos(theta)  # np.random.beta(a=70, b=30) * 100
+        #self.y = radius * np.sin(theta)  # np.random.beta(a=20, b=80) * 100
+        #r = np.random.random() * self.radius
+        #theta = np.random.random() * 2 * np.pi
         x = r * np.cos(theta)
         y = r * np.sin(theta)
         return x, y
@@ -48,7 +53,7 @@ class Generator():
 
     def generate_customer(self, customer_id, terminals, radius, mean_amount, std_amount, mean_nb_tx_per_day, max_days_from_compromission, compromission_probability):
         x_customer_id, y_customer_id = self.generate_object()
-        customer = Customer(customer_id, x_customer_id, y_customer_id, radius, mean_amount, std_amount, mean_nb_tx_per_day, max_days_from_compromission, compromission_probability, random_state=self.random_state, terminals=terminals)
+        customer = Customer(customer_id, x_customer_id, y_customer_id, radius, mean_amount, std_amount, mean_nb_tx_per_day, max_days_from_compromission, compromission_probability, random_state=self.random_state, terminals=terminals, radius_to_be=self.radius)
         print('Customer {} generated'.format(customer_id), end='\r')
         return customer
 
@@ -103,7 +108,11 @@ class Generator():
         self.transactions = []
 
         with Pool(self.n_jobs) as pool:
-            results = pool.starmap(self.generate_transactions_for_customer, [(customer, nb_days_to_generate) for customer in self.customers])
+            try:
+                results = pool.starmap(self.generate_transactions_for_customer, [(customer, nb_days_to_generate) for customer in self.customers])
+            except:
+                DEBUG =0
+                results = pool.starmap(self.generate_transactions_for_customer, [(customer, nb_days_to_generate) for customer in self.customers])
 
         for result in results:
             self.transactions.extend(result)
