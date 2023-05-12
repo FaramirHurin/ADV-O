@@ -1,0 +1,5 @@
+,Baseline,Baseline_balanced,SMOTE,Random,KMeansSMOTE,CTGAN,TIMEGAN,ADVO
+dataset1,0.265,0.09,0.285,0.12,0.15,0.175,0.235,0.23
+dataset2,0.235,0.075,0.2,0.06,0.15,0.22,0.265,0.265
+dataset3,0.105,0.075,0.165,0.125,0.1,0.125,0.16,0.145
+dataset4,0.255,0.075,0.28,0.105,0.12,0.165,0.22,0.215

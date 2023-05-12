@@ -53,3 +53,6 @@ _build/
 realdata/
 
 ./generator_main.py
+
+results_real/
+.ipynb_checkpoints/
