@@ -1,0 +1,74 @@
+
+\documentclass[12pt]{article}
+\usepackage{multirow}
+\usepackage{graphicx}
+
+\begin{document}
+
+\title{Model Comparison}
+\author{Your Name}
+\date{July 2023}
+\maketitle
+
+
+\begin{table}[]
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|l|ll|ll|ll|ll|}
+\hline
+& \multicolumn{2}{c|}{MLPRegressor} & \multicolumn{2}{c|}{Ridge} & \multicolumn{2}{c|}{RandomForestRegressor} & \multicolumn{2}{c|}{Naive} \\
+\cline{2-9}
+& Mean & Std & Mean & Std & Mean & Std & Mean & Variance \\
+\hline
+next\_X\_TERMINAL & -4.40 & 78.59 & 0.19 & 0.017 & 0.21 & 0.008 & -6.55e+08 & 8.92e+18 \\
+next\_Y\_TERMINAL & 0.035 & 6.01 & 0.93 & 0.001 & 0.93 & 0.001 & -3.28e+07 & 4.57e+16 \\
+next\_TX\_AMOUNT & 0.12 & 0.025 & 0.13 & 0.023 & 0.085 & 0.076 & -0.16 & 0.048 \\
+\hline
+\end{tabular}%
+}
+\caption{r2\_f2f\_real}
+\label{tab:model_metrics}
+\end{table}
+
+
+\begin{table}[]
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|l|ll|ll|ll|ll|}
+\hline
+& \multicolumn{2}{c|}{MLPRegressor} & \multicolumn{2}{c|}{Ridge} & \multicolumn{2}{c|}{RandomForestRegressor} & \multicolumn{2}{c|}{Naive} \\
+\cline{2-9}
+& Mean & Std & Mean & Std & Mean & Std & Mean & Variance \\
+\hline
+next\_X\_TERMINAL & -0.90 & 0.50 & -0.03 & 0.0011 & -0.05 & 0.0018 & -9.71e+07 & 6.41e+16 \\
+next\_Y\_TERMINAL & -0.02 & 0.00074 & -0.01 & 0.00029 & 0.0084 & 0.00051 & -7.64e+05 & 3.13e+12 \\
+next\_TX\_AMOUNT & -0.03 & 0.0017 & -0.0082 & 0.00032 & -0.0034 & 0.00066 & -0.31 & 0.19 \\
+\hline
+\end{tabular}%
+}
+\caption{r2\_g2f\_real}
+\label{tab:model_metrics}
+\end{table}
+
+
+\begin{table}[]
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|l|ll|ll|ll|ll|}
+\hline
+& \multicolumn{2}{c|}{MLPRegressor} & \multicolumn{2}{c|}{Ridge} & \multicolumn{2}{c|}{RandomForestRegressor} & \multicolumn{2}{c|}{Naive} \\
+\cline{2-9}
+& Mean & Std & Mean & Std & Mean & Std & Mean & Variance \\
+\hline
+next\_X\_TERMINAL & 0.938 & 0.00023 & 0.914 & 0.00023 & 0.948 & 0.00020 & -150.87 & 46111.70 \\
+next\_Y\_TERMINAL & 0.930 & 0.00022 & 0.899 & 0.00027 & 0.950 & 0.00017 & -105.09 & 22282.78 \\
+next\_TX\_AMOUNT & 0.858 & 0.00023 & 0.855 & 0.00023 & 0.825 & 0.00025 & -0.35 & 0.71 \\
+\hline
+\end{tabular}%
+}
+\caption{r2\_f2f\_synth}
+\label{tab:model_metrics}
+\end{table}
+
+
+
+
+
+\end{document}
