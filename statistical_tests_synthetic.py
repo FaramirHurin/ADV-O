@@ -56,6 +56,7 @@ if __name__ == "__main__":
     for filename in os.listdir(RESULTS_FOLDER):
         if filename.startswith("all_metrics"):
             dataframe = pd.read_csv(os.path.join(RESULTS_FOLDER, filename))
+            dataframe = dataframe.rename(columns={"TIMEGAN": "TimeGAN ADV-O", "ADVO": "MIMO ADV-O"})
             results_list.append(dataframe)
 
     

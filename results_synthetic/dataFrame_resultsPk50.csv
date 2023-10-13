@@ -1,4 +1,4 @@
-,Baseline,Baseline_balanced,SMOTE,Random,KMeansSMOTE,CTGAN,TIMEGAN,ADVO
+,Baseline,Baseline_balanced,SMOTE,Random,KMeansSMOTE,CTGAN,TimeGAN ADV-O,MIMO ADV-O
 dataset1,0.68,0.06,0.88,0.5,0.58,0.6,0.62,0.8
 dataset2,0.62,0.08,0.36,0.4,0.58,0.74,0.86,0.92
 dataset3,0.5,0.0,0.26,0.44,0.38,0.48,0.48,0.44
