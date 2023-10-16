@@ -58,3 +58,5 @@ realdata/
 
 main*.py
 main*.ipynb
+MAIN*.py
+MAIN*.ipynb
