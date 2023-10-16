@@ -55,3 +55,6 @@ realdata/
 ./generator_main.py
 
 .ipynb_checkpoints/
+
+main*.py
+main*.ipynb
