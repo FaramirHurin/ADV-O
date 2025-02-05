@@ -50,10 +50,14 @@ def run_advo(X_train, y_train, window_counter):
     regressor_scores.to_csv('results_synthetic/regressor_scores_'+str(window_counter)+'.csv', index=False)
     return advo
 
-def make_classification(train_size_days=10, test_size_days=10):
+def make_classification(train_size_days=10, test_size_days=10, load = True):
 
-    transactions_df = Generator(n_jobs=1, radius=8).generate(filename='dataset_six_months.csv', nb_days_to_generate=DAYS, max_days_from_compromission=7, n_terminals = N_TERMINALS, n_customers=N_USERS, compromission_probability= COMPROMISSION_PROBABILITY)
-    transactions_df = pd.read_csv('utils/dataset_six_months.csv', parse_dates=['TX_DATETIME'])
+    
+    if load:
+        transactions_df = pd.read_csv('utils/dataset_six_months.csv', parse_dates=['TX_DATETIME'])
+    else:
+        transactions_df = Generator(n_jobs=1, radius=8).generate(filename='dataset_six_months.csv', nb_days_to_generate=DAYS, max_days_from_compromission=7, n_terminals = N_TERMINALS, n_customers=N_USERS, compromission_probability= COMPROMISSION_PROBABILITY)
+        
 
     start_date, end_date = transactions_df['TX_DATETIME'].min(), transactions_df['TX_DATETIME'].max()
     
@@ -93,4 +97,4 @@ def make_classification(train_size_days=10, test_size_days=10):
 
 if __name__ == '__main__':
     np.random.seed(RANDOM_STATE)
-    make_classification(train_size_days=20, test_size_days=20)
+    make_classification(train_size_days=20, test_size_days=20, load=True)
