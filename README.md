@@ -28,6 +28,7 @@ The repository is expected to be extended in the future. <br>
 
 ## Visit our 🏠 [Homepage](https://FaramirHurin.github.io/ADV-O/) for the documentation!
 
+Tested on Python 3.10
 This work is based on the [transaction data simulator](https://fraud-detection-handbook.github.io/fraud-detection-handbook/Chapter_3_GettingStarted/SimulatedDataset.html) described in the [Fraud Detection Handbook](https://fraud-detection-handbook.github.io/fraud-detection-handbook/Foreword.html) by [Le Borgne et al.](https://fraud-detection-handbook.github.io/fraud-detection-handbook/Foreword.html#authors)
 
 If you use this work, you should cite: 
