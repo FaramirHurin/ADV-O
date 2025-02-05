@@ -47,7 +47,7 @@ publisher={Universit{\'e} Libre de Bruxelles}
 git clone https://github.com/FaramirHurin/ADV-O.git
 cd ADV-O
 pip install -r requirements.txt
-python main.py
+python main_synthetic.py
 ```
 
 ### 🦾 Demo
