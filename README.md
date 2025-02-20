@@ -33,6 +33,17 @@ This work is based on the [transaction data simulator](https://fraud-detection-h
 
 If you use this work, you should cite: 
 ```
+@ARTICLE{10332176,
+  author={Lunghi, Daniele and Paldino, Gian Marco and Caelen, Olivier and Bontempi, Gianluca},
+  journal={IEEE Access}, 
+  title={An Adversary Model of Fraudsters’ Behavior to Improve Oversampling in Credit Card Fraud Detection}, 
+  year={2023},
+  volume={11},
+  number={},
+  pages={136666-136679},
+  keywords={Fraud;Behavioral sciences;Credit cards;Time series analysis;Classification algorithms;Training;Prediction algorithms;Fraud detection;imbalance learning;machine learning;oversampling;synthetic data;time series;threat model},
+  doi={10.1109/ACCESS.2023.3337635}}
+
 @book{leborgne2022fraud,
 title={Reproducible Machine Learning for Credit Card Fraud Detection - Practical Handbook},
 author={Le Borgne, Yann-A{\"e}l and Siblini, Wissam and Lebichot, Bertrand and Bontempi, Gianluca},
